@@ -1,0 +1,214 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #020617;
+  --background-secondary: #0b1120;
+  --background-tertiary: #111827;
+  --foreground: #e5e7eb;
+  --card: rgba(255, 255, 255, 0.03);
+  --card-foreground: #e5e7eb;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-hover: rgba(255, 255, 255, 0.05);
+  --popover: rgba(255, 255, 255, 0.03);
+  --popover-foreground: #e5e7eb;
+  --primary: #22d3ee;
+  --primary-foreground: #020617;
+  --secondary: #06b6d4;
+  --secondary-foreground: #e5e7eb;
+  --muted: #6b7280;
+  --muted-foreground: #9ca3af;
+  --accent: #3b82f6;
+  --accent-foreground: #020617;
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.03);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Inter", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.06), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.04), transparent 50%),
+    linear-gradient(135deg, #020617, #0b1120);
+  background-attachment: fixed;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.25);
+  color: #effbff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.18);
+  background-clip: padding-box;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    background: transparent;
+  }
+
+  .card-premium {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+    transition: all 200ms ease-out;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 18px 40px rgba(2, 6, 23, 0.22);
+  }
+
+  .card-premium:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow:
+      0 0 20px rgba(34, 211, 238, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .card-soft {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 34px rgba(2, 6, 23, 0.18);
+  }
+
+  .smooth-transition {
+    transition: all 200ms ease-out;
+  }
+
+  .icon-accent {
+    background-color: rgba(34, 211, 238, 0.15);
+    color: #22d3ee;
+    border: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  .page-input {
+    @apply w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none smooth-transition;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .page-input:focus {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.5);
+    border-color: rgba(34, 211, 238, 0.35);
+  }
+
+  .page-input:hover,
+  .page-select:hover,
+  .page-textarea:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .page-textarea {
+    @apply page-input min-h-[110px] resize-y;
+  }
+
+  .page-select {
+    @apply appearance-none rounded-xl border border-white/10 bg-gray-900 px-4 py-2.5 text-sm text-white outline-none smooth-transition;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .page-button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-primary-foreground smooth-transition;
+    background: linear-gradient(135deg, #22d3ee, #3b82f6);
+    border: 1px solid rgba(125, 211, 252, 0.32);
+    box-shadow:
+      0 12px 24px rgba(14, 165, 233, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+
+  .page-button-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 16px 28px rgba(14, 165, 233, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .page-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-primary smooth-transition;
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.018));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .page-button-secondary:hover {
+    background:
+      linear-gradient(180deg, rgba(34, 211, 238, 0.15), rgba(59, 130, 246, 0.08));
+    border-color: rgba(125, 211, 252, 0.42);
+  }
+
+  .nav-pill {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border-radius: 1rem;
+  }
+
+  .toolbar-select {
+    @apply appearance-none rounded-xl border border-white/10 bg-gray-900 px-3 py-2 text-sm font-semibold text-white outline-none smooth-transition;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400;
+  }
+}
+
+select option {
+  background-color: #111827;
+  color: #ffffff;
+}
+
+select option:hover {
+  background-color: #1f2937;
+}
