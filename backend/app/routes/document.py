@@ -11,7 +11,7 @@ def get_documents(employee_id: int | None = None):
 
 
 @router.post(
-    "/upload-document/",
+    "/upload-document",
     summary="Register a file upload against an existing case",
 )
 async def upload_document(

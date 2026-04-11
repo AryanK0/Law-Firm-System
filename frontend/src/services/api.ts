@@ -452,7 +452,7 @@ async function readJsonOrThrow<T>(response: Response): Promise<T> {
   } catch {
     if (isProbablyHtmlPayload(text)) {
       throw new Error(
-        "API returned HTML instead of JSON (often the SPA or a login page). Use same-origin /api, run `npm run dev:vercel` at the repo root for local API, and set Vercel project Root Directory to the repository root so the api/ folder deploys.",
+        "API returned HTML instead of JSON. For local dev run `npm run dev` at the repo root (FastAPI + Vite). On Vercel, set VITE_API_BASE_URL to your deployed API (e.g. https://your-api.up.railway.app/api).",
       );
     }
     throw new Error("Invalid JSON in API response.");

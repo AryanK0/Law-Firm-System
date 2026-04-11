@@ -1,16 +1,13 @@
 from datetime import datetime, timezone
-from pathlib import Path
-
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, HTTPException
+from pymysql import MySQLError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .db import fetch_one
+from .paths import upload_dir as resolve_upload_dir
 from .routes import case, document, employee, overview, ticket
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-UPLOAD_DIR = REPO_ROOT / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
 
 TAGS_METADATA = [
     {
@@ -41,91 +38,140 @@ TAGS_METADATA = [
 
 ROUTE_INDEX = {
     "platform": {
-        "root": "/",
-        "health": "/health",
-        "docs": "/docs",
-        "openapi": "/openapi.json",
+        "root": "/api/",
+        "health": "/api/health",
+        "docs": "/api/docs",
+        "openapi": "/api/openapi.json",
     },
-    "firm_overview": "/overview",
+    "firm_overview": "/api/overview",
     "matters": {
-        "analytics": "/analytics",
-        "list": "/cases",
-        "detail": "/cases/{case_id}",
-        "team": "/cases/{case_id}/team",
-        "documents": "/cases/{case_id}/documents",
-        "status_history": "/cases/{case_id}/status-history",
-        "billing": "/cases/{case_id}/billing",
-        "create": "/cases",
-        "clients": "/clients",
+        "analytics": "/api/analytics",
+        "list": "/api/cases",
+        "detail": "/api/cases/{case_id}",
+        "team": "/api/cases/{case_id}/team",
+        "documents": "/api/cases/{case_id}/documents",
+        "status_history": "/api/cases/{case_id}/status-history",
+        "billing": "/api/cases/{case_id}/billing",
+        "create": "/api/cases",
+        "clients": "/api/clients",
     },
     "people": {
-        "employees": "/employees",
-        "roles": "/roles",
+        "employees": "/api/employees",
+        "roles": "/api/roles",
     },
     "support": {
-        "tickets": "/tickets",
+        "tickets": "/api/tickets",
     },
     "documents": {
-        "list": "/documents",
-        "upload": "/upload-document/",
+        "list": "/api/documents",
+        "upload": "/api/upload-document",
         "uploads_static": "/uploads/{filename}",
     },
 }
 
-app = FastAPI(
-    title="Precision Legal Management API",
-    summary="Operational backend for a premium legal-management demo workspace.",
-    description=(
-        "This FastAPI service powers the legal-management dashboard with matter data, "
-        "employee directory information, support tickets, analytics, and document intake. "
-        "The API is organized so product demos, frontend developers, and reviewers can "
-        "quickly understand what each section of the system is doing."
-    ),
-    version="2.0.0",
-    openapi_tags=TAGS_METADATA,
-)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-    ],
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-
-app.include_router(case.router)
-app.include_router(document.router)
-app.include_router(employee.router)
-app.include_router(overview.router)
-app.include_router(ticket.router)
+def _cors_origins() -> list[str]:
+    raw = os.getenv("CORS_ORIGINS", "").strip()
+    if not raw:
+        return [
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+            "http://127.0.0.1:5174",
+            "http://localhost:5174",
+            "http://127.0.0.1:5175",
+            "http://localhost:5175",
+            "http://127.0.0.1:5176",
+            "http://localhost:5176",
+        ]
+    return [x.strip() for x in raw.split(",") if x.strip()]
 
 
-@app.get("/", tags=["platform"], summary="Describe the API surface")
-def root():
-    return {
-        "name": app.title,
-        "status": "online",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "docs": "/docs",
-        "summary": (
-            "Use this API to explore legal-management operations, seed rich demo data, "
-            "and power the React workspace."
+def create_api_app() -> FastAPI:
+    api = FastAPI(
+        title="Precision Legal Management API",
+        summary="Operational backend for a premium legal-management demo workspace.",
+        description=(
+            "FastAPI service for the legal-management dashboard. Mount at /api for Vercel "
+            "static + cross-origin production, or run standalone for local dev."
         ),
-        "routes": ROUTE_INDEX,
-    }
+        version="2.0.0",
+        openapi_tags=TAGS_METADATA,
+    )
+
+    api.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins(),
+        allow_origin_regex=os.getenv(
+            "CORS_ORIGIN_REGEX",
+            r"https://.*\.vercel\.app|https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+        ),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    api.include_router(case.router)
+    api.include_router(document.router)
+    api.include_router(employee.router)
+    api.include_router(overview.router)
+    api.include_router(ticket.router)
+
+    @api.get("/", tags=["platform"], summary="Describe the API surface")
+    def api_root():
+        return {
+            "name": api.title,
+            "status": "online",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "docs": "/api/docs",
+            "summary": (
+                "Legal-management API: matters, people, tickets, documents, analytics."
+            ),
+            "routes": ROUTE_INDEX,
+        }
+
+    @api.get("/health", tags=["platform"], summary="Check API and database connectivity")
+    def health_check():
+        try:
+            database_time = fetch_one("SELECT NOW() AS database_time")
+        except MySQLError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail=f"MySQL: {exc}",
+            ) from exc
+        return {
+            "status": "ok",
+            "database": "connected",
+            "database_time": database_time["database_time"] if database_time else None,
+        }
+
+    return api
 
 
-@app.get("/health", tags=["platform"], summary="Check API and database connectivity")
-def health_check():
-    database_time = fetch_one("SELECT NOW() AS database_time")
+api_app = create_api_app()
+
+app = FastAPI(
+    title="Precision Legal Management — gateway",
+    description="Mounts /api (JSON) and /uploads (static files).",
+    version="2.0.0",
+)
+
+app.mount("/api", api_app)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory=str(resolve_upload_dir())),
+    name="uploads",
+)
+
+
+@app.get("/")
+def gateway_root():
     return {
-        "status": "ok",
-        "database": "reachable",
-        "database_time": database_time["database_time"] if database_time else None,
+        "name": "Precision Legal Management API gateway",
+        "status": "online",
+        "api": "/api",
+        "health": "/api/health",
+        "docs": "/api/docs",
+        "uploads": "/uploads",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }

@@ -19,10 +19,19 @@ Install dependencies from the repository root:
 npm install
 ```
 
-Run the frontend:
+Run **FastAPI + Vite** together (recommended):
 
 ```powershell
 npm run dev
+```
+
+This starts the API on `http://127.0.0.1:8000` and Vite on `http://127.0.0.1:5173`.
+The dev server proxies `/api` and `/uploads` to port 8000.
+
+Frontend only:
+
+```powershell
+npm run dev:vite
 ```
 
 Build the frontend:
@@ -31,8 +40,11 @@ Build the frontend:
 npm run build
 ```
 
-The frontend talks to `http://127.0.0.1:8000` by default. Override it with
-`VITE_API_BASE_URL` when needed.
+**Production (Vercel UI + hosted API):** build the frontend with
+`VITE_API_BASE_URL=https://<your-fastapi-host>/api` so the browser calls your
+deployed FastAPI service. The legacy Node `api/` folder is not uploaded to
+Vercel (see `.vercelignore`). Use the root `Dockerfile` for Railway, Fly.io, or
+any container host.
 
 ## Backend
 
@@ -42,29 +54,17 @@ Install backend dependencies:
 python -m pip install -r .\backend\requirements.txt
 ```
 
-Run the API from the repository root:
+Run the API from the repository root (`PYTHONPATH` must include the repo root):
 
 ```powershell
-uvicorn backend.app.main:app --reload
+$env:PYTHONPATH = "."
+python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The API exposes these main routes:
+JSON routes are mounted under **`/api`** (e.g. `GET /api/health`, `GET /api/cases`).
+Uploaded files are served from **`/uploads/...`** on the same origin.
 
-- `GET /`
-- `GET /health`
-- `GET /overview`
-- `GET /analytics`
-- `GET /cases`
-- `GET /cases/{case_id}`
-- `GET /clients`
-- `GET /tickets`
-- `GET /employees`
-- `GET /roles`
-- `POST /cases`
-- `POST /tickets`
-- `POST /upload-document/`
-
-Open `http://127.0.0.1:8000/docs` for the interactive API docs.
+Open `http://127.0.0.1:8000/api/docs` for the interactive API docs.
 
 ## Database Setup
 

@@ -175,14 +175,39 @@ def ensure_case_access(employee_id: int, case_id: int):
         raise HTTPException(status_code=403, detail="You do not have access to this case.")
 
 
-def list_cases(employee_id: int):
+def list_cases(
+    employee_id: int,
+    status: str | None = None,
+    search: str | None = None,
+):
+    params: list = [employee_id, employee_id]
+    parts = [ACCESS_SQL.strip()]
+    if status:
+        parts.append("c.status = %s")
+        params.append(status)
+    if search:
+        like = f"%{search}%"
+        parts.append(
+            """
+            (
+              COALESCE(c.title, '') LIKE %s
+              OR COALESCE(c.description, '') LIKE %s
+              OR COALESCE(c.case_code, '') LIKE %s
+              OR COALESCE(cl.organization, '') LIKE %s
+              OR COALESCE(cl.name, '') LIKE %s
+            )
+            """
+        )
+        params.extend([like, like, like, like, like])
+
+    where_clause = " AND ".join(parts)
     return fetch_all(
         f"""
         {CASE_SUMMARY_SQL}
-        WHERE {ACCESS_SQL}
+        WHERE {where_clause}
         ORDER BY c.case_id DESC
         """,
-        (employee_id, employee_id),
+        tuple(params),
     )
 
 
