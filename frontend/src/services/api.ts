@@ -1,4 +1,32 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+function normalizeApiBaseUrl(value: string | undefined): string {
+  const raw = (value ?? "/api").trim();
+  if (!raw) {
+    return "/api";
+  }
+
+  if (!/^https?:\/\//i.test(raw)) {
+    return raw.replace(/\/$/, "") || "/api";
+  }
+
+  try {
+    const u = new URL(raw);
+    const path = (u.pathname || "/").replace(/\/+$/, "") || "/";
+    if (path === "/") {
+      u.pathname = "/api";
+    }
+    let out = u.toString();
+    if (out.endsWith("/")) {
+      out = out.slice(0, -1);
+    }
+    return out;
+  } catch {
+    return "/api";
+  }
+}
+
+export const API_BASE_URL = normalizeApiBaseUrl(
+  import.meta.env.VITE_API_BASE_URL as string | undefined,
+);
 
 export interface CaseRecord {
   case_id: number;
@@ -409,29 +437,56 @@ function withEmployee(employeeId: number) {
   return searchParams;
 }
 
+function isProbablyHtmlPayload(text: string) {
+  const t = text.trimStart().toLowerCase();
+  return t.startsWith("<!doctype") || t.startsWith("<html");
+}
+
+async function readJsonOrThrow<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    if (isProbablyHtmlPayload(text)) {
+      throw new Error(
+        "API returned HTML instead of JSON (often the SPA or a login page). Use same-origin /api, run `npm run dev` at the repo root for local API, and set Vercel project Root Directory to the repository root so the api/ folder deploys.",
+      );
+    }
+    throw new Error("Invalid JSON in API response.");
+  }
+}
+
 async function requestJson<T>(
   path: string,
   init?: RequestInit,
   searchParams?: URLSearchParams,
 ): Promise<T> {
-  const response = await fetch(buildPath(path, searchParams), init);
+  const url = buildPath(path, searchParams);
+  const response = await fetch(url, init);
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;
 
     try {
-      const errorBody = (await response.json()) as { detail?: string };
+      const errorBody = (await readJsonOrThrow<{ detail?: string }>(
+        response.clone(),
+      )) as { detail?: string };
       if (errorBody.detail) {
         detail = errorBody.detail;
       }
-    } catch {
-      // Use default message for non-JSON responses.
+    } catch (e) {
+      if (e instanceof Error && e.message !== "Invalid JSON in API response.") {
+        detail = e.message;
+      }
     }
 
     throw new Error(detail);
   }
 
-  return (await response.json()) as T;
+  return readJsonOrThrow<T>(response);
 }
 
 export function getCases(employeeId: number) {
