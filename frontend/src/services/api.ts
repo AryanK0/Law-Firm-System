@@ -452,7 +452,7 @@ async function readJsonOrThrow<T>(response: Response): Promise<T> {
   } catch {
     if (isProbablyHtmlPayload(text)) {
       throw new Error(
-        "API returned HTML instead of JSON (often the SPA or a login page). Use same-origin /api, run `npm run dev` at the repo root for local API, and set Vercel project Root Directory to the repository root so the api/ folder deploys.",
+        "API returned HTML instead of JSON (often the SPA or a login page). Use same-origin /api, run `npm run dev:vercel` at the repo root for local API, and set Vercel project Root Directory to the repository root so the api/ folder deploys.",
       );
     }
     throw new Error("Invalid JSON in API response.");

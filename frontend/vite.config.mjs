@@ -14,7 +14,7 @@ function proxyApiErrorHandler(proxy) {
       res.end(
         JSON.stringify({
           detail:
-            "API unreachable. From the repository root run `npm run dev` (vercel dev), or set VITE_LOCAL_API_PROXY to your API URL.",
+            "API unreachable. From the repository root run `npm run dev:vercel`, or set VITE_LOCAL_API_PROXY to your API URL.",
         }),
       );
     }
@@ -25,7 +25,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    // Full stack: run `npm run dev` at repo root (`vercel dev`, usually http://localhost:3000).
+    // Full stack: run `npm run dev:vercel` at repo root (not `npm run dev`; that is Vite only).
     // Frontend-only: run this workspace dev server and point the proxy at your API.
     proxy: {
       "/api": {
