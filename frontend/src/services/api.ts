@@ -1,5 +1,4 @@
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export interface CaseRecord {
   case_id: number;
@@ -387,6 +386,23 @@ function buildPath(path: string, searchParams?: URLSearchParams) {
   return `${API_BASE_URL}${path}?${searchParams.toString()}`;
 }
 
+export function resolveFileUrl(fileUrl: string | null | undefined) {
+  if (!fileUrl) {
+    return null;
+  }
+
+  if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+    return fileUrl;
+  }
+
+  if (API_BASE_URL.startsWith("http://") || API_BASE_URL.startsWith("https://")) {
+    const origin = API_BASE_URL.replace(/\/api\/?$/, "");
+    return `${origin}${fileUrl}`;
+  }
+
+  return fileUrl;
+}
+
 function withEmployee(employeeId: number) {
   const searchParams = new URLSearchParams();
   searchParams.set("employee_id", String(employeeId));
@@ -544,7 +560,7 @@ export async function uploadDocument(
     searchParams.set("uploaded_by", String(uploadedBy));
   }
 
-  return requestJson<UploadResponse>("/upload-document/", {
+  return requestJson<UploadResponse>("/upload-document", {
     method: "POST",
     body: formData,
   }, searchParams);

@@ -4,12 +4,12 @@ import { Link, useParams } from "react-router-dom";
 
 import { useAuth } from "../content/AuthContext";
 import {
-  API_BASE_URL,
   getCaseBilling,
   getCaseDetail,
   getCaseDocuments,
   getCaseStatusHistory,
   getCaseTeam,
+  resolveFileUrl,
   type CaseBillingResponse,
   type CaseDetailRecord,
   type CaseDocumentsResponse,
@@ -351,7 +351,7 @@ export default function CaseDetailPage() {
                   </div>
                   {document.file_url ? (
                     <a
-                      href={`${API_BASE_URL}${document.file_url}`}
+                      href={resolveFileUrl(document.file_url) ?? "#"}
                       target="_blank"
                       rel="noreferrer"
                       className="page-button-secondary"
