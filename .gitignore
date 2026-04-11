@@ -9,3 +9,6 @@ uploads/
 frontend/*.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
+
+.vercel
+.env*.local
