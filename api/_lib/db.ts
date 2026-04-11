@@ -1,23 +1,48 @@
-import mysql, { type ResultSetHeader } from "mysql2/promise";
+import mysql, { type PoolOptions, type ResultSetHeader } from "mysql2/promise";
 
 let pool: mysql.Pool | null = null;
+
+function envFlag(name: string) {
+  const v = process.env[name]?.toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+}
+
+function buildPoolOptions(): PoolOptions {
+  const useSsl = envFlag("DB_SSL");
+  const connectTimeout = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 15_000);
+  if (!Number.isFinite(connectTimeout) || connectTimeout < 1) {
+    throw new Error("Invalid DB_CONNECT_TIMEOUT_MS.");
+  }
+
+  return {
+    host: process.env.DB_HOST ?? "127.0.0.1",
+    user: process.env.DB_USER ?? "root",
+    password: process.env.DB_PASSWORD ?? "",
+    database: process.env.DB_NAME ?? "lawfirm",
+    port: Number(process.env.DB_PORT ?? 3306),
+    waitForConnections: true,
+    connectionLimit: (() => {
+      const n = Number(process.env.DB_POOL_SIZE ?? 5);
+      return Number.isFinite(n) && n >= 1 ? Math.min(20, n) : 5;
+    })(),
+    decimalNumbers: true,
+    dateStrings: true,
+    connectTimeout,
+    enableKeepAlive: true,
+    ssl: useSsl
+      ? {
+          rejectUnauthorized: !envFlag("DB_SSL_INSECURE"),
+        }
+      : undefined,
+  };
+}
 
 function getPool() {
   if (pool) {
     return pool;
   }
 
-  pool = mysql.createPool({
-    host: process.env.DB_HOST ?? "localhost",
-    user: process.env.DB_USER ?? "root",
-    password: process.env.DB_PASSWORD ?? "",
-    database: process.env.DB_NAME ?? "lawfirm",
-    port: Number(process.env.DB_PORT ?? 3306),
-    waitForConnections: true,
-    connectionLimit: 5,
-    decimalNumbers: true,
-    dateStrings: true,
-  });
+  pool = mysql.createPool(buildPoolOptions());
 
   return pool;
 }
