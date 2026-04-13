@@ -5,13 +5,21 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 
+def get_env(*names: str, default: str | None = None):
+    for name in names:
+        value = os.getenv(name)
+        if value not in (None, ""):
+            return value
+    return default
+
+
 def get_connection():
     return pymysql.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", "Ar@230806."),
-        database=os.getenv("DB_NAME", "lawfirm"),
-        port=int(os.getenv("DB_PORT", "3306")),
+        host=get_env("DB_HOST", "MYSQLHOST", default="localhost"),
+        user=get_env("DB_USER", "MYSQLUSER", default="root"),
+        password=get_env("DB_PASSWORD", "MYSQLPASSWORD", default="Ar@230806."),
+        database=get_env("DB_NAME", "MYSQLDATABASE", default="lawfirm"),
+        port=int(get_env("DB_PORT", "MYSQLPORT", default="3306") or "3306"),
         autocommit=True,
         cursorclass=DictCursor,
     )

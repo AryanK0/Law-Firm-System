@@ -5,6 +5,12 @@ frontend/dist/
 __pycache__/
 *.pyc
 npm-debug.log*
+vite-start*.log
+.env
+.env.local
+frontend/.env
+frontend/.env.local
+backend/.env
 uploads/
 frontend/*.tsbuildinfo
 frontend/vite.config.js

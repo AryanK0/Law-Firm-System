@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -9,8 +10,20 @@ from .db import fetch_one
 from .routes import case, document, employee, overview, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-UPLOAD_DIR = REPO_ROOT / "uploads"
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", REPO_ROOT / "uploads")).resolve()
 UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+def parse_cors_origins():
+    raw = os.getenv("CORS_ORIGINS", "")
+    configured = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    if configured:
+        return configured
+
+    return [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ]
 
 TAGS_METADATA = [
     {
@@ -87,11 +100,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-    ],
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=parse_cors_origins(),
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
