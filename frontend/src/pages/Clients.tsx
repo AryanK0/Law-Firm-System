@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../content/AuthContext";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../services/api";
 
 export default function ClientsPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [cases, setCases] = useState<CaseRecord[]>([]);
@@ -265,7 +267,11 @@ export default function ClientsPage() {
                   </div>
                 </div>
 
-                <button type="button" className="mt-4 w-full rounded-lg py-2 text-sm font-medium text-primary smooth-transition hover:bg-white/5">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/clients/${client.client_id}`)}
+                  className="mt-4 w-full rounded-lg py-2 text-sm font-medium text-primary smooth-transition hover:bg-white/5"
+                >
                   View Details
                 </button>
               </div>

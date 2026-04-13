@@ -19,19 +19,10 @@ Install dependencies from the repository root:
 npm install
 ```
 
-Run **FastAPI + Vite** together (recommended):
+Run the frontend:
 
 ```powershell
 npm run dev
-```
-
-This starts the API on `http://127.0.0.1:8000` and Vite on `http://127.0.0.1:5173`.
-The dev server proxies `/api` and `/uploads` to port 8000.
-
-Frontend only:
-
-```powershell
-npm run dev:vite
 ```
 
 Build the frontend:
@@ -39,6 +30,9 @@ Build the frontend:
 ```powershell
 npm run build
 ```
+
+The frontend talks to `http://127.0.0.1:8000` by default. Override it with
+`VITE_API_BASE_URL` when needed.
 
 ## Backend
 
@@ -48,17 +42,29 @@ Install backend dependencies:
 python -m pip install -r .\backend\requirements.txt
 ```
 
-Run the API from the repository root (`PYTHONPATH` must include the repo root):
+Run the API from the repository root:
 
 ```powershell
-$env:PYTHONPATH = "."
-python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+uvicorn backend.app.main:app --reload
 ```
 
-JSON routes are mounted under **`/api`** (e.g. `GET /api/health`, `GET /api/cases`).
-Uploaded files are served from **`/uploads/...`** on the same origin.
+The API exposes these main routes:
 
-Open `http://127.0.0.1:8000/api/docs` for the interactive API docs.
+- `GET /`
+- `GET /health`
+- `GET /overview`
+- `GET /analytics`
+- `GET /cases`
+- `GET /cases/{case_id}`
+- `GET /clients`
+- `GET /tickets`
+- `GET /employees`
+- `GET /roles`
+- `POST /cases`
+- `POST /tickets`
+- `POST /upload-document/`
+
+Open `http://127.0.0.1:8000/docs` for the interactive API docs.
 
 ## Database Setup
 

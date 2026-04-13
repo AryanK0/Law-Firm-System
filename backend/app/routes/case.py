@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from pydantic import BaseModel
 from pymysql import MySQLError
 
@@ -32,12 +32,8 @@ class ClientInput(BaseModel):
 
 
 @router.get("/cases", summary="List case records for the matter workspace")
-def get_cases(
-    employee_id: int,
-    status: str | None = Query(default=None),
-    search: str | None = Query(default=None),
-):
-    return case_service.list_cases(employee_id, status=status, search=search)
+def get_cases(employee_id: int):
+    return case_service.list_cases(employee_id)
 
 
 @router.get("/cases/{case_id}", summary="Get full case detail")

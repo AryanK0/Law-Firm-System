@@ -5,7 +5,10 @@ from fastapi import HTTPException, UploadFile
 from pymysql import MySQLError
 
 from ..db import execute, fetch_all
-from ..paths import upload_dir
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+UPLOAD_DIR = REPO_ROOT / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 def list_documents(employee_id: int | None = None):
@@ -117,7 +120,7 @@ async def save_document_upload(
 
     safe_name = Path(file.filename).name
     stored_name = f"{uuid4().hex}_{safe_name}"
-    stored_path = upload_dir() / stored_name
+    stored_path = UPLOAD_DIR / stored_name
 
     with stored_path.open("wb") as buffer:
         while chunk := await file.read(1024 * 1024):

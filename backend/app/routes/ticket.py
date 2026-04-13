@@ -18,8 +18,8 @@ class TicketInput(BaseModel):
     resolution_deadline: datetime | None = None
 
 
-class ResolveTicketInput(BaseModel):
-    employee_id: int
+class TicketResolveInput(BaseModel):
+    resolved_by: int
 
 
 @router.get("/tickets", summary="List support tickets ordered by newest activity")
@@ -42,12 +42,12 @@ def create_ticket(payload: TicketInput):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.patch("/tickets/{ticket_id}/resolve", summary="Resolve a support ticket")
-def resolve_ticket(ticket_id: int, payload: ResolveTicketInput):
+@router.post("/tickets/{ticket_id}/resolve", summary="Resolve a support ticket")
+def resolve_ticket(ticket_id: int, payload: TicketResolveInput):
     try:
         return ticket_service.resolve_ticket(
             ticket_id=ticket_id,
-            employee_id=payload.employee_id,
+            resolved_by=payload.resolved_by,
         )
     except MySQLError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

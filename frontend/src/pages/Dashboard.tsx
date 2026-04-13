@@ -811,17 +811,17 @@ export default function Dashboard() {
                   key={document.document_id}
                   className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-5"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold text-primary">
                         {formatCaseCode(document.case_code, `Matter #${document.document_id}`)}
                       </p>
-                      <h3 className="mt-1 text-base font-semibold text-foreground">
+                      <h3 className="mt-1 break-words text-base font-semibold text-foreground">
                         {getVisibleFileName(document.file_path)}
                       </h3>
                     </div>
                     <span
-                      className={`max-w-full self-start whitespace-normal break-words rounded-full px-3 py-1 text-xs font-medium ${getConfidentialityTone(
+                      className={`shrink-0 self-start rounded-full px-3 py-1 text-xs font-medium ${getConfidentialityTone(
                         document.confidentiality_level,
                       )}`}
                     >

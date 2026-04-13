@@ -1,2 +1,0 @@
-# Use FastAPI for the HTTP API (see Dockerfile / npm run dev). Node api/ is not deployed.
-api/

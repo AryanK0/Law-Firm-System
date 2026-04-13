@@ -1,42 +1,20 @@
 import os
-import ssl
 from contextlib import closing
 
 import pymysql
 from pymysql.cursors import DictCursor
 
 
-def _env_flag(name: str) -> bool:
-    v = os.getenv(name, "").lower()
-    return v in ("1", "true", "yes")
-
-
 def get_connection():
-    host = os.getenv("DB_HOST", "127.0.0.1")
-    user = os.getenv("DB_USER", "root")
-    password = os.getenv("DB_PASSWORD", "")
-    database = os.getenv("DB_NAME", "lawfirm")
-    port = int(os.getenv("DB_PORT", "3306"))
-
-    kwargs: dict = {
-        "host": host,
-        "user": user,
-        "password": password,
-        "database": database,
-        "port": port,
-        "autocommit": True,
-        "cursorclass": DictCursor,
-        "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "15")),
-    }
-
-    if _env_flag("DB_SSL"):
-        ctx = ssl.create_default_context()
-        if _env_flag("DB_SSL_INSECURE"):
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-        kwargs["ssl"] = ctx
-
-    return pymysql.connect(**kwargs)
+    return pymysql.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", "Ar@230806."),
+        database=os.getenv("DB_NAME", "lawfirm"),
+        port=int(os.getenv("DB_PORT", "3306")),
+        autocommit=True,
+        cursorclass=DictCursor,
+    )
 
 
 def fetch_all(query, params=None):

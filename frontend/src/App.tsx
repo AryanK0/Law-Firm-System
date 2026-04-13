@@ -8,6 +8,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Cases = lazy(() => import("./pages/Cases"));
 const CaseDetail = lazy(() => import("./pages/CaseDetail"));
 const Clients = lazy(() => import("./pages/Clients"));
+const ClientDetail = lazy(() => import("./pages/ClientDetail"));
 const Documents = lazy(() => import("./content/Upload"));
 const Tickets = lazy(() => import("./pages/Tickets"));
 
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="/cases" element={<Cases />} />
             <Route path="/cases/:caseId" element={<CaseDetail />} />
             <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:clientId" element={<ClientDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="*" element={<Navigate to="/" replace />} />

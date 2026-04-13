@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 
 import { formatCaseCode, formatDateTime } from "../lib/format";
 import {
+  API_BASE_URL,
   getCases,
   getDocuments,
-  resolveFileUrl,
   type CaseRecord,
   type DocumentRecord,
   uploadDocument,
@@ -350,7 +350,7 @@ export default function DocumentsPage() {
                     <td className="px-6 py-4 text-sm">
                       {document.file_url ? (
                         <a
-                          href={resolveFileUrl(document.file_url) ?? "#"}
+                          href={`${API_BASE_URL}${document.file_url}`}
                           target="_blank"
                           rel="noreferrer"
                           className="font-medium text-primary hover:opacity-70 smooth-transition"

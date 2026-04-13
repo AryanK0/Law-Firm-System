@@ -175,39 +175,14 @@ def ensure_case_access(employee_id: int, case_id: int):
         raise HTTPException(status_code=403, detail="You do not have access to this case.")
 
 
-def list_cases(
-    employee_id: int,
-    status: str | None = None,
-    search: str | None = None,
-):
-    params: list = [employee_id, employee_id]
-    parts = [ACCESS_SQL.strip()]
-    if status:
-        parts.append("c.status = %s")
-        params.append(status)
-    if search:
-        like = f"%{search}%"
-        parts.append(
-            """
-            (
-              COALESCE(c.title, '') LIKE %s
-              OR COALESCE(c.description, '') LIKE %s
-              OR COALESCE(c.case_code, '') LIKE %s
-              OR COALESCE(cl.organization, '') LIKE %s
-              OR COALESCE(cl.name, '') LIKE %s
-            )
-            """
-        )
-        params.extend([like, like, like, like, like])
-
-    where_clause = " AND ".join(parts)
+def list_cases(employee_id: int):
     return fetch_all(
         f"""
         {CASE_SUMMARY_SQL}
-        WHERE {where_clause}
+        WHERE {ACCESS_SQL}
         ORDER BY c.case_id DESC
         """,
-        tuple(params),
+        (employee_id, employee_id),
     )
 
 
@@ -223,12 +198,11 @@ def get_case_detail(case_id: int):
           h.date,
           h.notes,
           court.name AS court_name,
-          court.location,
-          court.jurisdiction_type
+          court.location
         FROM Hearing h
-        LEFT JOIN Court court ON h.court_id = court.court_id
+        INNER JOIN Court court ON h.court_id = court.court_id
         WHERE h.case_id = %s
-        ORDER BY h.date, h.hearing_id
+        ORDER BY h.date ASC, h.hearing_id ASC
         """,
         (case_id,),
     )

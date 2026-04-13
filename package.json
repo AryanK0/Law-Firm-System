@@ -1,30 +1,11 @@
 {
   "name": "law-firm-system",
   "private": true,
-  "engines": {
-    "node": "22.x"
-  },
-  "dependencies": {
-    "@vercel/blob": "^1.1.1",
-    "formidable": "^3.5.4",
-    "mysql2": "^3.15.1"
-  },
-  "devDependencies": {
-    "@vercel/node": "^5.3.25",
-    "concurrently": "^9.2.1",
-    "cross-env": "^7.0.3",
-    "typescript": "^6.0.2",
-    "vercel": "^41.4.1"
-  },
   "workspaces": [
     "frontend"
   ],
   "scripts": {
-    "typecheck:api": "tsc -p tsconfig.api.json --noEmit",
-    "dev": "concurrently -k -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:vite\"",
-    "dev:api": "cross-env PYTHONPATH=. python -m uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000",
-    "dev:vercel": "vercel dev",
-    "dev:vite": "npm run dev --workspace law-firm-frontend",
+    "dev": "npm run dev --workspace law-firm-frontend",
     "build": "npm run build --workspace law-firm-frontend",
     "preview": "npm run preview --workspace law-firm-frontend"
   }

@@ -22,6 +22,7 @@ export default function TicketsPage() {
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resolvingTicketId, setResolvingTicketId] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -81,22 +82,7 @@ export default function TicketsPage() {
 
   const canResolveTicket = (ticket: TicketRecord) =>
     ticket.status !== "Resolved" &&
-    (user.role === "IT" || user.hierarchy <= 2 || ticket.assigned_to_name === user.name);
-
-  const handleResolveTicket = async (ticketId: number) => {
-    setError(null);
-    setMessage(null);
-
-    try {
-      const resolved = await resolveTicket(ticketId, user.id);
-      setTickets((current) =>
-        current.map((ticket) => (ticket.ticket_id === ticketId ? resolved : ticket)),
-      );
-      setMessage(`Resolved ticket #${ticketId}.`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resolve ticket.");
-    }
-  };
+    (user.role === "IT" || ticket.assigned_to === user.id);
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {
@@ -174,6 +160,24 @@ export default function TicketsPage() {
       setError(err instanceof Error ? err.message : "Could not raise ticket.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResolveTicket = async (ticketId: number) => {
+    setError(null);
+    setMessage(null);
+    setResolvingTicketId(ticketId);
+
+    try {
+      const resolved = await resolveTicket(ticketId, { resolved_by: user.id });
+      setTickets((current) =>
+        current.map((ticket) => (ticket.ticket_id === ticketId ? resolved : ticket)),
+      );
+      setMessage(`Resolved ticket #${ticketId}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resolve ticket.");
+    } finally {
+      setResolvingTicketId(null);
     }
   };
 
@@ -328,18 +332,15 @@ export default function TicketsPage() {
                   <p className="mt-2 text-sm font-medium text-muted-foreground">
                     Assigned to: {ticket.assigned_to_name || "Unassigned"}
                   </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Deadline {formatDateTime(ticket.resolution_deadline, "Not set")}
+                    {ticket.resolved_at
+                      ? ` | Resolved ${formatDateTime(ticket.resolved_at)}`
+                      : ""}
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  {canResolveTicket(ticket) ? (
-                    <button
-                      type="button"
-                      onClick={() => handleResolveTicket(ticket.ticket_id)}
-                      className="page-button-secondary"
-                    >
-                      Resolve
-                    </button>
-                  ) : null}
                   <span
                     className={`inline-flex items-center gap-1 rounded-md border px-3 py-1 text-xs font-medium ${getPriorityColor(
                       ticket.priority,
@@ -358,6 +359,16 @@ export default function TicketsPage() {
                   <span className="text-xs font-medium text-muted-foreground">
                     {formatDateTime(ticket.created_at)}
                   </span>
+                  {canResolveTicket(ticket) ? (
+                    <button
+                      type="button"
+                      onClick={() => handleResolveTicket(ticket.ticket_id)}
+                      disabled={resolvingTicketId === ticket.ticket_id}
+                      className="page-button-secondary disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {resolvingTicketId === ticket.ticket_id ? "Resolving..." : "Resolve"}
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </div>

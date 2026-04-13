@@ -1,23 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Download, FileText, Users } from "lucide-react";
+import { ArrowLeft, Download, FileText, Gavel, Users } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { useAuth } from "../content/AuthContext";
+import { formatCaseCode, formatCurrency, formatDate, formatDateTime } from "../lib/format";
 import {
+  API_BASE_URL,
   getCaseBilling,
   getCaseDetail,
   getCaseDocuments,
   getCaseStatusHistory,
   getCaseTeam,
-  resolveFileUrl,
   type CaseBillingResponse,
   type CaseDetailRecord,
   type CaseDocumentsResponse,
-  type CaseStatusHistoryEntry,
   type CaseStatusHistoryResponse,
   type CaseTeamResponse,
 } from "../services/api";
-import { formatCaseCode, formatCurrency, formatDate, formatDateTime } from "../lib/format";
 
 function EmptyState({ message }: { message: string }) {
   return (
@@ -44,29 +43,19 @@ function getStatusTone(status: string | null) {
   }
 }
 
-function buildTimeline(detail: CaseDetailRecord, history: CaseStatusHistoryEntry[] | undefined) {
-  const ordered = [...(history ?? [])].reverse();
-  const items = ordered.map((item) => ({
-    key: `history-${item.history_id}`,
-    label: item.new_status || detail.status || "Open",
-    note: item.old_status
-      ? `Moved from ${item.old_status} by ${item.changed_by_name || "Unknown"}`
-      : `Created by ${item.changed_by_name || detail.created_by.name || "Unknown"}`,
-    timestamp: item.timestamp,
-  }));
-
-  if (items.length === 0) {
-    return [
-      {
-        key: "current",
-        label: detail.status || "Open",
-        note: "Current status",
-        timestamp: detail.start_date,
-      },
-    ];
-  }
-
-  return items;
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/[0.03] p-4">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
+    </div>
+  );
 }
 
 export default function CaseDetailPage() {
@@ -125,10 +114,23 @@ export default function CaseDetailPage() {
     };
   }, [parsedCaseId, user.id]);
 
-  const timeline = useMemo(
-    () => (detail ? buildTimeline(detail, history?.history) : []),
-    [detail, history?.history],
+  const accessDenied = useMemo(
+    () => (error ?? "").toLowerCase().includes("access"),
+    [error],
   );
+  const teamMembers = team?.team ?? [];
+  const statusHistory = history?.history ?? [];
+  const documentItems = documents?.documents ?? [];
+  const billingEntries = billing?.entries ?? [];
+  const billingSummary = billing?.summary ?? {
+    bill_count: 0,
+    total_amount: 0,
+    approved_amount: 0,
+    pending_amount: 0,
+    total_hours: 0,
+    time_log_count: 0,
+  };
+  const hearings = detail?.hearings ?? [];
 
   if (!Number.isFinite(parsedCaseId)) {
     return <div className="card-premium p-6 text-sm text-red-300">Invalid case id.</div>;
@@ -143,23 +145,19 @@ export default function CaseDetailPage() {
   }
 
   if (error || !detail) {
-    const denied =
-      (error || "").toLowerCase().includes("access") ||
-      (error || "").toLowerCase().includes("403");
-
     return (
       <div className="space-y-4">
-        <Link
-          to="/cases"
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary"
-        >
+        <Link to="/cases" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
           <ArrowLeft size={16} />
           Back to cases
         </Link>
-        <div className="card-premium p-6 text-sm text-red-300">
-          {denied
-            ? "You do not have access to this case."
-            : error || "Case not found."}
+        <div className="card-premium p-6">
+          <h1 className="text-xl font-semibold text-foreground">
+            {accessDenied ? "Access denied" : "Case unavailable"}
+          </h1>
+          <p className="mt-3 text-sm text-slate-300">
+            {error || "Case not found."}
+          </p>
         </div>
       </div>
     );
@@ -167,16 +165,13 @@ export default function CaseDetailPage() {
 
   return (
     <div className="space-y-8">
-      <Link
-        to="/cases"
-        className="inline-flex items-center gap-2 text-sm font-medium text-primary"
-      >
+      <Link to="/cases" className="inline-flex items-center gap-2 text-sm font-medium text-primary">
         <ArrowLeft size={16} />
         Back to cases
       </Link>
 
       <section className="card-premium p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-semibold text-primary">
@@ -200,73 +195,29 @@ export default function CaseDetailPage() {
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
               {detail.title || "Untitled matter"}
             </h1>
-            <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="eyebrow">Description</p>
-              <p className="mt-3 text-base leading-7 text-slate-300">
-                {detail.description || "No description available."}
-              </p>
+
+            <div className="mt-5 flex flex-wrap gap-4 text-sm text-slate-400">
+              <span>Opened {formatDate(detail.start_date)}</span>
+              <span>Target {formatDate(detail.end_date, "Open ended")}</span>
+              <span>Lead {detail.lead_partner.name || "Unassigned"}</span>
+              <span>Senior {detail.lead_senior.name || "Not assigned"}</span>
             </div>
           </div>
 
           <div className="grid min-w-[260px] grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Team</p>
-              <p className="mt-1 text-2xl font-semibold text-foreground">
-                {detail.metrics.team_size}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                Documents
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-foreground">
-                {detail.metrics.document_count}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                Billing
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-foreground">
-                {formatCurrency(detail.metrics.billed_total)}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Hours</p>
-              <p className="mt-1 text-2xl font-semibold text-foreground">
-                {detail.metrics.total_hours}
-              </p>
-            </div>
+            <SummaryCard label="Team" value={detail.metrics.team_size} />
+            <SummaryCard label="Documents" value={detail.metrics.document_count} />
+            <SummaryCard label="Billing" value={formatCurrency(detail.metrics.billed_total)} />
+            <SummaryCard label="Hours" value={detail.metrics.total_hours} />
           </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="card-premium p-6">
-          <p className="eyebrow">Client Info</p>
-          <h2 className="mt-2 text-xl font-semibold text-foreground">
-            {detail.client.display_name || "Client pending"}
-          </h2>
-          <p className="mt-3 text-sm text-slate-300">
-            {detail.client.contact_info || "No contact info on file."}
-          </p>
-        </div>
-        <div className="card-premium p-6">
-          <p className="eyebrow">Lead Team</p>
-          <h2 className="mt-2 text-xl font-semibold text-foreground">
-            {detail.lead_partner.name || "Lead partner pending"}
-          </h2>
-          <p className="mt-3 text-sm text-slate-300">
-            Senior lead: {detail.lead_senior.name || "Not assigned"}
-          </p>
-        </div>
-        <div className="card-premium p-6">
-          <p className="eyebrow">Matter Dates</p>
-          <h2 className="mt-2 text-xl font-semibold text-foreground">
-            Opened {formatDate(detail.start_date)}
-          </h2>
-          <p className="mt-3 text-sm text-slate-300">
-            Target close {formatDate(detail.end_date, "Open ended")}
+      <section className="card-premium p-6">
+        <p className="eyebrow">Description</p>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <p className="whitespace-pre-line text-sm leading-7 text-slate-300">
+            {detail.description || "No description available."}
           </p>
         </div>
       </section>
@@ -278,8 +229,8 @@ export default function CaseDetailPage() {
             <h2 className="text-xl font-semibold text-foreground">Team</h2>
           </div>
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-            {team?.team.length ? (
-              team.team.map((member) => (
+            {teamMembers.length ? (
+              teamMembers.map((member) => (
                 <div
                   key={member.employee_id}
                   className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
@@ -302,21 +253,24 @@ export default function CaseDetailPage() {
         <div className="card-premium p-6">
           <h2 className="text-xl font-semibold text-foreground">Status Timeline</h2>
           <div className="mt-5 space-y-4">
-            {timeline.length ? (
-              timeline.map((item, index) => (
-                <div key={item.key} className="relative pl-8">
-                  {index !== timeline.length - 1 ? (
-                    <span className="absolute left-[11px] top-7 h-[calc(100%+0.75rem)] w-px bg-white/10" />
+            {statusHistory.length ? (
+              statusHistory.map((item, index) => (
+                <div key={item.history_id} className="relative pl-8">
+                  {index !== statusHistory.length - 1 ? (
+                    <span className="absolute left-[11px] top-8 h-[calc(100%+0.75rem)] w-px bg-white/10" />
                   ) : null}
                   <span className="absolute left-0 top-1.5 h-6 w-6 rounded-full border border-primary/30 bg-primary/10" />
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="font-semibold text-foreground">{item.label}</p>
-                      <span className="text-xs text-slate-400">
-                        {formatDateTime(item.timestamp, "Status recorded")}
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="text-slate-400">{item.old_status || "New matter"}</span>
+                      <span className="text-primary">to</span>
+                      <span className="font-semibold text-foreground">
+                        {item.new_status || "Updated"}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-slate-300">{item.note}</p>
+                    <p className="mt-2 text-xs text-slate-400">
+                      {item.changed_by_name || "Unknown"} | {formatDateTime(item.timestamp)}
+                    </p>
                   </div>
                 </div>
               ))
@@ -327,15 +281,15 @@ export default function CaseDetailPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="card-premium p-6">
           <div className="flex items-center gap-2">
             <FileText size={18} className="text-primary" />
             <h2 className="text-xl font-semibold text-foreground">Documents</h2>
           </div>
           <div className="mt-5 space-y-3">
-            {documents?.documents.length ? (
-              documents.documents.map((document) => (
+            {documentItems.length ? (
+              documentItems.map((document) => (
                 <div
                   key={document.document_id}
                   className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:flex-row md:items-center md:justify-between"
@@ -345,16 +299,18 @@ export default function CaseDetailPage() {
                       {document.file_name || "Document"}
                     </p>
                     <p className="mt-1 text-sm text-slate-300">
-                      Uploaded by {document.uploaded_by_name || "Unknown"} |{" "}
-                      {formatDateTime(document.created_at)}
+                      {document.confidentiality_level || "Internal"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Uploaded {formatDateTime(document.created_at)}
                     </p>
                   </div>
                   {document.file_url ? (
                     <a
-                      href={resolveFileUrl(document.file_url) ?? "#"}
+                      href={`${API_BASE_URL}${document.file_url}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="page-button-secondary"
+                      className="page-button-secondary shrink-0"
                     >
                       <Download size={16} />
                       Download
@@ -373,92 +329,87 @@ export default function CaseDetailPage() {
         <div className="card-premium p-6">
           <h2 className="text-xl font-semibold text-foreground">Billing</h2>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Total</p>
-              <p className="mt-1 text-xl font-semibold text-foreground">
-                {formatCurrency(billing?.summary.total_amount)}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Entries</p>
-              <p className="mt-1 text-xl font-semibold text-foreground">
-                {billing?.summary.bill_count ?? 0}
-              </p>
-            </div>
+            <SummaryCard label="Total" value={formatCurrency(billingSummary.total_amount)} />
+            <SummaryCard label="Entries" value={billingSummary.bill_count} />
+            <SummaryCard
+              label="Pending"
+              value={formatCurrency(billingSummary.pending_amount)}
+            />
+            <SummaryCard label="Hours" value={billingSummary.total_hours} />
           </div>
 
-          {billing?.entries.length ? (
-            <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-white/[0.03]">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                        Bill
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                        Amount
-                      </th>
+          <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-white/[0.03] text-slate-400">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Bill</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Generated By</th>
+                  <th className="px-4 py-3 font-medium text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {billingEntries.length ? (
+                  billingEntries.map((entry) => (
+                    <tr key={entry.bill_id} className="border-t border-white/10">
+                      <td className="px-4 py-3 text-foreground">#{entry.bill_id}</td>
+                      <td className="px-4 py-3 text-slate-300">{entry.status || "Pending"}</td>
+                      <td className="px-4 py-3 text-slate-300">
+                        {entry.generated_by_name || "Unknown"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-primary">
+                        {formatCurrency(entry.amount)}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10">
-                    {billing.entries.map((entry) => (
-                      <tr key={entry.bill_id}>
-                        <td className="px-4 py-3 text-sm text-foreground">
-                          #{entry.bill_id}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-300">
-                          {entry.status || "Pending"}
-                        </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-primary">
-                          {formatCurrency(entry.amount)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-5">
-              <EmptyState message="No billing entries available." />
-            </div>
-          )}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                      No billing entries available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <section className="card-premium p-6">
-        <h2 className="text-xl font-semibold text-foreground">Hearings</h2>
-        <div className="mt-5 space-y-3">
-          {detail.hearings.length ? (
-            detail.hearings.map((hearing) => (
-              <div
-                key={hearing.hearing_id}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-              >
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="font-semibold text-foreground">
-                      {hearing.court_name || "Court pending"}
-                    </p>
-                    <p className="text-sm text-slate-300">
-                      {formatDate(hearing.date)} | {hearing.location || "Location pending"}
-                    </p>
+        <div className="flex items-center gap-2">
+          <Gavel size={18} className="text-primary" />
+          <h2 className="text-xl font-semibold text-foreground">Hearings</h2>
+        </div>
+        <div className="mt-5 space-y-4">
+          {hearings.length ? (
+            hearings.map((hearing, index) => (
+              <div key={hearing.hearing_id} className="relative pl-8">
+                {index !== hearings.length - 1 ? (
+                  <span className="absolute left-[11px] top-8 h-[calc(100%+0.75rem)] w-px bg-white/10" />
+                ) : null}
+                <span className="absolute left-0 top-1.5 h-6 w-6 rounded-full border border-primary/30 bg-primary/10" />
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-foreground">
+                        {hearing.court_name || "Court to be confirmed"}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-300">
+                        {formatDate(hearing.date)} | {hearing.location || "Location pending"}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
+                      Hearing #{hearing.hearing_id}
+                    </span>
                   </div>
-                  <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                    {hearing.jurisdiction_type || "Hearing"}
-                  </span>
+                  <p className="mt-3 text-sm text-slate-400">
+                    {hearing.notes || "No hearing notes recorded."}
+                  </p>
                 </div>
-                <p className="mt-3 text-sm text-slate-400">
-                  {hearing.notes || "No hearing notes recorded."}
-                </p>
               </div>
             ))
           ) : (
-            <EmptyState message="No hearings scheduled for this case." />
+            <EmptyState message="No hearings scheduled for this matter." />
           )}
         </div>
       </section>

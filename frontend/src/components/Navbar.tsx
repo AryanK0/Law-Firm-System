@@ -53,7 +53,7 @@ export function Navbar({
             <BriefcaseBusiness size={18} />
           </span>
           <span className="text-lg font-bold tracking-tight text-foreground">
-            PSL
+            PSL Law
           </span>
         </button>
 
