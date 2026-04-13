@@ -40,12 +40,6 @@ Build the frontend:
 npm run build
 ```
 
-**Production (Vercel UI + hosted API):** build the frontend with
-`VITE_API_BASE_URL=https://<your-fastapi-host>/api` so the browser calls your
-deployed FastAPI service. The legacy Node `api/` folder is not uploaded to
-Vercel (see `.vercelignore`). Use the root `Dockerfile` for Railway, Fly.io, or
-any container host.
-
 ## Backend
 
 Install backend dependencies:

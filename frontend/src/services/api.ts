@@ -10,18 +10,8 @@ async function request(path: string) {
   return res.json();
 }
 
-export function fetchCases() {
-  return request("/cases");
-}
-
-export function fetchClients() {
-  return request("/clients");
-}
-
-export function fetchTickets() {
-  return request("/tickets");
-}
-
-export function fetchOverview() {
-  return request("/overview");
-}
+export const fetchCases = () => request("/cases");
+export const fetchClients = () => request("/clients");
+export const fetchTickets = () => request("/tickets");
+export const fetchDocuments = () => request("/documents");
+export const fetchOverview = () => request("/overview");
