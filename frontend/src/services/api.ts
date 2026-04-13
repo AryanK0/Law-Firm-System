@@ -1,7 +1,27 @@
 const BASE_URL = "/api";
 
-export async function fetchCases() {
-  const res = await fetch(`${BASE_URL}/cases`);
-  if (!res.ok) throw new Error("Failed to fetch cases");
+async function request(path: string) {
+  const res = await fetch(`${BASE_URL}${path}`);
+
+  if (!res.ok) {
+    throw new Error(`Request failed with status ${res.status}`);
+  }
+
   return res.json();
+}
+
+export function fetchCases() {
+  return request("/cases");
+}
+
+export function fetchClients() {
+  return request("/clients");
+}
+
+export function fetchTickets() {
+  return request("/tickets");
+}
+
+export function fetchOverview() {
+  return request("/overview");
 }
