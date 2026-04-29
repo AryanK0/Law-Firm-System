@@ -4,10 +4,12 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pymysql import MySQLError
 
 from .db import fetch_one
-from .routes import case, document, employee, overview, ticket
+from .routes import case, document, employee, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", REPO_ROOT / "uploads")).resolve()
@@ -62,12 +64,15 @@ ROUTE_INDEX = {
     "firm_overview": "/overview",
     "matters": {
         "analytics": "/analytics",
+        "overview": "/overview",
         "list": "/cases",
         "detail": "/cases/{case_id}",
         "team": "/cases/{case_id}/team",
+        "team_assign": "/cases/{case_id}/team [POST]",
         "documents": "/cases/{case_id}/documents",
         "status_history": "/cases/{case_id}/status-history",
         "billing": "/cases/{case_id}/billing",
+        "billing_approve": "/billing/{bill_id}/approve",
         "create": "/cases",
         "clients": "/clients",
     },
@@ -86,15 +91,15 @@ ROUTE_INDEX = {
 }
 
 app = FastAPI(
-    title="Precision Legal Management API",
-    summary="Operational backend for a premium legal-management demo workspace.",
+    title="Law Firm DBMS API",
+    summary="Academic MySQL backend for legal matter, billing, document, and access-control workflows.",
     description=(
-        "This FastAPI service powers the legal-management dashboard with matter data, "
-        "employee directory information, support tickets, analytics, and document intake. "
-        "The API is organized so product demos, frontend developers, and reviewers can "
-        "quickly understand what each section of the system is doing."
+        "This FastAPI service exposes a DBMS-focused legal operations dataset backed by "
+        "MySQL tables, views, stored procedures, stored functions, cursor procedures, "
+        "and triggers. The API keeps the React frontend working while surfacing the "
+        "database-centric workflows required for an academic project review."
     ),
-    version="2.0.0",
+    version="2.1.0",
     openapi_tags=TAGS_METADATA,
 )
 
@@ -112,7 +117,6 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.include_router(case.router)
 app.include_router(document.router)
 app.include_router(employee.router)
-app.include_router(overview.router)
 app.include_router(ticket.router)
 
 
@@ -124,7 +128,7 @@ def root():
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "docs": "/docs",
         "summary": (
-            "Use this API to explore legal-management operations, seed rich demo data, "
+            "Use this API to explore the MySQL-backed law-firm project, inspect reports, "
             "and power the React workspace."
         ),
         "routes": ROUTE_INDEX,
@@ -133,7 +137,18 @@ def root():
 
 @app.get("/health", tags=["platform"], summary="Check API and database connectivity")
 def health_check():
-    database_time = fetch_one("SELECT NOW() AS database_time")
+    try:
+        database_time = fetch_one("SELECT NOW() AS database_time")
+    except MySQLError as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "error",
+                "database": "unreachable",
+                "detail": str(exc),
+            },
+        )
+
     return {
         "status": "ok",
         "database": "reachable",

@@ -1,15 +1,5 @@
 from ..db import fetch_all, fetch_one
 
-ACCESS_LEVEL_SQL = """
-CASE
-  WHEN r.hierarchy_level = 1 THEN 'Executive'
-  WHEN r.hierarchy_level = 2 THEN 'Leadership'
-  WHEN r.hierarchy_level = 3 THEN 'Senior Matter Access'
-  WHEN r.hierarchy_level = 4 THEN 'Matter Access'
-  ELSE 'Support Access'
-END
-"""
-
 
 def get_analytics():
     case_status = fetch_all(
@@ -24,11 +14,10 @@ def get_analytics():
     billing = fetch_all(
         """
         SELECT
-          COALESCE(NULLIF(c.case_code, ''), c.title, CONCAT('Case #', b.case_id)) AS name,
-          COALESCE(SUM(b.amount), 0) AS amount
-        FROM Billing b
-        LEFT JOIN Cases c ON b.case_id = c.case_id
-        GROUP BY COALESCE(NULLIF(c.case_code, ''), c.title, CONCAT('Case #', b.case_id))
+          case_code AS name,
+          COALESCE(SUM(amount), 0) AS amount
+        FROM vw_billing_register
+        GROUP BY case_code
         ORDER BY amount DESC
         LIMIT 6
         """
@@ -46,12 +35,11 @@ def get_analytics():
     roles = fetch_all(
         """
         SELECT
-          r.role_name AS name,
-          COUNT(e.employee_id) AS value
-        FROM Role r
-        LEFT JOIN Employee e ON e.role_id = r.role_id
-        GROUP BY r.role_id, r.role_name
-        ORDER BY r.hierarchy_level
+          role_name AS name,
+          COUNT(employee_id) AS value
+        FROM vw_employee_directory
+        GROUP BY role_name
+        ORDER BY MIN(hierarchy_level), role_name
         """
     )
 
@@ -70,7 +58,13 @@ def get_analytics():
     return {
         "summary": summary,
         "case_status": case_status,
-        "billing": billing,
+        "billing": [
+            {
+                **item,
+                "amount": float(item["amount"] or 0),
+            }
+            for item in billing
+        ],
         "ticket_status": ticket_status,
         "roles": roles,
     }
@@ -93,86 +87,63 @@ def get_overview():
         "active_clients": fetch_one(
             "SELECT COUNT(DISTINCT client_id) AS total FROM Cases WHERE status <> 'Closed'"
         )["total"],
-        "tracked_revenue": fetch_one(
-            "SELECT COALESCE(SUM(amount), 0) AS total FROM Billing"
-        )["total"],
+        "tracked_revenue": float(
+            fetch_one("SELECT COALESCE(SUM(amount), 0) AS total FROM Billing")["total"] or 0
+        ),
         "pending_bills": fetch_one(
             "SELECT COUNT(*) AS total FROM Billing WHERE status = 'Pending'"
         )["total"],
         "sla_risk": fetch_one(
             """
             SELECT COUNT(*) AS total
-            FROM Ticket
+            FROM vw_ticket_overview
             WHERE status <> 'Resolved'
-              AND (
-                breach_flag = TRUE
-                OR (
-                  resolution_deadline IS NOT NULL
-                  AND resolution_deadline <= DATE_ADD(NOW(), INTERVAL 2 DAY)
-                )
-              )
+              AND sla_state IN ('Overdue', 'Due Soon')
             """
         )["total"],
     }
 
     featured_people = fetch_all(
-        f"""
+        """
         SELECT
-          e.employee_id,
-          e.name,
-          r.role_name,
-          d.department_name,
-          e.status,
-          e.employment_type,
-          supervisor.name AS supervisor_name,
-          {ACCESS_LEVEL_SQL} AS access_level
-        FROM Employee e
-        LEFT JOIN Department d ON e.department_id = d.department_id
-        LEFT JOIN Role r ON e.role_id = r.role_id
-        LEFT JOIN Employee supervisor ON e.supervisor_id = supervisor.employee_id
-        ORDER BY r.hierarchy_level, e.name
+          employee_id,
+          name,
+          role_name,
+          department_name,
+          status,
+          employment_type,
+          supervisor_name,
+          access_level
+        FROM vw_employee_directory
+        ORDER BY hierarchy_level, name
         """
     )
 
     role_access = fetch_all(
-        f"""
-        SELECT
-          r.role_id,
-          r.role_name,
-          r.hierarchy_level,
-          {ACCESS_LEVEL_SQL} AS access_level,
-          COALESCE(
-            GROUP_CONCAT(DISTINCT p.permission_name ORDER BY p.permission_name SEPARATOR ', '),
-            'No explicit permissions mapped'
-          ) AS permissions
-        FROM Role r
-        LEFT JOIN Role_Permission rp ON r.role_id = rp.role_id
-        LEFT JOIN Permission p ON rp.permission_id = p.permission_id
-        GROUP BY r.role_id, r.role_name, r.hierarchy_level
-        ORDER BY r.hierarchy_level, r.role_name
+        """
+        SELECT role_id, role_name, hierarchy_level, access_level, permissions
+        FROM vw_role_access_matrix
+        ORDER BY hierarchy_level, role_name
         """
     )
 
     priority_matters = fetch_all(
         """
         SELECT
-          c.case_id,
-          COALESCE(NULLIF(c.case_code, ''), CONCAT('Case #', c.case_id)) AS case_code,
-          c.title,
-          c.case_type,
-          c.status,
-          c.confidentiality_level,
-          cl.organization AS client_name,
-          lp.name AS lead_partner_name,
-          ls.name AS lead_senior_name,
-          c.start_date,
-          c.end_date
-        FROM Cases c
-        LEFT JOIN Client cl ON c.client_id = cl.client_id
-        LEFT JOIN Employee lp ON c.lead_partner_id = lp.employee_id
-        LEFT JOIN Employee ls ON c.lead_senior_id = ls.employee_id
+          case_id,
+          COALESCE(case_code, CONCAT('Case #', case_id)) AS case_code,
+          title,
+          case_type,
+          status,
+          confidentiality_level,
+          client_name,
+          lead_partner_name,
+          lead_senior_name,
+          start_date,
+          end_date
+        FROM vw_case_overview
         ORDER BY
-          CASE c.status
+          CASE status
             WHEN 'Hearing Scheduled' THEN 1
             WHEN 'Open' THEN 2
             WHEN 'Drafting' THEN 3
@@ -180,9 +151,9 @@ def get_overview():
             WHEN 'Closed' THEN 5
             ELSE 6
           END,
-          c.end_date IS NULL,
-          c.end_date,
-          c.case_id DESC
+          end_date IS NULL,
+          end_date,
+          case_id DESC
         LIMIT 8
         """
     )
@@ -190,19 +161,17 @@ def get_overview():
     upcoming_hearings = fetch_all(
         """
         SELECT
-          h.hearing_id,
-          h.date,
-          h.notes,
-          c.case_id,
-          COALESCE(NULLIF(c.case_code, ''), CONCAT('Case #', c.case_id)) AS case_code,
-          c.title,
-          court.name AS court_name,
-          court.location
-        FROM Hearing h
-        INNER JOIN Cases c ON h.case_id = c.case_id
-        INNER JOIN Court court ON h.court_id = court.court_id
-        WHERE h.date >= CURDATE()
-        ORDER BY h.date, h.hearing_id
+          hearing_id,
+          date,
+          notes,
+          case_id,
+          case_code,
+          title,
+          court_name,
+          location
+        FROM vw_hearing_calendar
+        WHERE date >= CURDATE()
+        ORDER BY date, hearing_id
         LIMIT 6
         """
     )
@@ -210,17 +179,15 @@ def get_overview():
     recent_documents = fetch_all(
         """
         SELECT
-          d.document_id,
-          d.created_at,
-          d.confidentiality_level,
-          d.file_path,
-          COALESCE(NULLIF(c.case_code, ''), CONCAT('Case #', c.case_id)) AS case_code,
-          c.title,
-          uploader.name AS uploaded_by_name
-        FROM Document d
-        LEFT JOIN Cases c ON d.case_id = c.case_id
-        LEFT JOIN Employee uploader ON d.uploaded_by = uploader.employee_id
-        ORDER BY d.created_at DESC, d.document_id DESC
+          document_id,
+          created_at,
+          confidentiality_level,
+          file_path,
+          case_code,
+          case_title AS title,
+          uploaded_by_name
+        FROM vw_document_register
+        ORDER BY created_at DESC, document_id DESC
         LIMIT 6
         """
     )
@@ -228,28 +195,27 @@ def get_overview():
     support_watch = fetch_all(
         """
         SELECT
-          t.ticket_id,
-          t.description,
-          t.priority,
-          t.status,
-          t.resolution_deadline,
-          t.breach_flag,
-          raised_by.name AS raised_by_name,
-          assigned_to.name AS assigned_to_name
-        FROM Ticket t
-        LEFT JOIN Employee raised_by ON t.raised_by = raised_by.employee_id
-        LEFT JOIN Employee assigned_to ON t.assigned_to = assigned_to.employee_id
-        WHERE t.status <> 'Resolved'
+          ticket_id,
+          description,
+          priority,
+          status,
+          resolution_deadline,
+          breach_flag,
+          raised_by_name,
+          assigned_to_name
+        FROM vw_ticket_overview
+        WHERE status <> 'Resolved'
         ORDER BY
-          CASE t.priority
-            WHEN 'High' THEN 1
-            WHEN 'Medium' THEN 2
-            WHEN 'Low' THEN 3
-            ELSE 4
+          CASE priority
+            WHEN 'Critical' THEN 1
+            WHEN 'High' THEN 2
+            WHEN 'Medium' THEN 3
+            WHEN 'Low' THEN 4
+            ELSE 5
           END,
-          t.resolution_deadline IS NULL,
-          t.resolution_deadline,
-          t.ticket_id DESC
+          resolution_deadline IS NULL,
+          resolution_deadline,
+          ticket_id DESC
         LIMIT 6
         """
     )
@@ -269,29 +235,13 @@ def get_overview():
     client_portfolio = fetch_all(
         """
         SELECT
-          cl.client_id,
-          COALESCE(NULLIF(cl.organization, ''), NULLIF(cl.name, ''), CONCAT('Client #', cl.client_id)) AS client_name,
-          COALESCE(m.matter_count, 0) AS matter_count,
-          COALESCE(b.billed_total, 0) AS billed_total,
-          i.last_contact
-        FROM Client cl
-        LEFT JOIN (
-          SELECT client_id, COUNT(*) AS matter_count
-          FROM Cases
-          GROUP BY client_id
-        ) m ON m.client_id = cl.client_id
-        LEFT JOIN (
-          SELECT c.client_id, COALESCE(SUM(b.amount), 0) AS billed_total
-          FROM Cases c
-          LEFT JOIN Billing b ON b.case_id = c.case_id
-          GROUP BY c.client_id
-        ) b ON b.client_id = cl.client_id
-        LEFT JOIN (
-          SELECT client_id, MAX(datetime) AS last_contact
-          FROM Client_Interaction
-          GROUP BY client_id
-        ) i ON i.client_id = cl.client_id
-        WHERE COALESCE(m.matter_count, 0) > 0
+          client_id,
+          client_name,
+          matter_count,
+          billed_total,
+          last_contact
+        FROM vw_client_portfolio
+        WHERE matter_count > 0
         ORDER BY matter_count DESC, billed_total DESC, client_name
         LIMIT 6
         """
@@ -314,30 +264,26 @@ def get_overview():
         """
     )
 
-    billing_watch = fetch_all(
+    billing_watch_rows = fetch_all(
         """
         SELECT
-          b.bill_id,
-          b.amount,
-          b.status,
-          COALESCE(NULLIF(c.case_code, ''), CONCAT('Case #', c.case_id)) AS case_code,
-          c.title,
-          COALESCE(NULLIF(cl.organization, ''), NULLIF(cl.name, ''), CONCAT('Client #', cl.client_id)) AS client_name,
-          generator.name AS generated_by_name,
-          approver.name AS approved_by_name
-        FROM Billing b
-        LEFT JOIN Cases c ON b.case_id = c.case_id
-        LEFT JOIN Client cl ON c.client_id = cl.client_id
-        LEFT JOIN Employee generator ON b.generated_by = generator.employee_id
-        LEFT JOIN Employee approver ON b.approved_by = approver.employee_id
+          bill_id,
+          amount,
+          status,
+          case_code,
+          title,
+          client_name,
+          generated_by_name,
+          approved_by_name
+        FROM vw_billing_register
         ORDER BY
-          CASE b.status
+          CASE status
             WHEN 'Pending' THEN 1
             WHEN 'Approved' THEN 2
             ELSE 3
           END,
-          b.amount DESC,
-          b.bill_id DESC
+          amount DESC,
+          bill_id DESC
         LIMIT 6
         """
     )
@@ -345,7 +291,7 @@ def get_overview():
     return {
         "firm": {
             "name": "Precision in Legal Management",
-            "tagline": "Premium operations workspace for matters, access, hearings, and support.",
+            "tagline": "Academic DBMS project for legal matters, access control, billing, documents, and support operations.",
         },
         "summary": summary,
         "featured_people": featured_people,
@@ -355,7 +301,19 @@ def get_overview():
         "recent_documents": recent_documents,
         "support_watch": support_watch,
         "department_coverage": department_coverage,
-        "client_portfolio": client_portfolio,
+        "client_portfolio": [
+            {
+                **item,
+                "billed_total": float(item["billed_total"] or 0),
+            }
+            for item in client_portfolio
+        ],
         "recent_interactions": recent_interactions,
-        "billing_watch": billing_watch,
+        "billing_watch": [
+            {
+                **item,
+                "amount": float(item["amount"] or 0),
+            }
+            for item in billing_watch_rows
+        ],
     }

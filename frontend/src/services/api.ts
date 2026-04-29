@@ -404,6 +404,13 @@ function withEmployee(employeeId: number) {
   return searchParams;
 }
 
+export function getDocumentDownloadUrl(documentId: number, employeeId?: number) {
+  return buildPath(
+    `/documents/${documentId}/download`,
+    typeof employeeId === "number" ? withEmployee(employeeId) : undefined,
+  );
+}
+
 async function requestJson<T>(
   path: string,
   init?: RequestInit,

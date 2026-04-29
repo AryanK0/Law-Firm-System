@@ -322,25 +322,24 @@ INSERT INTO Document (
   (54, 18, 13, 'Confidential', 'uploads/meridian_media_response_grid.xlsx', '2026-04-11 09:05:00');
 
 INSERT INTO Document_Version (
-  version_id,
   document_id,
   version_number,
   modified_by,
   modified_at,
   change_notes
 ) VALUES
-  (1, 1, 2, 5, '2026-04-01 13:40:00', 'Updated market concentration narrative for board review.'),
-  (2, 4, 2, 3, '2026-04-03 19:10:00', 'Partner revisions for emergency proxy briefing.'),
-  (3, 7, 2, 16, '2026-04-04 18:35:00', 'Added final witness sequence and hearing prep notes.'),
-  (4, 10, 2, 14, '2026-04-05 12:50:00', 'Expanded sanctions control timeline and open questions.'),
-  (5, 15, 2, 6, '2026-04-07 09:15:00', 'Added red flag scoring and indemnity references.'),
-  (6, 18, 2, 17, '2026-04-08 15:05:00', 'Inserted notification dependencies for regulator outreach.'),
-  (7, 25, 2, 10, '2026-04-08 18:25:00', 'Updated class certification themes after data review.'),
-  (8, 34, 2, 11, '2026-04-09 18:05:00', 'Added damages ranges and licensing audit notes.'),
-  (9, 40, 3, 18, '2026-04-10 11:05:00', 'Second board review round on committee authority.'),
-  (10, 45, 2, 11, '2026-04-10 18:05:00', 'Refined replacement-cost model and cover assumptions.'),
-  (11, 49, 2, 12, '2026-04-10 16:15:00', 'Inserted hospice timeline references and medical source cites.'),
-  (12, 53, 2, 10, '2026-04-11 08:35:00', 'Partner markup on sponsor notice and clawback fallback terms.');
+  (1, 2, 5, '2026-04-01 13:40:00', 'Updated market concentration narrative for board review.'),
+  (4, 2, 3, '2026-04-03 19:10:00', 'Partner revisions for emergency proxy briefing.'),
+  (7, 2, 16, '2026-04-04 18:35:00', 'Added final witness sequence and hearing prep notes.'),
+  (10, 2, 14, '2026-04-05 12:50:00', 'Expanded sanctions control timeline and open questions.'),
+  (15, 2, 6, '2026-04-07 09:15:00', 'Added red flag scoring and indemnity references.'),
+  (18, 2, 17, '2026-04-08 15:05:00', 'Inserted notification dependencies for regulator outreach.'),
+  (25, 2, 10, '2026-04-08 18:25:00', 'Updated class certification themes after data review.'),
+  (34, 2, 11, '2026-04-09 18:05:00', 'Added damages ranges and licensing audit notes.'),
+  (40, 3, 18, '2026-04-10 11:05:00', 'Second board review round on committee authority.'),
+  (45, 2, 11, '2026-04-10 18:05:00', 'Refined replacement-cost model and cover assumptions.'),
+  (49, 2, 12, '2026-04-10 16:15:00', 'Inserted hospice timeline references and medical source cites.'),
+  (53, 2, 10, '2026-04-11 08:35:00', 'Partner markup on sponsor notice and clawback fallback terms.');
 
 -- BILLING
 INSERT INTO Billing (bill_id, case_id, generated_by, approved_by, amount, status) VALUES

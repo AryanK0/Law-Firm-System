@@ -117,7 +117,8 @@ if (-not $Password) {
 $sqlFiles = @(
   (Join-Path $scriptDir "schema.sql"),
   (Join-Path $scriptDir "triggers.sql"),
-  (Join-Path $scriptDir "procedures.sql")
+  (Join-Path $scriptDir "procedures.sql"),
+  (Join-Path $scriptDir "views_reports.sql")
 )
 
 if ($IncludeSampleData) {
@@ -181,3 +182,4 @@ if ($IncludeSampleData) {
 }
 
 Write-Host "Database initialization completed successfully."
+Write-Host "Run backend/sql/tabular_reports.sql manually in mysql when you want the joined tabular demo output."

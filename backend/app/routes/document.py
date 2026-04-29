@@ -10,6 +10,19 @@ def get_documents(employee_id: int | None = None):
     return document_service.list_documents(employee_id)
 
 
+@router.get(
+    "/documents/{document_id}/download",
+    summary="Download a stored document or a valid seeded placeholder file",
+)
+def download_document(document_id: int, employee_id: int | None = None):
+    document = document_service.get_document_record(document_id)
+
+    if employee_id is not None and document.get("case_id") is not None:
+        case_service.ensure_case_access(employee_id, int(document["case_id"]))
+
+    return document_service.build_document_download_response(document)
+
+
 @router.post(
     "/upload-document/",
     summary="Register a file upload against an existing case",

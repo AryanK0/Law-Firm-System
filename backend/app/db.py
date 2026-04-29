@@ -1,23 +1,16 @@
-import os
 from contextlib import closing
 
 import pymysql
 from pymysql.cursors import DictCursor
 
-
-def get_env(*names: str, default: str | None = None):
-    for name in names:
-        value = os.getenv(name)
-        if value not in (None, ""):
-            return value
-    return default
+from .config import get_env
 
 
 def get_connection():
     return pymysql.connect(
         host=get_env("DB_HOST", "MYSQLHOST", default="localhost"),
         user=get_env("DB_USER", "MYSQLUSER", default="root"),
-        password=get_env("DB_PASSWORD", "MYSQLPASSWORD", default="Ar@230806."),
+        password=get_env("DB_PASSWORD", "MYSQLPASSWORD", default=""),
         database=get_env("DB_NAME", "MYSQLDATABASE", default="lawfirm"),
         port=int(get_env("DB_PORT", "MYSQLPORT", default="3306") or "3306"),
         autocommit=True,

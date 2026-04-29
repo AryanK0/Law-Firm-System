@@ -12,6 +12,13 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
+const compactDateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -43,6 +50,14 @@ export function formatDateTime(
 ) {
   const parsed = parseDate(value);
   return parsed ? dateTimeFormatter.format(parsed) : fallback;
+}
+
+export function formatCompactDateTime(
+  value: string | null | undefined,
+  fallback = "Not set",
+) {
+  const parsed = parseDate(value);
+  return parsed ? compactDateTimeFormatter.format(parsed) : fallback;
 }
 
 export function formatCurrency(value: number | null | undefined) {

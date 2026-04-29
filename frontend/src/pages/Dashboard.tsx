@@ -20,10 +20,12 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { CardComponent } from "../components/CardComponent";
 import {
   formatCaseCode,
+  formatCompactDateTime,
   formatCurrency,
   formatDate,
   formatDateTime,
@@ -280,15 +282,17 @@ export default function Dashboard() {
             Premium Operations View
           </span>
 
-          <h1 className="mt-6 max-w-3xl">
-            <span className="mb-2 block text-5xl font-semibold tracking-tight text-foreground md:text-6xl">
+          <h1 className="mt-6 max-w-3xl pb-2">
+            <span className="mb-2 block text-5xl font-semibold tracking-tight leading-[1.02] text-foreground md:text-6xl">
               Precision in Legal
             </span>
             <span
-              className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-5xl font-semibold tracking-tight text-transparent md:text-6xl"
+              className="block pb-1 text-5xl font-semibold tracking-tight leading-[1.02] text-transparent md:text-6xl"
               style={{ textShadow: "0 0 20px rgba(34, 211, 238, 0.25)" }}
             >
-              Management
+              <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text pb-1 text-transparent">
+                Management
+              </span>
             </span>
           </h1>
 
@@ -370,14 +374,14 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-8 border-t border-white/10 pt-6">
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <p className="eyebrow">Billing Watch</p>
                   <p className="mt-2 text-sm text-slate-300">
                     Pending approvals and the heaviest billed matters in view.
                   </p>
                 </div>
-                <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
                   {loading ? "..." : `${billingWatch.length} visible`}
                 </span>
               </div>
@@ -745,8 +749,8 @@ export default function Dashboard() {
                         {interaction.interaction_type || "Client update"}
                       </h3>
                     </div>
-                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                      {formatDateTime(interaction.datetime, "Not set")}
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
+                      {formatCompactDateTime(interaction.datetime, "Not set")}
                     </span>
                   </div>
 
@@ -772,28 +776,32 @@ export default function Dashboard() {
             {upcomingHearings.length === 0 ? (
               <EmptyPanel message="No hearings scheduled." />
             ) : (
-              upcomingHearings.map((hearing, index) => (
-                <div key={hearing.hearing_id} className="relative pl-8">
-                  {index !== upcomingHearings.length - 1 ? (
-                    <span className="absolute left-[11px] top-8 h-[calc(100%+0.75rem)] w-px bg-white/10" />
-                  ) : null}
-                  <span className="absolute left-0 top-1.5 h-6 w-6 rounded-full border border-primary/30 bg-primary/10" />
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                    <p className="text-sm font-semibold text-primary">
-                      {formatCaseCode(hearing.case_code, `Matter #${hearing.case_id}`)}
-                    </p>
+                upcomingHearings.map((hearing, index) => (
+                  <Link
+                    key={hearing.hearing_id}
+                    to={`/cases/${hearing.case_id}`}
+                    className="group relative block pl-8"
+                  >
+                    {index !== upcomingHearings.length - 1 ? (
+                      <span className="absolute left-[11px] top-8 h-[calc(100%+0.75rem)] w-px bg-white/10" />
+                    ) : null}
+                    <span className="absolute left-0 top-1.5 h-6 w-6 rounded-full border border-primary/30 bg-primary/10" />
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 smooth-transition group-hover:-translate-y-0.5 group-hover:bg-white/[0.05]">
+                      <p className="text-sm font-semibold text-primary">
+                        {formatCaseCode(hearing.case_code, `Matter #${hearing.case_id}`)}
+                      </p>
                     <h3 className="mt-1 text-base font-semibold text-foreground">
                       {hearing.court_name || "Court to be confirmed"}
                     </h3>
                     <p className="mt-2 text-sm text-slate-300">
                       {formatDate(hearing.date)} | {hearing.location || "Location pending"}
                     </p>
-                    <p className="mt-3 text-sm text-slate-400">
-                      {truncate(hearing.notes, 96)}
-                    </p>
-                  </div>
-                </div>
-              ))
+                      <p className="mt-3 text-sm text-slate-400">
+                        {truncate(hearing.notes, 96)}
+                      </p>
+                    </div>
+                  </Link>
+                ))
             )}
           </div>
         </div>
@@ -806,14 +814,15 @@ export default function Dashboard() {
             {recentDocuments.length === 0 ? (
               <EmptyPanel message="No documents available." />
             ) : (
-              recentDocuments.map((document) => (
-                <div
-                  key={document.document_id}
-                  className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-5"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-primary">
+                recentDocuments.map((document) => (
+                  <Link
+                    key={document.document_id}
+                    to="/documents"
+                    className="block overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-5 smooth-transition hover:-translate-y-0.5 hover:bg-white/[0.05]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-primary">
                         {formatCaseCode(document.case_code, `Matter #${document.document_id}`)}
                       </p>
                       <h3 className="mt-1 break-words text-base font-semibold text-foreground">
@@ -832,12 +841,12 @@ export default function Dashboard() {
                   <p className="mt-4 text-sm text-slate-300">
                     {document.title || "Matter title unavailable"}
                   </p>
-                  <p className="mt-4 text-xs text-slate-400">
-                    Uploaded by {document.uploaded_by_name || "Unknown"} |{" "}
-                    {formatDateTime(document.created_at)}
-                  </p>
-                </div>
-              ))
+                    <p className="mt-4 text-xs text-slate-400">
+                      Uploaded by {document.uploaded_by_name || "Unknown"} |{" "}
+                      {formatDateTime(document.created_at)}
+                    </p>
+                  </Link>
+                ))
             )}
           </div>
         </div>
@@ -850,14 +859,15 @@ export default function Dashboard() {
             {clientPortfolio.length === 0 ? (
               <EmptyPanel message="No client portfolio data available." />
             ) : (
-              clientPortfolio.map((client) => (
-                <div
-                  key={client.client_id}
-                  className="rounded-3xl border border-white/10 bg-white/[0.03] p-5"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-base font-semibold text-foreground">
+                clientPortfolio.map((client) => (
+                  <Link
+                    key={client.client_id}
+                    to={`/clients/${client.client_id}`}
+                    className="block rounded-3xl border border-white/10 bg-white/[0.03] p-5 smooth-transition hover:-translate-y-0.5 hover:bg-white/[0.05]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-base font-semibold text-foreground">
                         {client.client_name}
                       </h3>
                       <p className="mt-1 text-xs text-slate-400">
@@ -885,7 +895,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

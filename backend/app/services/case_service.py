@@ -2,164 +2,48 @@ from datetime import date
 
 from fastapi import HTTPException
 
-from ..db import call_procedure_one, fetch_all, fetch_one
+from ..db import call_procedure_one, execute, fetch_all, fetch_one
 
-CASE_SUMMARY_SQL = """
+
+CASE_LIST_SQL = """
 SELECT
-  c.case_id,
-  c.case_code,
-  c.title,
-  c.description,
-  c.case_type,
-  c.client_id,
-  COALESCE(NULLIF(cl.organization, ''), NULLIF(cl.name, ''), CONCAT('Client #', cl.client_id)) AS client_name,
-  c.lead_partner_id,
-  lp.name AS lead_partner_name,
-  c.lead_senior_id,
-  ls.name AS lead_senior_name,
-  c.status,
-  c.confidentiality_level,
-  c.created_by,
-  creator.name AS created_by_name,
-  c.start_date,
-  c.end_date,
-  COALESCE(team.team_size, 0) AS team_size,
-  COALESCE(documents.document_count, 0) AS document_count,
-  COALESCE(billing.total_amount, 0) AS billed_total,
-  COALESCE(hours.total_hours, 0) AS total_hours
-FROM Cases c
-LEFT JOIN Client cl ON c.client_id = cl.client_id
-LEFT JOIN Employee lp ON c.lead_partner_id = lp.employee_id
-LEFT JOIN Employee ls ON c.lead_senior_id = ls.employee_id
-LEFT JOIN Employee creator ON c.created_by = creator.employee_id
-LEFT JOIN (
-  SELECT case_id, COUNT(*) AS team_size
-  FROM Case_Team
-  GROUP BY case_id
-) team ON team.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COUNT(*) AS document_count
-  FROM Document
-  GROUP BY case_id
-) documents ON documents.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COALESCE(SUM(amount), 0) AS total_amount
-  FROM Billing
-  GROUP BY case_id
-) billing ON billing.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COALESCE(SUM(hours), 0) AS total_hours
-  FROM Time_Log
-  GROUP BY case_id
-) hours ON hours.case_id = c.case_id
+  case_id,
+  case_code,
+  title,
+  description,
+  case_type,
+  client_id,
+  client_name,
+  lead_partner_id,
+  lead_partner_name,
+  lead_senior_id,
+  lead_senior_name,
+  status,
+  confidentiality_level,
+  created_by,
+  created_by_name,
+  start_date,
+  end_date,
+  team_size,
+  document_count,
+  billed_total,
+  total_hours
+FROM vw_case_overview
 """
 
-CASE_DETAIL_SQL = """
-SELECT
-  c.case_id,
-  c.case_code,
-  c.title,
-  c.description,
-  c.case_type,
-  c.status,
-  c.confidentiality_level,
-  c.start_date,
-  c.end_date,
-  c.created_by,
-  creator.name AS created_by_name,
-  c.client_id,
-  cl.name AS client_contact_name,
-  cl.organization AS client_organization,
-  cl.contact_info AS client_contact_info,
-  COALESCE(NULLIF(cl.organization, ''), NULLIF(cl.name, ''), CONCAT('Client #', cl.client_id)) AS client_name,
-  c.lead_partner_id,
-  lp.name AS lead_partner_name,
-  lp.email AS lead_partner_email,
-  c.lead_senior_id,
-  ls.name AS lead_senior_name,
-  ls.email AS lead_senior_email,
-  COALESCE(team.team_size, 0) AS team_size,
-  COALESCE(documents.document_count, 0) AS document_count,
-  COALESCE(billing.total_amount, 0) AS billed_total,
-  COALESCE(hours.total_hours, 0) AS total_hours,
-  hearing.hearing_id AS next_hearing_id,
-  hearing.date AS next_hearing_date,
-  hearing.notes AS next_hearing_notes,
-  hearing.court_name AS next_hearing_court_name,
-  hearing.location AS next_hearing_location
-FROM Cases c
-LEFT JOIN Client cl ON c.client_id = cl.client_id
-LEFT JOIN Employee lp ON c.lead_partner_id = lp.employee_id
-LEFT JOIN Employee ls ON c.lead_senior_id = ls.employee_id
-LEFT JOIN Employee creator ON c.created_by = creator.employee_id
-LEFT JOIN (
-  SELECT case_id, COUNT(*) AS team_size
-  FROM Case_Team
-  GROUP BY case_id
-) team ON team.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COUNT(*) AS document_count
-  FROM Document
-  GROUP BY case_id
-) documents ON documents.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COALESCE(SUM(amount), 0) AS total_amount
-  FROM Billing
-  GROUP BY case_id
-) billing ON billing.case_id = c.case_id
-LEFT JOIN (
-  SELECT case_id, COALESCE(SUM(hours), 0) AS total_hours
-  FROM Time_Log
-  GROUP BY case_id
-) hours ON hours.case_id = c.case_id
-LEFT JOIN (
-  SELECT
-    h.case_id,
-    h.hearing_id,
-    h.date,
-    h.notes,
-    court.name AS court_name,
-    court.location
-  FROM Hearing h
-  INNER JOIN Court court ON h.court_id = court.court_id
-  INNER JOIN (
-    SELECT case_id, MIN(date) AS next_date
-    FROM Hearing
-    GROUP BY case_id
-  ) next_hearing ON next_hearing.case_id = h.case_id AND next_hearing.next_date = h.date
-) hearing ON hearing.case_id = c.case_id
-"""
 
-ACCESS_SQL = """
-(
-  EXISTS (
-    SELECT 1
-    FROM Employee e
-    INNER JOIN Role r ON e.role_id = r.role_id
-    WHERE e.employee_id = %s
-      AND r.hierarchy_level <= 2
-  )
-  OR EXISTS (
-    SELECT 1
-    FROM Case_Team ct
-    WHERE ct.case_id = c.case_id
-      AND ct.employee_id = %s
-  )
-)
-"""
+def _to_case_record(row: dict):
+    return {
+        **row,
+        "billed_total": float(row["billed_total"] or 0),
+        "total_hours": float(row["total_hours"] or 0),
+    }
 
 
 def check_case_access(employee_id: int, case_id: int) -> bool:
     result = fetch_one(
-        f"""
-        SELECT EXISTS(
-          SELECT 1
-          FROM Cases c
-          WHERE c.case_id = %s
-            AND {ACCESS_SQL}
-        ) AS has_access
-        """,
-        (case_id, employee_id, employee_id),
+        "SELECT check_access(%s, %s) AS has_access",
+        (employee_id, case_id),
     )
     return bool(result and result["has_access"])
 
@@ -175,34 +59,67 @@ def ensure_case_access(employee_id: int, case_id: int):
         raise HTTPException(status_code=403, detail="You do not have access to this case.")
 
 
-def list_cases(employee_id: int):
+def list_clients():
     return fetch_all(
-        f"""
-        {CASE_SUMMARY_SQL}
-        WHERE {ACCESS_SQL}
-        ORDER BY c.case_id DESC
-        """,
-        (employee_id, employee_id),
+        """
+        SELECT client_id, name, organization, contact_info
+        FROM Client
+        ORDER BY organization, name, client_id
+        """
     )
 
 
+def create_client_record(*, name: str | None, organization: str | None, contact_info: str | None):
+    if not (name or organization):
+        raise HTTPException(
+            status_code=400,
+            detail="Provide either a client name or organization.",
+        )
+
+    client_id = execute(
+        """
+        INSERT INTO Client(name, contact_info, organization)
+        VALUES (%s, %s, %s)
+        """,
+        (name, contact_info, organization),
+    )
+
+    return fetch_one(
+        """
+        SELECT client_id, name, organization, contact_info
+        FROM Client
+        WHERE client_id = %s
+        """,
+        (client_id,),
+    )
+
+
+def list_cases(employee_id: int):
+    rows = fetch_all(
+        f"""
+        {CASE_LIST_SQL}
+        WHERE check_access(%s, case_id)
+        ORDER BY case_id DESC
+        """,
+        (employee_id,),
+    )
+    return [_to_case_record(row) for row in rows]
+
+
 def get_case_detail(case_id: int):
-    row = fetch_one(f"{CASE_DETAIL_SQL} WHERE c.case_id = %s", (case_id,))
+    row = fetch_one(
+        "SELECT * FROM vw_case_overview WHERE case_id = %s",
+        (case_id,),
+    )
     if not row:
         raise HTTPException(status_code=404, detail="Case not found.")
 
     hearings = fetch_all(
         """
-        SELECT
-          h.hearing_id,
-          h.date,
-          h.notes,
-          court.name AS court_name,
-          court.location
-        FROM Hearing h
-        INNER JOIN Court court ON h.court_id = court.court_id
-        WHERE h.case_id = %s
-        ORDER BY h.date ASC, h.hearing_id ASC
+        SELECT hearing_id, date, notes, court_name, location
+        FROM vw_hearing_calendar
+        WHERE case_id = %s
+        ORDER BY date ASC, hearing_id ASC
         """,
         (case_id,),
     )
@@ -265,32 +182,28 @@ def get_case_team(case_id: int):
         "team": fetch_all(
             """
             SELECT
-              ct.employee_id,
-              ct.role_in_case,
-              ct.assigned_by,
-              assigned_by_employee.name AS assigned_by_name,
-              e.name,
-              e.email,
-              e.phone,
-              e.status,
-              e.employment_type,
-              d.department_name,
-              r.role_name,
-              r.hierarchy_level
-            FROM Case_Team ct
-            INNER JOIN Employee e ON ct.employee_id = e.employee_id
-            LEFT JOIN Employee assigned_by_employee ON ct.assigned_by = assigned_by_employee.employee_id
-            LEFT JOIN Department d ON e.department_id = d.department_id
-            LEFT JOIN Role r ON e.role_id = r.role_id
-            WHERE ct.case_id = %s
+              employee_id,
+              role_in_case,
+              assigned_by,
+              assigned_by_name,
+              name,
+              email,
+              phone,
+              status,
+              employment_type,
+              department_name,
+              role_name,
+              hierarchy_level
+            FROM vw_case_team_roster
+            WHERE case_id = %s
             ORDER BY
-              CASE ct.role_in_case
+              CASE role_in_case
                 WHEN 'Lead Partner' THEN 1
                 WHEN 'Lead Senior' THEN 2
                 ELSE 3
               END,
-              r.hierarchy_level,
-              e.name
+              hierarchy_level,
+              name
             """,
             (case_id,),
         ),
@@ -323,18 +236,16 @@ def get_case_billing(case_id: int):
     entries = fetch_all(
         """
         SELECT
-          b.bill_id,
-          b.amount,
-          b.status,
-          b.generated_by,
-          generator.name AS generated_by_name,
-          b.approved_by,
-          approver.name AS approved_by_name
-        FROM Billing b
-        LEFT JOIN Employee generator ON b.generated_by = generator.employee_id
-        LEFT JOIN Employee approver ON b.approved_by = approver.employee_id
-        WHERE b.case_id = %s
-        ORDER BY b.bill_id DESC
+          bill_id,
+          amount,
+          status,
+          generated_by,
+          generated_by_name,
+          approved_by,
+          approved_by_name
+        FROM vw_billing_register
+        WHERE case_id = %s
+        ORDER BY bill_id DESC
         """,
         (case_id,),
     )
@@ -353,12 +264,12 @@ def get_case_billing(case_id: int):
     hours = fetch_one(
         """
         SELECT
-          COALESCE(SUM(hours), 0) AS total_hours,
+          get_case_total_hours(%s) AS total_hours,
           COUNT(*) AS log_count
         FROM Time_Log
         WHERE case_id = %s
         """,
-        (case_id,),
+        (case_id, case_id),
     )
 
     return {
@@ -418,3 +329,73 @@ def create_case(
         raise HTTPException(status_code=400, detail="Case creation did not return a new id.")
 
     return get_case_detail(created["case_id"])
+
+
+def assign_case_team_member(
+    *,
+    case_id: int,
+    employee_id: int,
+    role_in_case: str,
+    assigned_by: int | None,
+):
+    created = call_procedure_one(
+        "assign_employee_case",
+        (case_id, employee_id, role_in_case, assigned_by),
+    )
+    if not created:
+        raise HTTPException(status_code=400, detail="Case assignment did not return a result.")
+
+    return fetch_one(
+        """
+        SELECT
+          case_id,
+          employee_id,
+          role_in_case,
+          assigned_by,
+          assigned_by_name,
+          name,
+          email,
+          phone,
+          status,
+          employment_type,
+          department_name,
+          role_name,
+          hierarchy_level
+        FROM vw_case_team_roster
+        WHERE case_id = %s AND employee_id = %s
+        """,
+        (case_id, employee_id),
+    )
+
+
+def approve_billing_entry(*, bill_id: int, approver_id: int):
+    approved = call_procedure_one("approve_billing", (bill_id, approver_id))
+    if not approved:
+        raise HTTPException(status_code=400, detail="Billing approval did not return a result.")
+
+    entry = fetch_one(
+        """
+        SELECT
+          bill_id,
+          case_id,
+          case_code,
+          title,
+          client_name,
+          generated_by,
+          generated_by_name,
+          approved_by,
+          approved_by_name,
+          amount,
+          status
+        FROM vw_billing_register
+        WHERE bill_id = %s
+        """,
+        (bill_id,),
+    )
+    if not entry:
+        raise HTTPException(status_code=404, detail="Billing entry not found.")
+
+    return {
+        **entry,
+        "amount": float(entry["amount"] or 0),
+    }

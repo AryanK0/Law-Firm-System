@@ -5,10 +5,10 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../content/AuthContext";
 import { formatCaseCode, formatCurrency, formatDate, formatDateTime } from "../lib/format";
 import {
-  API_BASE_URL,
   getCaseBilling,
   getCaseDetail,
   getCaseDocuments,
+  getDocumentDownloadUrl,
   getCaseStatusHistory,
   getCaseTeam,
   type CaseBillingResponse,
@@ -305,11 +305,9 @@ export default function CaseDetailPage() {
                       Uploaded {formatDateTime(document.created_at)}
                     </p>
                   </div>
-                  {document.file_url ? (
+                  {document.document_id ? (
                     <a
-                      href={`${API_BASE_URL}${document.file_url}`}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={getDocumentDownloadUrl(document.document_id, user.id)}
                       className="page-button-secondary shrink-0"
                     >
                       <Download size={16} />
