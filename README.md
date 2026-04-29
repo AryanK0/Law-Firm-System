@@ -254,7 +254,36 @@ Build the frontend:
 npm run build
 ```
 
-By default, the frontend calls `http://127.0.0.1:8000`. Override it with `VITE_API_BASE_URL` if needed.
+By default, the frontend calls the same origin as the page. In local Vite dev,
+`frontend/vite.config.ts` proxies API paths to `http://127.0.0.1:8000`.
+Override it with `VITE_API_BASE_URL` if you deploy the frontend and backend as
+separate services.
+
+## Railway Deployment
+
+This repository includes a `Dockerfile` for Railway. It builds the React frontend,
+installs the FastAPI backend, and serves both from one public Railway URL.
+
+Required Railway variables:
+
+```env
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_NAME=lawfirm
+DB_USER=your-mysql-user
+DB_PASSWORD=your-mysql-password
+```
+
+Railway MySQL variables named `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`,
+`MYSQLUSER`, and `MYSQLPASSWORD` also work. After deployment, open:
+
+```text
+https://your-app.up.railway.app/health
+```
+
+It should return `"database": "reachable"`. If the frontend loads but shows
+zero counts, the app is running but the database is either empty or not connected
+to the seeded `lawfirm` schema.
 
 ## What Happens in the System
 

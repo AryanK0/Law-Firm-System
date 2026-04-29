@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pymysql import MySQLError
 
@@ -14,6 +14,7 @@ from .routes import case, document, employee, ticket
 REPO_ROOT = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", REPO_ROOT / "uploads")).resolve()
 UPLOAD_DIR.mkdir(exist_ok=True)
+FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
 
 
 def parse_cors_origins():
@@ -106,13 +107,19 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_cors_origins(),
-    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX"),
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.up\.railway\.app"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+if (FRONTEND_DIST / "assets").exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=FRONTEND_DIST / "assets"),
+        name="frontend-assets",
+    )
 
 app.include_router(case.router)
 app.include_router(document.router)
@@ -154,3 +161,26 @@ def health_check():
         "database": "reachable",
         "database_time": database_time["database_time"] if database_time else None,
     }
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+def serve_frontend(full_path: str):
+    requested_file = (FRONTEND_DIST / full_path).resolve()
+    if FRONTEND_DIST.exists() and requested_file.is_file():
+        try:
+            requested_file.relative_to(FRONTEND_DIST.resolve())
+        except ValueError:
+            pass
+        else:
+            return FileResponse(requested_file)
+
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+
+    return JSONResponse(
+        status_code=404,
+        content={
+            "detail": "Frontend build not found. Run `npm run build` before serving the app."
+        },
+    )
