@@ -2,13 +2,13 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pymysql import MySQLError
 
-from .db import fetch_one
+from .db import fetch_one, get_connection_info
 from .routes import case, document, employee, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -127,6 +127,19 @@ app.include_router(employee.router)
 app.include_router(ticket.router)
 
 
+@app.exception_handler(MySQLError)
+async def database_exception_handler(_request: Request, exc: MySQLError):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "status": "error",
+            "database": "unreachable",
+            "error_type": exc.__class__.__name__,
+            "detail": str(exc),
+        },
+    )
+
+
 @app.get("/", tags=["platform"], summary="Describe the API surface")
 def root():
     return {
@@ -145,13 +158,15 @@ def root():
 @app.get("/health", tags=["platform"], summary="Check API and database connectivity")
 def health_check():
     try:
+        connection_info = get_connection_info()
         database_time = fetch_one("SELECT NOW() AS database_time")
-    except MySQLError as exc:
+    except Exception as exc:
         return JSONResponse(
             status_code=503,
             content={
                 "status": "error",
                 "database": "unreachable",
+                "error_type": exc.__class__.__name__,
                 "detail": str(exc),
             },
         )
@@ -159,7 +174,9 @@ def health_check():
     return {
         "status": "ok",
         "database": "reachable",
-        "database_time": database_time["database_time"] if database_time else None,
+        "database_time": str(database_time["database_time"]) if database_time else None,
+        "config_source": connection_info["source"],
+        "database_name": connection_info["database"],
     }
 
 

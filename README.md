@@ -264,6 +264,10 @@ separate services.
 This repository includes a `Dockerfile` for Railway. It builds the React frontend,
 installs the FastAPI backend, and serves both from one public Railway URL.
 
+In Railway service settings, deploy from the repository root (`/`). Do not set
+the root directory to `frontend`, because that only serves the React app and API
+routes such as `/health`, `/overview`, and `/clients` will return `index.html`.
+
 Required Railway variables:
 
 ```env
@@ -275,7 +279,9 @@ DB_PASSWORD=your-mysql-password
 ```
 
 Railway MySQL variables named `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`,
-`MYSQLUSER`, and `MYSQLPASSWORD` also work. After deployment, open:
+`MYSQLUSER`, and `MYSQLPASSWORD` also work. URL-style variables named
+`MYSQL_URL`, `MYSQL_PUBLIC_URL`, or `DATABASE_URL` also work. After deployment,
+open:
 
 ```text
 https://your-app.up.railway.app/health
