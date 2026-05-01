@@ -70,7 +70,7 @@ export function formatCaseCode(value: string | null | undefined, fallback = "Mat
   }
 
   return value
-    .replace(/^PSL-/i, "MAT-")
+    .replace(/^LEGACY-/i, "MAT-")
     .replace(/^Case\s+#/i, "Matter #");
 }
 

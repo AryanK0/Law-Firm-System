@@ -290,8 +290,8 @@ def get_overview():
 
     return {
         "firm": {
-            "name": "Precision in Legal Management",
-            "tagline": "Academic DBMS project for legal matters, access control, billing, documents, and support operations.",
+            "name": "Pearson Specter Systems",
+            "tagline": "Legal operations workspace for matters, access control, billing, documents, and support activity.",
         },
         "summary": summary,
         "featured_people": featured_people,

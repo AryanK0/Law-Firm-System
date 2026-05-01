@@ -32,9 +32,10 @@ The schema lives in [backend/sql/schema.sql](backend/sql/schema.sql) and contain
 - control and audit tables such as `Access_Control`, `Conflict_Check`, `Audit_Log`, `Ticket_Logs`, `IT_System_Log`
 - foreign keys, check constraints, and performance-oriented indexes
 
-### Stored procedures and functions
+### Stored procedures and DBMS features
 
 The stored-programming layer lives in [backend/sql/procedures.sql](backend/sql/procedures.sql).
+The Systems Oversight support layer lives in [backend/sql/dbms_features.sql](backend/sql/dbms_features.sql) so activity logging, protected-record controls, continuity snapshots, stored functions, cursor report tables, and operational views are easy to review in one file.
 
 #### Procedures used by the backend
 
@@ -48,6 +49,9 @@ The stored-programming layer lives in [backend/sql/procedures.sql](backend/sql/p
 
 - `generate_client_billing_report`
 - `generate_ticket_sla_review`
+- `sp_generate_case_report`
+- `sp_generate_employee_workload_report`
+- `sp_generate_ticket_report`
 
 These are included specifically so the project clearly demonstrates cursor usage in MySQL stored programming.
 
@@ -57,6 +61,19 @@ These are included specifically so the project clearly demonstrates cursor usage
 - `get_employee_access_level`
 - `get_case_billed_total`
 - `get_case_total_hours`
+- `fn_total_case_billing`
+- `fn_total_case_hours`
+- `fn_employee_case_count`
+- `fn_ticket_sla_status`
+
+### Systems Oversight data
+
+The `/dbms` frontend page appears as Systems Oversight and is backed by synthetic operational trace rows seeded from [backend/sql/sample_data.sql](backend/sql/sample_data.sql). It shows:
+
+- protected records from `Lock_Log`
+- interrupted and resolved activity from `Transaction_Log`
+- continuity snapshot history from `System_Checkpoint`
+- generated cursor reports for cases, employees, and tickets
 
 ### Triggers
 
@@ -132,12 +149,18 @@ backend/
     services/
   sql/
     schema.sql
+    access_control.sql
+    dbms_features.sql
     triggers.sql
     procedures.sql
     views_reports.sql
     sample_data.sql
+    access_dashboard.sql
     tabular_reports.sql
     init_db.ps1
+dbms_lab/
+  01_plsql_basics.sql ... 10_dashboard_queries.sql
+  DBMS_Features.md
 frontend/
   src/
 uploads/
@@ -182,8 +205,10 @@ If you want to run the SQL files manually, use this order:
 
 ```sql
 SOURCE backend/sql/schema.sql;
-SOURCE backend/sql/triggers.sql;
+SOURCE backend/sql/access_control.sql;
+SOURCE backend/sql/dbms_features.sql;
 SOURCE backend/sql/procedures.sql;
+SOURCE backend/sql/triggers.sql;
 SOURCE backend/sql/views_reports.sql;
 SOURCE backend/sql/sample_data.sql;
 ```
@@ -336,11 +361,12 @@ When a new document row is inserted:
 ## Suggested Viva / Demo Flow
 
 1. Show the schema and explain the main entities.
-2. Show `procedures.sql`, `triggers.sql`, and `views_reports.sql`.
-3. Run `tabular_reports.sql` in MySQL.
-4. Demonstrate `CALL generate_client_billing_report(1);`
-5. Demonstrate `CALL generate_ticket_sla_review(3);`
-6. Open the frontend and show that case, document, ticket, and overview screens still work.
+2. Show `dbms_features.sql`, `procedures.sql`, `triggers.sql`, and `views_reports.sql`.
+3. Open Systems Oversight and discuss protected records, interrupted activity, resolution history, continuity snapshots, and cursor-generated reports.
+4. Run `tabular_reports.sql` in MySQL.
+5. Demonstrate `CALL generate_client_billing_report(1);`
+6. Demonstrate `CALL generate_ticket_sla_review(3);`
+7. Open the frontend and show that case, document, ticket, overview, access control, and systems screens work.
 
 ## Notes
 

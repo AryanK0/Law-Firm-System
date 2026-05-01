@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile
 
-from ..services import case_service, document_service
+from ..services import document_service
 
 router = APIRouter(tags=["documents"])
 
@@ -16,9 +16,8 @@ def get_documents(employee_id: int | None = None):
 )
 def download_document(document_id: int, employee_id: int | None = None):
     document = document_service.get_document_record(document_id)
-
-    if employee_id is not None and document.get("case_id") is not None:
-        case_service.ensure_case_access(employee_id, int(document["case_id"]))
+    if employee_id is not None:
+        document_service.ensure_document_access(employee_id, document_id)
 
     return document_service.build_document_download_response(document)
 

@@ -156,15 +156,12 @@ BEGIN
   END IF;
 
   IF NEW.approved_by IS NOT NULL
-     AND NOT EXISTS (
-       SELECT 1
-       FROM Employee e
-       INNER JOIN Role r ON e.role_id = r.role_id
-       WHERE e.employee_id = NEW.approved_by
-         AND r.hierarchy_level <= 3
+     AND NOT (
+       fn_has_permission(NEW.approved_by, 'EDIT_CASE')
+       OR fn_has_permission(NEW.approved_by, 'APPROVE_BILLING')
      ) THEN
     SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Only senior associates or above can approve time logs.';
+      SET MESSAGE_TEXT = 'Approver lacks time-log approval authority.';
   END IF;
 END $$
 
@@ -178,15 +175,12 @@ BEGIN
   END IF;
 
   IF NEW.approved_by IS NOT NULL
-     AND NOT EXISTS (
-       SELECT 1
-       FROM Employee e
-       INNER JOIN Role r ON e.role_id = r.role_id
-       WHERE e.employee_id = NEW.approved_by
-         AND r.hierarchy_level <= 3
+     AND NOT (
+       fn_has_permission(NEW.approved_by, 'EDIT_CASE')
+       OR fn_has_permission(NEW.approved_by, 'APPROVE_BILLING')
      ) THEN
     SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Only senior associates or above can approve time logs.';
+      SET MESSAGE_TEXT = 'Approver lacks time-log approval authority.';
   END IF;
 END $$
 

@@ -65,7 +65,7 @@ const emptyAnalytics: AnalyticsResponse = {
 
 const emptyOverview: OverviewResponse = {
   firm: {
-    name: "Precision in Legal Management",
+    name: "Pearson Specter Systems",
     tagline: "Premium operations workspace for matters, access, hearings, and support.",
   },
   summary: {

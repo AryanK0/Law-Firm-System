@@ -270,6 +270,24 @@ def get_document_record(document_id: int):
     return document
 
 
+def ensure_document_access(employee_id: int, document_id: int):
+    result = fetch_one(
+        "SELECT fn_can_view_document(%s, %s) AS allowed",
+        (employee_id, document_id),
+    )
+    if not result or not result["allowed"]:
+        execute(
+            """
+            CALL sp_log_access_violation(
+              %s, 'Document', %s, 'VIEW_DOCUMENT',
+              'Document denied by case access or clearance policy.', 'HIGH', NULL
+            )
+            """,
+            (employee_id, document_id),
+        )
+        raise HTTPException(status_code=403, detail="You do not have clearance for this document.")
+
+
 def list_documents(employee_id: int | None = None):
     if employee_id is None:
         return fetch_all(
@@ -312,7 +330,7 @@ def list_documents(employee_id: int | None = None):
           version_count,
           last_modified_at
         FROM vw_document_register
-        WHERE check_access(%s, case_id)
+        WHERE fn_can_view_document(%s, document_id)
         ORDER BY created_at DESC, document_id DESC
         """,
         (employee_id,),

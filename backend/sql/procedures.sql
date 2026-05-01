@@ -7,92 +7,6 @@ DROP PROCEDURE IF EXISTS raise_ticket $$
 DROP PROCEDURE IF EXISTS resolve_ticket_workflow $$
 DROP PROCEDURE IF EXISTS generate_client_billing_report $$
 DROP PROCEDURE IF EXISTS generate_ticket_sla_review $$
-DROP FUNCTION IF EXISTS check_access $$
-DROP FUNCTION IF EXISTS get_employee_access_level $$
-DROP FUNCTION IF EXISTS get_case_billed_total $$
-DROP FUNCTION IF EXISTS get_case_total_hours $$
-
-CREATE FUNCTION get_employee_access_level(emp INT)
-RETURNS VARCHAR(50)
-READS SQL DATA
-BEGIN
-  DECLARE access_label VARCHAR(50) DEFAULT 'Support Access';
-
-  SELECT CASE
-    WHEN r.hierarchy_level = 1 THEN 'Executive'
-    WHEN r.hierarchy_level = 2 THEN 'Leadership'
-    WHEN r.hierarchy_level = 3 THEN 'Senior Matter Access'
-    WHEN r.role_name = 'IT' THEN 'Systems Access'
-    WHEN r.hierarchy_level = 4 THEN 'Matter Access'
-    ELSE 'Support Access'
-  END
-  INTO access_label
-  FROM Employee e
-  INNER JOIN Role r ON e.role_id = r.role_id
-  WHERE e.employee_id = emp
-  LIMIT 1;
-
-  RETURN access_label;
-END $$
-
-CREATE FUNCTION get_case_billed_total(caseid INT)
-RETURNS DECIMAL(10,2)
-READS SQL DATA
-BEGIN
-  DECLARE billed_total DECIMAL(10,2) DEFAULT 0.00;
-
-  SELECT COALESCE(SUM(amount), 0.00)
-  INTO billed_total
-  FROM Billing
-  WHERE case_id = caseid;
-
-  RETURN billed_total;
-END $$
-
-CREATE FUNCTION get_case_total_hours(caseid INT)
-RETURNS DECIMAL(10,2)
-READS SQL DATA
-BEGIN
-  DECLARE total_hours DECIMAL(10,2) DEFAULT 0.00;
-
-  SELECT COALESCE(SUM(hours), 0.00)
-  INTO total_hours
-  FROM Time_Log
-  WHERE case_id = caseid;
-
-  RETURN total_hours;
-END $$
-
-CREATE FUNCTION check_access(emp INT, caseid INT)
-RETURNS BOOLEAN
-READS SQL DATA
-BEGIN
-  DECLARE access_allowed BOOLEAN DEFAULT FALSE;
-
-  SELECT (
-    EXISTS (
-      SELECT 1
-      FROM Employee e
-      INNER JOIN Role r ON e.role_id = r.role_id
-      WHERE e.employee_id = emp
-        AND (r.hierarchy_level <= 2 OR r.role_name = 'IT')
-    )
-    OR EXISTS (
-      SELECT 1
-      FROM Case_Team ct
-      WHERE ct.employee_id = emp
-        AND ct.case_id = caseid
-    )
-    OR EXISTS (
-      SELECT 1
-      FROM Cases c
-      WHERE c.case_id = caseid
-        AND (c.lead_partner_id = emp OR c.lead_senior_id = emp OR c.created_by = emp)
-    )
-  ) INTO access_allowed;
-
-  RETURN access_allowed;
-END $$
 
 CREATE PROCEDURE create_case_full(
   IN case_code_param VARCHAR(50),
@@ -182,22 +96,12 @@ CREATE PROCEDURE assign_employee_case(
   IN assigned_by_param INT
 )
 BEGIN
-  INSERT INTO Case_Team(case_id, employee_id, role_in_case, assigned_by)
-  VALUES (case_id_param, emp_id_param, role_param, assigned_by_param);
-
-  INSERT INTO Access_Control(employee_id, resource_type, resource_id, access_type)
-  SELECT emp_id_param, 'Case', case_id_param, 'Team Assignment'
-  FROM DUAL
-  WHERE NOT EXISTS (
-    SELECT 1
-    FROM Access_Control ac
-    WHERE ac.employee_id = emp_id_param
-      AND ac.resource_type = 'Case'
-      AND ac.resource_id = case_id_param
-      AND ac.access_type = 'Team Assignment'
+  CALL sp_assign_employee_case_locked(
+    case_id_param,
+    emp_id_param,
+    role_param,
+    assigned_by_param
   );
-
-  SELECT case_id_param AS case_id, emp_id_param AS employee_id;
 END $$
 
 CREATE PROCEDURE approve_billing(
@@ -205,22 +109,7 @@ CREATE PROCEDURE approve_billing(
   IN approver_param INT
 )
 BEGIN
-  UPDATE Billing
-  SET status = 'Approved',
-      approved_by = approver_param
-  WHERE bill_id = bill_id_param;
-
-  INSERT INTO Audit_Log(user_id, action, table_name, record_id, new_value, timestamp)
-  VALUES (
-    approver_param,
-    'APPROVE',
-    'Billing',
-    bill_id_param,
-    CONCAT('Billing entry approved by employee ', approver_param),
-    NOW()
-  );
-
-  SELECT bill_id_param AS bill_id;
+  CALL sp_approve_billing_transaction(bill_id_param, approver_param);
 END $$
 
 CREATE PROCEDURE raise_ticket(
@@ -266,24 +155,15 @@ CREATE PROCEDURE resolve_ticket_workflow(
 BEGIN
   DECLARE assigned_owner INT;
   DECLARE current_status VARCHAR(50);
-  DECLARE resolver_role VARCHAR(100);
   DECLARE can_manage_tickets BOOLEAN DEFAULT FALSE;
 
   SELECT
     t.assigned_to,
     t.status,
-    r.role_name,
-    EXISTS (
-      SELECT 1
-      FROM Role_Permission rp
-      INNER JOIN Permission p ON p.permission_id = rp.permission_id
-      WHERE rp.role_id = e.role_id
-        AND p.permission_name = 'Manage Tickets'
-    )
-  INTO assigned_owner, current_status, resolver_role, can_manage_tickets
+    fn_has_permission(resolved_by_param, 'OVERRIDE_ACCESS')
+  INTO assigned_owner, current_status, can_manage_tickets
   FROM Ticket t
   INNER JOIN Employee e ON e.employee_id = resolved_by_param
-  LEFT JOIN Role r ON e.role_id = r.role_id
   WHERE t.ticket_id = ticket_id_param;
 
   IF current_status IS NULL THEN
@@ -293,7 +173,6 @@ BEGIN
 
   IF NOT (
     assigned_owner = resolved_by_param
-    OR resolver_role = 'IT'
     OR can_manage_tickets
   ) THEN
     SIGNAL SQLSTATE '45000'

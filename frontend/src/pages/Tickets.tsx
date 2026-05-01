@@ -48,7 +48,7 @@ export default function TicketsPage() {
           assigned_to:
             current.assigned_to ||
             String(
-              employeeData.find((employee) => employee.role_name === "IT")
+              employeeData.find((employee) => employee.role_name === "IT Admin")
                 ?.employee_id ?? "",
             ),
         }));
@@ -82,7 +82,7 @@ export default function TicketsPage() {
 
   const canResolveTicket = (ticket: TicketRecord) =>
     ticket.status !== "Resolved" &&
-    (user.role === "IT" || ticket.assigned_to === user.id);
+    (user.role === "IT Admin" || ticket.assigned_to === user.id);
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {

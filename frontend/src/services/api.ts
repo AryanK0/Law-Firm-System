@@ -390,6 +390,104 @@ export interface ResolveTicketPayload {
   resolved_by: number;
 }
 
+export interface DbmsTransactionRecord {
+  txn_id: number;
+  txn_type: string;
+  table_name: string;
+  record_id: number | null;
+  action: string;
+  status: string;
+  error_message: string | null;
+  created_at: string | null;
+}
+
+export interface DbmsTransactionsResponse {
+  recent: DbmsTransactionRecord[];
+  failures: DbmsTransactionRecord[];
+  recovery_logs: DbmsTransactionRecord[];
+}
+
+export interface DbmsLockRecord {
+  lock_id: number;
+  table_name: string;
+  record_id: number;
+  locked_by: number | null;
+  locked_by_name: string | null;
+  lock_reason: string | null;
+  locked_at: string | null;
+  released_at: string | null;
+  status: string;
+}
+
+export interface DbmsCheckpointRecord {
+  checkpoint_id: number;
+  checkpoint_name: string;
+  notes: string | null;
+  created_at: string | null;
+}
+
+export interface DbmsCaseReportRecord {
+  report_id: number;
+  case_id: number;
+  case_code: string;
+  title: string | null;
+  summary: string;
+  total_billing: number;
+  total_hours: number;
+  document_count: number;
+  generated_at: string | null;
+}
+
+export interface DbmsEmployeeReportRecord {
+  report_id: number;
+  employee_id: number;
+  name: string;
+  summary: string;
+  active_cases: number;
+  total_hours: number;
+  tickets_raised: number;
+  generated_at: string | null;
+}
+
+export interface DbmsTicketReportRecord {
+  report_id: number;
+  ticket_id: number;
+  summary: string;
+  sla_status: string;
+  priority: string | null;
+  assigned_to_name: string | null;
+  generated_at: string | null;
+}
+
+export interface CreateCheckpointPayload {
+  name?: string;
+  notes?: string;
+}
+
+export interface UpdateCaseAccessPayload {
+  approver_id: number;
+  employee_id: number;
+  case_id: number;
+  case_role?: string;
+  can_view: boolean;
+  can_edit: boolean;
+  can_upload_docs: boolean;
+  can_approve_docs: boolean;
+  can_close_case: boolean;
+  can_assign_members: boolean;
+}
+
+export interface AccessDashboardResponse {
+  hierarchy: Array<Record<string, string | number | boolean | null>>;
+  permissions: Array<Record<string, string | number | boolean | null>>;
+  matrix: Array<Record<string, string | number | boolean | null>>;
+  case_access: Array<Record<string, string | number | boolean | null>>;
+  clearances: Array<Record<string, string | number | boolean | null>>;
+  violations: Array<Record<string, string | number | boolean | null>>;
+  delegations: Array<Record<string, string | number | boolean | null>>;
+  requests: Array<Record<string, string | number | boolean | null>>;
+}
+
 function buildPath(path: string, searchParams?: URLSearchParams) {
   if (!searchParams || Array.from(searchParams.keys()).length === 0) {
     return `${API_BASE_URL}${path}`;
@@ -538,6 +636,76 @@ export function resolveTicket(ticketId: number, payload: ResolveTicketPayload) {
 
 export function createClient(payload: CreateClientPayload) {
   return requestJson<ClientRecord>("/clients", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getDbmsTransactions(employeeId: number) {
+  return requestJson<DbmsTransactionsResponse>(
+    "/dbms/transactions",
+    undefined,
+    withEmployee(employeeId),
+  );
+}
+
+export function getDbmsLocks(employeeId: number) {
+  return requestJson<DbmsLockRecord[]>("/dbms/locks", undefined, withEmployee(employeeId));
+}
+
+export function getDbmsCheckpoints(employeeId: number) {
+  return requestJson<DbmsCheckpointRecord[]>(
+    "/dbms/checkpoint/list",
+    undefined,
+    withEmployee(employeeId),
+  );
+}
+
+export function createDbmsCheckpoint(employeeId: number, payload: CreateCheckpointPayload = {}) {
+  return requestJson<DbmsCheckpointRecord>("/dbms/checkpoint/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }, withEmployee(employeeId));
+}
+
+export function recoverDbmsTransaction(employeeId: number, txnId: number) {
+  return requestJson<DbmsTransactionRecord>(`/dbms/recovery/${txnId}`, {
+    method: "POST",
+  }, withEmployee(employeeId));
+}
+
+export function getDbmsCaseReports(employeeId: number) {
+  return requestJson<DbmsCaseReportRecord[]>(
+    "/dbms/reports/cases",
+    undefined,
+    withEmployee(employeeId),
+  );
+}
+
+export function getDbmsEmployeeReports(employeeId: number) {
+  return requestJson<DbmsEmployeeReportRecord[]>(
+    "/dbms/reports/employees",
+    undefined,
+    withEmployee(employeeId),
+  );
+}
+
+export function getDbmsTicketReports(employeeId: number) {
+  return requestJson<DbmsTicketReportRecord[]>(
+    "/dbms/reports/tickets",
+    undefined,
+    withEmployee(employeeId),
+  );
+}
+
+export function getAccessDashboard() {
+  return requestJson<AccessDashboardResponse>("/access/dashboard");
+}
+
+export function updateCaseAccess(payload: UpdateCaseAccessPayload) {
+  return requestJson<Record<string, string | number | boolean | null>>("/access/case-access", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

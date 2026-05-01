@@ -2,7 +2,7 @@ import { BriefcaseBusiness, ChevronDown } from "lucide-react";
 
 import type { Role, User } from "../types/user";
 
-export type AppPage = "dashboard" | "cases" | "clients" | "documents" | "tickets";
+export type AppPage = "dashboard" | "cases" | "clients" | "documents" | "tickets" | "access" | "dbms";
 
 interface NavbarProps {
   activePage: AppPage;
@@ -18,6 +18,8 @@ export const pageRoutes: Record<AppPage, string> = {
   clients: "/clients",
   documents: "/documents",
   tickets: "/tickets",
+  access: "/access-control",
+  dbms: "/dbms",
 };
 
 const navItems: Array<{ label: string; page: AppPage }> = [
@@ -26,7 +28,13 @@ const navItems: Array<{ label: string; page: AppPage }> = [
   { label: "Clients", page: "clients" },
   { label: "Documents", page: "documents" },
   { label: "Tickets", page: "tickets" },
+  { label: "Access Control", page: "access" },
+  { label: "Systems Oversight", page: "dbms" },
 ];
+
+function canViewSystemsOversight(user: User) {
+  return user.id === 8 && user.name === "Benjamin" && user.role === "IT Admin";
+}
 
 export function Navbar({
   activePage,
@@ -35,6 +43,10 @@ export function Navbar({
   users,
   setRole,
 }: NavbarProps) {
+  const visibleNavItems = navItems.filter(
+    (item) => item.page !== "dbms" || canViewSystemsOversight(user),
+  );
+
   return (
     <nav
       className="sticky top-0 z-50 border-b backdrop-blur-md"
@@ -58,7 +70,7 @@ export function Navbar({
         </button>
 
         <div className="flex flex-wrap items-center gap-3 lg:gap-4 xl:flex-1 xl:justify-center">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <button
               key={item.page}
               type="button"

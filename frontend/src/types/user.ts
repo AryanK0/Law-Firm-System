@@ -4,7 +4,9 @@ export type Role =
   | "Senior Associate"
   | "Associate"
   | "Paralegal"
-  | "IT";
+  | "Intern"
+  | "IT Admin"
+  | "Finance Admin";
 
 export interface User {
   id: number;
@@ -21,7 +23,9 @@ export const roleHierarchy: Record<Role, number> = {
   "Senior Associate": 3,
   Associate: 4,
   Paralegal: 5,
-  IT: 4,
+  Intern: 6,
+  "IT Admin": 4,
+  "Finance Admin": 4,
 };
 
 export const demoUsers: User[] = [
@@ -68,7 +72,7 @@ export const demoUsers: User[] = [
   {
     id: 8,
     name: "Benjamin",
-    role: "IT",
+    role: "IT Admin",
     hierarchy: 4,
     accessLabel: "Systems Access",
     practice: "Technology",

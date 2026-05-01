@@ -32,15 +32,6 @@ CREATE TABLE Employee (
   CONSTRAINT fk_employee_supervisor FOREIGN KEY (supervisor_id) REFERENCES Employee(employee_id) ON DELETE SET NULL
 );
 
-CREATE TABLE Assistant_Assignment (
-  assistant_id INT NOT NULL,
-  assigned_to INT NOT NULL,
-  type VARCHAR(50) NOT NULL,
-  PRIMARY KEY (assistant_id, assigned_to),
-  CONSTRAINT fk_assignment_assistant FOREIGN KEY (assistant_id) REFERENCES Employee(employee_id) ON DELETE CASCADE,
-  CONSTRAINT fk_assignment_owner FOREIGN KEY (assigned_to) REFERENCES Employee(employee_id) ON DELETE CASCADE
-);
-
 CREATE TABLE Client (
   client_id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100),
@@ -216,14 +207,15 @@ CREATE TABLE IT_System_Log (
 
 CREATE TABLE Permission (
   permission_id INT AUTO_INCREMENT PRIMARY KEY,
-  permission_name VARCHAR(100) NOT NULL UNIQUE
+  permission_name VARCHAR(100) NOT NULL UNIQUE,
+  description TEXT
 );
 
 CREATE TABLE Role_Permission (
-  role_id INT NOT NULL,
+  hierarchy_id INT NOT NULL,
   permission_id INT NOT NULL,
-  PRIMARY KEY (role_id, permission_id),
-  CONSTRAINT fk_role_permission_role FOREIGN KEY (role_id) REFERENCES Role(role_id) ON DELETE CASCADE,
+  allowed BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (hierarchy_id, permission_id),
   CONSTRAINT fk_role_permission_permission FOREIGN KEY (permission_id) REFERENCES Permission(permission_id) ON DELETE CASCADE
 );
 

@@ -116,8 +116,10 @@ if (-not $Password) {
 
 $sqlFiles = @(
   (Join-Path $scriptDir "schema.sql"),
-  (Join-Path $scriptDir "triggers.sql"),
+  (Join-Path $scriptDir "access_control.sql"),
+  (Join-Path $scriptDir "dbms_features.sql"),
   (Join-Path $scriptDir "procedures.sql"),
+  (Join-Path $scriptDir "triggers.sql"),
   (Join-Path $scriptDir "views_reports.sql")
 )
 

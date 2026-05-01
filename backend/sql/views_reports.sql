@@ -10,35 +10,29 @@ SELECT
   e.employment_type,
   d.department_name,
   r.role_name,
-  r.hierarchy_level,
+  hl.rank_no AS hierarchy_level,
   get_employee_access_level(e.employee_id) AS access_level,
   supervisor.name AS supervisor_name
 FROM Employee e
 LEFT JOIN Department d ON e.department_id = d.department_id
 LEFT JOIN Role r ON e.role_id = r.role_id
+LEFT JOIN Hierarchy_Level hl ON e.hierarchy_id = hl.hierarchy_id
 LEFT JOIN Employee supervisor ON e.supervisor_id = supervisor.employee_id;
 
 CREATE OR REPLACE VIEW vw_role_access_matrix AS
 SELECT
-  r.role_id,
-  r.role_name,
-  r.hierarchy_level,
-  CASE
-    WHEN r.hierarchy_level = 1 THEN 'Executive'
-    WHEN r.hierarchy_level = 2 THEN 'Leadership'
-    WHEN r.hierarchy_level = 3 THEN 'Senior Matter Access'
-    WHEN r.hierarchy_level = 4 AND r.role_name = 'IT' THEN 'Systems Access'
-    WHEN r.hierarchy_level = 4 THEN 'Matter Access'
-    ELSE 'Support Access'
-  END AS access_level,
+  h.hierarchy_id AS role_id,
+  h.title AS role_name,
+  h.rank_no AS hierarchy_level,
+  h.title AS access_level,
   COALESCE(
-    GROUP_CONCAT(DISTINCT p.permission_name ORDER BY p.permission_name SEPARATOR ', '),
+    GROUP_CONCAT(DISTINCT CASE WHEN rp.allowed THEN p.permission_name END ORDER BY p.permission_name SEPARATOR ', '),
     'No explicit permissions mapped'
   ) AS permissions
-FROM Role r
-LEFT JOIN Role_Permission rp ON r.role_id = rp.role_id
+FROM Hierarchy_Level h
+LEFT JOIN Role_Permission rp ON h.hierarchy_id = rp.hierarchy_id
 LEFT JOIN Permission p ON rp.permission_id = p.permission_id
-GROUP BY r.role_id, r.role_name, r.hierarchy_level;
+GROUP BY h.hierarchy_id, h.title, h.rank_no;
 
 CREATE OR REPLACE VIEW vw_case_overview AS
 SELECT
@@ -122,12 +116,13 @@ SELECT
   e.employment_type,
   d.department_name,
   r.role_name,
-  r.hierarchy_level
+  hl.rank_no AS hierarchy_level
 FROM Case_Team ct
 INNER JOIN Employee e ON ct.employee_id = e.employee_id
 LEFT JOIN Employee assigned_by_employee ON ct.assigned_by = assigned_by_employee.employee_id
 LEFT JOIN Department d ON e.department_id = d.department_id
-LEFT JOIN Role r ON e.role_id = r.role_id;
+LEFT JOIN Role r ON e.role_id = r.role_id
+LEFT JOIN Hierarchy_Level hl ON e.hierarchy_id = hl.hierarchy_id;
 
 CREATE OR REPLACE VIEW vw_hearing_calendar AS
 SELECT
@@ -150,6 +145,8 @@ SELECT
   d.case_id,
   d.uploaded_by,
   d.confidentiality_level,
+  d.clearance_id,
+  sc.level_name AS clearance_level,
   d.file_path,
   CONCAT('/', TRIM(LEADING '/' FROM d.file_path)) AS file_url,
   SUBSTRING_INDEX(d.file_path, '/', -1) AS file_name,
@@ -163,6 +160,7 @@ SELECT
 FROM Document d
 LEFT JOIN Cases c ON d.case_id = c.case_id
 LEFT JOIN Employee uploader ON d.uploaded_by = uploader.employee_id
+LEFT JOIN Security_Clearance sc ON d.clearance_id = sc.clearance_id
 LEFT JOIN (
   SELECT
     document_id,

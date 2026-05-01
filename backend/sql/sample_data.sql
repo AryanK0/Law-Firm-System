@@ -14,15 +14,13 @@ INSERT INTO Department (department_id, department_name) VALUES
 -- ROLES
 INSERT INTO Role (role_id, role_name, hierarchy_level) VALUES
   (1, 'Managing Partner', 1),
-  (2, 'Chief Operating Officer', 2),
-  (3, 'Partner', 2),
-  (4, 'Senior Associate', 3),
-  (5, 'Special Counsel', 3),
-  (6, 'Associate', 4),
-  (7, 'IT', 4),
-  (8, 'Paralegal', 5),
-  (9, 'Legal Secretary', 5),
-  (10, 'Records Manager', 5);
+  (2, 'Partner', 2),
+  (3, 'Senior Associate', 3),
+  (4, 'Associate', 4),
+  (5, 'Paralegal', 5),
+  (6, 'Intern', 6),
+  (7, 'IT Admin', 4),
+  (8, 'Finance Admin', 4);
 
 -- EMPLOYEES
 INSERT INTO Employee (
@@ -34,34 +32,30 @@ INSERT INTO Employee (
   department_id,
   supervisor_id,
   employment_type,
-  status
+  status,
+  hierarchy_id,
+  clearance_id
 ) VALUES
-  (1, 'Jessica Pearson', 'jessica.pearson@counsel.local', '+1-212-555-0101', 1, 1, NULL, 'Equity', 'Active'),
-  (2, 'Harvey Specter', 'harvey.specter@counsel.local', '+1-212-555-0102', 3, 2, 1, 'Equity', 'Active'),
-  (3, 'Louis Litt', 'louis.litt@counsel.local', '+1-212-555-0103', 3, 3, 1, 'Equity', 'Active'),
-  (4, 'Donna Paulsen', 'donna.paulsen@counsel.local', '+1-212-555-0104', 2, 6, 1, 'Full-Time', 'Active'),
-  (5, 'Katrina Bennett', 'katrina.bennett@counsel.local', '+1-212-555-0105', 4, 2, 2, 'Full-Time', 'Active'),
-  (6, 'Mike Ross', 'mike.ross@counsel.local', '+1-212-555-0106', 6, 3, 3, 'Full-Time', 'Active'),
-  (7, 'Rachel Zane', 'rachel.zane@counsel.local', '+1-212-555-0107', 8, 4, 5, 'Full-Time', 'Active'),
-  (8, 'Benjamin', 'benjamin@counsel.local', '+1-212-555-0108', 7, 5, 4, 'Full-Time', 'Active'),
-  (9, 'Gretchen Bodinski', 'gretchen.bodinski@counsel.local', '+1-212-555-0109', 9, 6, 2, 'Full-Time', 'Active'),
-  (10, 'Alex Williams', 'alex.williams@counsel.local', '+1-212-555-0110', 3, 2, 1, 'Equity', 'Active'),
-  (11, 'Samantha Wheeler', 'samantha.wheeler@counsel.local', '+1-212-555-0111', 3, 2, 1, 'Equity', 'Active'),
-  (12, 'Robert Zane', 'robert.zane@counsel.local', '+1-212-555-0112', 3, 3, 1, 'Equity', 'Active'),
-  (13, 'Sheila Sazs', 'sheila.sazs@counsel.local', '+1-212-555-0113', 10, 7, 4, 'Full-Time', 'Active'),
-  (14, 'Jeff Malone', 'jeff.malone@counsel.local', '+1-212-555-0114', 3, 8, 1, 'Equity', 'Active'),
-  (15, 'Oliver Grady', 'oliver.grady@counsel.local', '+1-212-555-0115', 6, 3, 3, 'Full-Time', 'Active'),
-  (16, 'Brian Altman', 'brian.altman@counsel.local', '+1-212-555-0116', 6, 2, 10, 'Full-Time', 'Active'),
-  (17, 'Sean Cahill', 'sean.cahill@counsel.local', '+1-212-555-0117', 5, 8, 14, 'Full-Time', 'Active'),
-  (18, 'Dana Scott', 'dana.scott@counsel.local', '+1-212-555-0118', 3, 3, 1, 'Equity', 'Active');
-
-INSERT INTO Assistant_Assignment (assistant_id, assigned_to, type) VALUES
-  (7, 2, 'Matter Support'),
-  (7, 3, 'Closing Support'),
-  (7, 10, 'Trial Support'),
-  (9, 2, 'Executive Desk'),
-  (9, 10, 'Trial Scheduling'),
-  (13, 4, 'Records Liaison');
+  (1, 'Jessica Pearson', 'jessica.pearson@pearsonspecter.example', '+1-212-555-0101', 1, 1, NULL, 'Equity', 'Active', 1, 5),
+  (2, 'Harvey Specter', 'harvey.specter@pearsonspecter.example', '+1-212-555-0102', 2, 2, 1, 'Equity', 'Active', 2, 5),
+  (3, 'Louis Litt', 'louis.litt@pearsonspecter.example', '+1-212-555-0103', 2, 3, 1, 'Equity', 'Active', 2, 5),
+  (4, 'Donna Paulsen', 'donna.paulsen@pearsonspecter.example', '+1-212-555-0104', 8, 6, 1, 'Full-Time', 'Active', 8, 5),
+  (5, 'Katrina Bennett', 'katrina.bennett@pearsonspecter.example', '+1-212-555-0105', 3, 2, 2, 'Full-Time', 'Active', 3, 4),
+  (6, 'Mike Ross', 'mike.ross@pearsonspecter.example', '+1-212-555-0106', 4, 3, 2, 'Full-Time', 'Active', 4, 3),
+  (7, 'Rachel Zane', 'rachel.zane@pearsonspecter.example', '+1-212-555-0107', 5, 4, 5, 'Full-Time', 'Active', 5, 3),
+  (8, 'Benjamin', 'benjamin@pearsonspecter.example', '+1-212-555-0108', 7, 5, 4, 'Full-Time', 'Active', 7, 4),
+  (9, 'Gretchen Bodinski', 'gretchen.bodinski@pearsonspecter.example', '+1-212-555-0109', 5, 6, 2, 'Full-Time', 'Active', 5, 3),
+  (10, 'Alex Williams', 'alex.williams@pearsonspecter.example', '+1-212-555-0110', 2, 2, 1, 'Equity', 'Active', 2, 5),
+  (11, 'Samantha Wheeler', 'samantha.wheeler@pearsonspecter.example', '+1-212-555-0111', 2, 2, 1, 'Equity', 'Active', 2, 5),
+  (12, 'Robert Zane', 'robert.zane@pearsonspecter.example', '+1-212-555-0112', 2, 3, 1, 'Equity', 'Active', 2, 5),
+  (13, 'Sheila Sazs', 'sheila.sazs@pearsonspecter.example', '+1-212-555-0113', 5, 7, 4, 'Full-Time', 'Active', 5, 4),
+  (14, 'Jeff Malone', 'jeff.malone@pearsonspecter.example', '+1-212-555-0114', 2, 8, 1, 'Equity', 'Active', 2, 5),
+  (15, 'Oliver Grady', 'oliver.grady@pearsonspecter.example', '+1-212-555-0115', 6, 3, 3, 'Full-Time', 'Active', 6, 2),
+  (16, 'Brian Altman', 'brian.altman@pearsonspecter.example', '+1-212-555-0116', 4, 2, 10, 'Full-Time', 'Active', 4, 3),
+  (17, 'Sean Cahill', 'sean.cahill@pearsonspecter.example', '+1-212-555-0117', 3, 8, 14, 'Full-Time', 'Active', 3, 4),
+  (18, 'Dana Scott', 'dana.scott@pearsonspecter.example', '+1-212-555-0118', 2, 3, 1, 'Equity', 'Active', 2, 5),
+  (19, 'Cameron Dennis', 'cameron.dennis@pearsonspecter.example', '+1-212-555-0119', 2, 8, 1, 'Equity', 'Active', 2, 5),
+  (20, 'Jenny Griffith', 'jenny.griffith@pearsonspecter.example', '+1-212-555-0120', 6, 4, 7, 'Internship', 'Active', 6, 2);
 
 -- CLIENTS
 INSERT INTO Client (client_id, name, contact_info, organization) VALUES
@@ -447,32 +441,6 @@ INSERT INTO IT_System_Log (log_id, employee_id, action_type, affected_table, tim
   (3, 13, 'ACCESS_AUDIT_EXPORT', 'Access_Control', '2026-04-08 16:43:00', '10.20.7.11'),
   (4, 8, 'AUDIO_PROFILE_RESET', 'Ticket', '2026-04-09 10:15:00', '10.20.4.12');
 
--- PERMISSIONS
-INSERT INTO Permission (permission_id, permission_name) VALUES
-  (1, 'View Cases'),
-  (2, 'Edit Cases'),
-  (3, 'Approve Billing'),
-  (4, 'Upload Documents'),
-  (5, 'Manage Tickets'),
-  (6, 'Manage Access'),
-  (7, 'View Financials'),
-  (8, 'View Executive Notes'),
-  (9, 'Assign Case Teams'),
-  (10, 'Manage Records'),
-  (11, 'Administer Systems');
-
-INSERT INTO Role_Permission (role_id, permission_id) VALUES
-  (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11),
-  (2, 1), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 10), (2, 11),
-  (3, 1), (3, 2), (3, 3), (3, 4), (3, 7), (3, 9), (3, 10),
-  (4, 1), (4, 2), (4, 4), (4, 9), (4, 10),
-  (5, 1), (5, 2), (5, 4), (5, 7), (5, 9), (5, 10),
-  (6, 1), (6, 2), (6, 4),
-  (7, 1), (7, 5), (7, 6), (7, 10), (7, 11),
-  (8, 1), (8, 4), (8, 10),
-  (9, 1), (9, 4), (9, 10),
-  (10, 1), (10, 6), (10, 10);
-
 INSERT INTO Access_Control (access_id, employee_id, resource_type, resource_id, access_type) VALUES
   (1, 2, 'Case', 1, 'Lead'),
   (2, 5, 'Case', 1, 'Edit'),
@@ -501,3 +469,122 @@ INSERT INTO Conflict_Check (conflict_id, employee_id, client_id, restriction_rea
 INSERT INTO Audit_Log (audit_id, user_id, action, table_name, record_id, old_value, new_value, timestamp) VALUES
   (1, 4, 'UPDATE', 'Access_Control', 15, 'Pending review', 'Audit rights granted', '2026-04-08 16:44:00'),
   (2, 1, 'UPDATE', 'Cases', 9, 'Drafting', 'Hearing Scheduled', '2026-04-05 09:26:00');
+
+-- ENTERPRISE HIERARCHY AND ACCESS SEEDING
+UPDATE Employee e
+INNER JOIN Role r ON r.role_id = e.role_id
+INNER JOIN Hierarchy_Level h ON h.title = r.role_name
+SET e.hierarchy_id = h.hierarchy_id;
+
+UPDATE Employee e
+SET e.clearance_id = CASE
+  WHEN e.employee_id IN (1, 2, 3, 4, 10, 11, 12, 14, 18, 19) THEN 5
+  WHEN e.employee_id IN (5, 8, 13, 17) THEN 4
+  WHEN e.employee_id IN (6, 7, 9, 16) THEN 3
+  ELSE 2
+END;
+
+UPDATE Document
+SET clearance_id = CASE
+  WHEN confidentiality_level = 'Highly Confidential' THEN 4
+  WHEN confidentiality_level = 'Confidential' THEN 3
+  WHEN confidentiality_level = 'Internal' THEN 2
+  ELSE 1
+END;
+
+CALL sp_sync_case_access();
+
+INSERT INTO Access_Request (
+  request_id, requester_id, resource_type, resource_id, requested_permission,
+  reason, status, approved_by, approved_at, created_at
+) VALUES
+  (1, 6, 'Case', 2, 'VIEW_DOCUMENT', 'Mike needs the Blue Ridge binder for emergency motion drafting.', 'Approved', 2, '2026-04-09 13:15:00', '2026-04-09 12:40:00'),
+  (2, 20, 'Case', 1, 'VIEW_CASE', 'Jenny requested shadow access for training on antitrust matter intake.', 'Pending', NULL, NULL, '2026-04-10 09:20:00'),
+  (3, 7, 'Case', 12, 'UPLOAD_DOCUMENT', 'Rachel requested upload access for licensing exhibits.', 'Pending', NULL, NULL, '2026-04-10 10:05:00');
+
+INSERT INTO Delegated_Access (
+  delegation_id, from_employee, to_employee, permission_id, valid_from, valid_to, status
+) VALUES
+  (1, 1, 4, 13, '2026-04-10 08:00:00', '2026-04-12 18:00:00', 'Active'),
+  (2, 2, 5, 3, '2026-04-09 09:00:00', '2026-04-15 18:00:00', 'Active');
+
+INSERT INTO Access_Violation_Log (
+  violation_id, employee_id, attempted_resource_type, attempted_resource_id,
+  attempted_action, reason, severity, timestamp, ip_address
+) VALUES
+  (1, 20, 'Document', 11, 'VIEW_DOCUMENT', 'Intern clearance is below Restricted document clearance.', 'HIGH', '2026-04-10 09:35:00', '10.20.9.21'),
+  (2, 7, 'Billing', 5, 'APPROVE_BILLING', 'Paralegal hierarchy does not include billing approval.', 'MEDIUM', '2026-04-10 11:25:00', '10.20.6.18'),
+  (3, 6, 'Case', 4, 'OVERRIDE_ACCESS', 'Associate attempted override access without permission.', 'CRITICAL', '2026-04-10 12:10:00', '10.20.3.44');
+
+-- SYSTEMS OVERSIGHT DEMO DATA
+-- These rows keep the systems view populated immediately after initialization.
+-- They are synthetic operational traces for continuity review, not live user actions.
+INSERT INTO System_Checkpoint (checkpoint_id, checkpoint_name, notes, created_at) VALUES
+  (1, 'Morning continuity snapshot', 'Baseline before billing approvals | total_cases=18; total_documents=48; protected_records=2; open_tickets=6', '2026-04-10 08:30:00'),
+  (2, 'Pre-hearing operations snapshot', 'Captured active matters before hearing calendar updates | total_cases=18; total_documents=48; protected_records=2; open_tickets=6', '2026-04-10 16:45:00');
+
+INSERT INTO Lock_Log (lock_id, table_name, record_id, locked_by, lock_reason, locked_at, released_at, status) VALUES
+  (1, 'Cases', 2, 3, 'Partner reviewing proxy defense staffing before assignment changes.', '2026-04-10 09:15:00', NULL, 'Active'),
+  (2, 'Document_Version', 7, 13, 'Records team validating exhibit packet version history.', '2026-04-10 10:40:00', NULL, 'Active'),
+  (3, 'Billing', 5, 2, 'Billing approval transaction completed during demo seed.', '2026-04-09 17:10:00', '2026-04-09 17:12:00', 'Released');
+
+INSERT INTO Transaction_Log (
+  txn_id,
+  txn_type,
+  table_name,
+  record_id,
+  old_value,
+  new_value,
+  action,
+  status,
+  error_message,
+  created_at
+) VALUES
+  (
+    1,
+    'CASE_REASSIGNMENT',
+    'Cases',
+    4,
+    JSON_OBJECT('status', 'Drafting', 'lead_partner_id', 14, 'lead_senior_id', 17),
+    JSON_OBJECT('status', 'Drafting', 'lead_partner_id', 99, 'lead_senior_id', 17),
+    'UPDATE',
+    'Failed',
+    'Foreign key validation failed while assigning a non-existent partner.',
+    '2026-04-10 11:05:00'
+  ),
+  (
+    2,
+    'BILLING_APPROVAL',
+    'Billing',
+    5,
+    JSON_OBJECT('amount', 35600.00, 'status', 'Pending', 'approved_by', NULL),
+    JSON_OBJECT('amount', 35600.00, 'status', 'Approved', 'approved_by', 7),
+    'UPDATE',
+    'Failed',
+    'Only Partner-level staff can approve billing.',
+    '2026-04-10 11:22:00'
+  ),
+  (
+    3,
+    'DOCUMENT_VERSION_UPDATE',
+    'Document_Version',
+    12,
+    JSON_OBJECT('version_number', 1, 'change_notes', 'Initial version created from document trigger.'),
+    JSON_OBJECT('version_number', 2, 'change_notes', 'Recovered after duplicate exhibit notes were detected.'),
+    'UPDATE',
+    'Recovered',
+    NULL,
+    '2026-04-10 12:05:00'
+  ),
+  (
+    4,
+    'CHECKPOINT',
+    'System_Checkpoint',
+    2,
+    NULL,
+    JSON_OBJECT('summary', 'Pre-hearing operations snapshot created for systems review.'),
+    'CREATE',
+    'Success',
+    NULL,
+    '2026-04-10 16:45:00'
+  );

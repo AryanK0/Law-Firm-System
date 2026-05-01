@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pymysql import MySQLError
 
 from .db import fetch_one, get_connection_info
-from .routes import case, document, employee, ticket
+from .routes import access, case, dbms, document, employee, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", REPO_ROOT / "uploads")).resolve()
@@ -53,6 +53,14 @@ TAGS_METADATA = [
         "name": "documents",
         "description": "Document registration and upload handling.",
     },
+    {
+        "name": "access",
+        "description": "Hierarchy, permissions, clearances, delegation, requests, and violations.",
+    },
+    {
+        "name": "systems",
+        "description": "Systems oversight views for protected records, continuity snapshots, exceptions, and workload reports.",
+    },
 ]
 
 ROUTE_INDEX = {
@@ -89,16 +97,33 @@ ROUTE_INDEX = {
         "upload": "/upload-document/",
         "uploads_static": "/uploads/{filename}",
     },
+    "access": {
+        "dashboard": "/access/dashboard",
+        "check": "/access/check",
+        "request": "/access/request",
+        "approve": "/access/approve/{request_id}",
+        "violations": "/access/violations",
+        "delegations": "/access/delegations",
+    },
+    "systems_oversight": {
+        "snapshot_create": "/dbms/checkpoint/create",
+        "snapshot_list": "/dbms/checkpoint/list",
+        "resolve_activity": "/dbms/recovery/{txn_id}",
+        "case_reports": "/dbms/reports/cases",
+        "employee_reports": "/dbms/reports/employees",
+        "protected_records": "/dbms/locks",
+        "activity": "/dbms/transactions",
+    },
 }
 
 app = FastAPI(
-    title="Law Firm DBMS API",
-    summary="Academic MySQL backend for legal matter, billing, document, and access-control workflows.",
+    title="Law Firm Operations API",
+    summary="MySQL backend for legal matter, billing, document, and access-control workflows.",
     description=(
-        "This FastAPI service exposes a DBMS-focused legal operations dataset backed by "
+        "This FastAPI service exposes a legal operations dataset backed by "
         "MySQL tables, views, stored procedures, stored functions, cursor procedures, "
         "and triggers. The API keeps the React frontend working while surfacing the "
-        "database-centric workflows required for an academic project review."
+        "operational workflows required for project review."
     ),
     version="2.1.0",
     openapi_tags=TAGS_METADATA,
@@ -125,6 +150,8 @@ app.include_router(case.router)
 app.include_router(document.router)
 app.include_router(employee.router)
 app.include_router(ticket.router)
+app.include_router(access.router)
+app.include_router(dbms.router)
 
 
 @app.exception_handler(MySQLError)
