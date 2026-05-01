@@ -1,5 +1,5 @@
-fastapi
+fastapi[all]
 uvicorn
-pymysql
+mysql-connector-python
+python-dotenv
 python-multipart
-cryptography
