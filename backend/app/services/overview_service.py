@@ -43,16 +43,23 @@ def get_analytics():
         """
     )
 
+    summary_data = fetch_one(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM Cases) AS total_cases,
+            (SELECT COUNT(*) FROM Cases WHERE status <> 'Closed') AS open_cases,
+            (SELECT COUNT(*) FROM Ticket) AS total_tickets,
+            (SELECT COUNT(*) FROM Ticket WHERE breach_flag = TRUE) AS breached_tickets,
+            (SELECT COUNT(*) FROM Document) AS documents
+        """
+    )
+
     summary = {
-        "total_cases": fetch_one("SELECT COUNT(*) AS total FROM Cases")["total"],
-        "open_cases": fetch_one(
-            "SELECT COUNT(*) AS total FROM Cases WHERE status <> 'Closed'"
-        )["total"],
-        "total_tickets": fetch_one("SELECT COUNT(*) AS total FROM Ticket")["total"],
-        "breached_tickets": fetch_one(
-            "SELECT COUNT(*) AS total FROM Ticket WHERE breach_flag = TRUE"
-        )["total"],
-        "documents": fetch_one("SELECT COUNT(*) AS total FROM Document")["total"],
+        "total_cases": summary_data["total_cases"],
+        "open_cases": summary_data["open_cases"],
+        "total_tickets": summary_data["total_tickets"],
+        "breached_tickets": summary_data["breached_tickets"],
+        "documents": summary_data["documents"],
     }
 
     return {
@@ -71,36 +78,29 @@ def get_analytics():
 
 
 def get_overview():
+    summary_data = fetch_one(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM Employee WHERE status = 'Active') AS active_people,
+            (SELECT COUNT(*) FROM Cases WHERE status <> 'Closed') AS open_matters,
+            (SELECT COUNT(*) FROM Hearing WHERE date >= CURDATE()) AS upcoming_hearings,
+            (SELECT COUNT(*) FROM Ticket WHERE status <> 'Resolved') AS open_tickets,
+            (SELECT COUNT(DISTINCT client_id) FROM Cases WHERE status <> 'Closed') AS active_clients,
+            (SELECT COALESCE(SUM(amount), 0) FROM Billing) AS tracked_revenue,
+            (SELECT COUNT(*) FROM Billing WHERE status = 'Pending') AS pending_bills,
+            (SELECT COUNT(*) FROM vw_ticket_overview WHERE status <> 'Resolved' AND sla_state IN ('Overdue', 'Due Soon')) AS sla_risk
+        """
+    )
+
     summary = {
-        "active_people": fetch_one(
-            "SELECT COUNT(*) AS total FROM Employee WHERE status = 'Active'"
-        )["total"],
-        "open_matters": fetch_one(
-            "SELECT COUNT(*) AS total FROM Cases WHERE status <> 'Closed'"
-        )["total"],
-        "upcoming_hearings": fetch_one(
-            "SELECT COUNT(*) AS total FROM Hearing WHERE date >= CURDATE()"
-        )["total"],
-        "open_tickets": fetch_one(
-            "SELECT COUNT(*) AS total FROM Ticket WHERE status <> 'Resolved'"
-        )["total"],
-        "active_clients": fetch_one(
-            "SELECT COUNT(DISTINCT client_id) AS total FROM Cases WHERE status <> 'Closed'"
-        )["total"],
-        "tracked_revenue": float(
-            fetch_one("SELECT COALESCE(SUM(amount), 0) AS total FROM Billing")["total"] or 0
-        ),
-        "pending_bills": fetch_one(
-            "SELECT COUNT(*) AS total FROM Billing WHERE status = 'Pending'"
-        )["total"],
-        "sla_risk": fetch_one(
-            """
-            SELECT COUNT(*) AS total
-            FROM vw_ticket_overview
-            WHERE status <> 'Resolved'
-              AND sla_state IN ('Overdue', 'Due Soon')
-            """
-        )["total"],
+        "active_people": summary_data["active_people"],
+        "open_matters": summary_data["open_matters"],
+        "upcoming_hearings": summary_data["upcoming_hearings"],
+        "open_tickets": summary_data["open_tickets"],
+        "active_clients": summary_data["active_clients"],
+        "tracked_revenue": float(summary_data["tracked_revenue"] or 0),
+        "pending_bills": summary_data["pending_bills"],
+        "sla_risk": summary_data["sla_risk"],
     }
 
     featured_people = fetch_all(

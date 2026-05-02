@@ -61,17 +61,34 @@ def get_connection_info():
     }
 
 
+_connection_pool = []
+
 def get_connection():
     config = _connection_config()
     config.pop("_source", None)
+    
+    while _connection_pool:
+        conn = _connection_pool.pop()
+        try:
+            conn.ping(reconnect=False)
+            return conn
+        except Exception:
+            pass
+            
     return pymysql.connect(**config)
+
+def release_connection(conn):
+    _connection_pool.append(conn)
 
 
 def fetch_all(query, params=None):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
             cursor.execute(query, params or ())
             return cursor.fetchall()
+    finally:
+        release_connection(conn)
 
 
 def fetch_one(query, params=None):
@@ -80,15 +97,19 @@ def fetch_one(query, params=None):
 
 
 def execute(query, params=None):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
             cursor.execute(query, params or ())
             return cursor.lastrowid
+    finally:
+        release_connection(conn)
 
 
 def call_procedure(name, params=None):
-    with closing(get_connection()) as connection:
-        with connection.cursor() as cursor:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
             cursor.callproc(name, params or ())
 
             result_sets = []
@@ -98,6 +119,8 @@ def call_procedure(name, params=None):
                     break
 
             return result_sets
+    finally:
+        release_connection(conn)
 
 
 def call_procedure_one(name, params=None):
