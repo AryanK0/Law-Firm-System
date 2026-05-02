@@ -32,7 +32,7 @@ def get_env(*names: str, default: str | None = None):
 
 
 def is_vercel_runtime():
-    return any(os.getenv(name) for name in ("VERCEL", "VERCEL_ENV", "VERCEL_URL"))
+    return any(os.getenv(name) for name in ("VERCEL", "VERCEL_ENV", "VERCEL_URL", "AWS_LAMBDA_FUNCTION_NAME", "AWS_EXECUTION_ENV")) or str(REPO_ROOT).startswith("/var/task")
 
 
 def resolve_upload_dir():
@@ -65,5 +65,12 @@ def resolve_upload_dir():
 
 def ensure_upload_dir():
     upload_dir = resolve_upload_dir()
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        upload_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        if e.errno == 30:  # Read-only file system
+            upload_dir = Path("/tmp") / (upload_dir.name or "uploads")
+            upload_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            raise
     return upload_dir
