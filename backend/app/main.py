@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -8,30 +7,17 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pymysql import MySQLError
 
+from .config import ensure_upload_dir, get_env
 from .db import fetch_one, get_connection_info
 from .routes import access, case, dbms, document, employee, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
-
-
-def resolve_upload_dir():
-    configured_dir = os.getenv("UPLOAD_DIR")
-    if configured_dir:
-        return Path(configured_dir).resolve()
-
-    if os.getenv("VERCEL"):
-        return Path("/tmp/uploads")
-
-    return (REPO_ROOT / "uploads").resolve()
-
-
-UPLOAD_DIR = resolve_upload_dir()
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = ensure_upload_dir()
 
 
 def parse_cors_origins():
-    raw = os.getenv("CORS_ORIGINS", "")
+    raw = get_env("CORS_ORIGINS", default="")
     configured = [origin.strip() for origin in raw.split(",") if origin.strip()]
     if configured:
         return configured
@@ -145,7 +131,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_cors_origins(),
-    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.up\.railway\.app"),
+    allow_origin_regex=get_env("CORS_ORIGIN_REGEX", default=r"https://.*\.up\.railway\.app"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
