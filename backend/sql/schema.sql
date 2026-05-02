@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS lawfirm
+CREATE DATABASE IF NOT EXISTS railway
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE lawfirm;
+USE railway;
 
 CREATE TABLE Department (
   department_id INT AUTO_INCREMENT PRIMARY KEY,

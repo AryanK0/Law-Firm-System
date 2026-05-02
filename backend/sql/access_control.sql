@@ -1,4 +1,4 @@
-USE lawfirm;
+USE railway;
 
 CREATE TABLE IF NOT EXISTS Hierarchy_Level (
   hierarchy_id INT AUTO_INCREMENT PRIMARY KEY,

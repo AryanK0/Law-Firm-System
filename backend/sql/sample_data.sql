@@ -1,4 +1,4 @@
-USE lawfirm;
+USE railway;
 
 -- DEPARTMENTS
 INSERT INTO Department (department_id, department_name) VALUES

@@ -1,4 +1,4 @@
-USE lawfirm;
+USE railway;
 
 SELECT 'HIERARCHY LEVELS' AS section;
 SELECT hierarchy_id, title, rank_no, can_assign_case, can_approve_billing,
