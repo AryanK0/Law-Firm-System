@@ -1,0 +1,18 @@
+[project]
+name = "law-firm-system"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[all]",
+    "uvicorn",
+    "pymysql",
+    "python-dotenv",
+    "python-multipart",
+    "pydantic",
+]
+
+[project.scripts]
+app = "backend.app.main:app"
+
+[tool.vercel.scripts]
+build = "npm install && npm run build"

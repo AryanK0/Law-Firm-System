@@ -316,6 +316,35 @@ It should return `"database": "reachable"`. If the frontend loads but shows
 zero counts, the app is running but the database is either empty or not connected
 to the seeded `lawfirm` schema.
 
+## Vercel Deployment
+
+This repository also includes root deployment metadata for Vercel's FastAPI
+builder. `app.py` exports the existing FastAPI application from
+`backend.app.main:app`, while `pyproject.toml` runs `npm run build` so the React
+bundle exists before the backend starts serving requests.
+
+Deploy from the repository root (`/`). Keep the Vercel framework preset as
+FastAPI, or let Vercel detect it from `pyproject.toml`.
+
+Required Vercel variables:
+
+```env
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_NAME=lawfirm
+DB_USER=your-mysql-user
+DB_PASSWORD=your-mysql-password
+```
+
+URL-style variables named `MYSQL_URL`, `MYSQL_PUBLIC_URL`, or `DATABASE_URL`
+also work. After deployment, open:
+
+```text
+https://your-vercel-app.vercel.app/health
+```
+
+It should return `"database": "reachable"`.
+
 ## What Happens in the System
 
 ### Case creation
