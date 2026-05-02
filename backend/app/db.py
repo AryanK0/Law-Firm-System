@@ -18,7 +18,7 @@ def _connection_config():
     database_url = get_env("MYSQL_URL", "MYSQL_PUBLIC_URL", "DATABASE_URL")
     if database_url:
         parsed = urlparse(database_url)
-        if parsed.scheme not in {"mysql", "mysql2"}:
+        if parsed.scheme not in {"mysql", "mysql2", "mysql+pymysql", "mysql+aiomysql"}:
             raise RuntimeError(
                 f"Unsupported database URL scheme: {parsed.scheme or 'missing'}"
             )
@@ -36,11 +36,11 @@ def _connection_config():
         }
 
     return {
-        "host": get_env("DB_HOST", "MYSQLHOST", default="localhost"),
-        "user": get_env("DB_USER", "MYSQLUSER", default="root"),
-        "password": get_env("DB_PASSWORD", "MYSQLPASSWORD", default=""),
-        "database": get_env("DB_NAME", "MYSQLDATABASE", default="lawfirm"),
-        "port": _parse_port(get_env("DB_PORT", "MYSQLPORT", default="3306")),
+        "host": get_env("DB_HOST", "MYSQL_HOST", "MYSQLHOST", default="localhost"),
+        "user": get_env("DB_USER", "MYSQL_USER", "MYSQLUSER", default="root"),
+        "password": get_env("DB_PASSWORD", "MYSQL_PASSWORD", "MYSQLPASSWORD", default=""),
+        "database": get_env("DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE", default="lawfirm"),
+        "port": _parse_port(get_env("DB_PORT", "MYSQL_PORT", "MYSQLPORT", default="3306")),
         "autocommit": True,
         "cursorclass": DictCursor,
         "connect_timeout": 10,
