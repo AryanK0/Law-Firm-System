@@ -165,6 +165,19 @@ async def database_exception_handler(_request: Request, exc: MySQLError):
         },
     )
 
+@app.exception_handler(Exception)
+async def global_exception_handler(_request: Request, exc: Exception):
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "error_type": exc.__class__.__name__,
+            "detail": str(exc),
+            "traceback": traceback.format_exc()
+        },
+    )
+
 
 def frontend_index():
     index_file = FRONTEND_DIST / "index.html"

@@ -17,6 +17,8 @@ def _parse_port(raw_port):
 def _connection_config():
     database_url = get_env("MYSQL_URL", "MYSQL_PUBLIC_URL", "DATABASE_URL")
     if database_url:
+        if "://" not in database_url:
+            database_url = "mysql://" + database_url
         parsed = urlparse(database_url)
         if parsed.scheme not in {"mysql", "mysql2", "mysql+pymysql", "mysql+aiomysql"}:
             raise RuntimeError(
