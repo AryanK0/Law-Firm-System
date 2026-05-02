@@ -12,9 +12,22 @@ from .db import fetch_one, get_connection_info
 from .routes import access, case, dbms, document, employee, ticket
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", REPO_ROOT / "uploads")).resolve()
-UPLOAD_DIR.mkdir(exist_ok=True)
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
+
+
+def resolve_upload_dir():
+    configured_dir = os.getenv("UPLOAD_DIR")
+    if configured_dir:
+        return Path(configured_dir).resolve()
+
+    if os.getenv("VERCEL"):
+        return Path("/tmp/uploads")
+
+    return (REPO_ROOT / "uploads").resolve()
+
+
+UPLOAD_DIR = resolve_upload_dir()
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def parse_cors_origins():
@@ -167,8 +180,20 @@ async def database_exception_handler(_request: Request, exc: MySQLError):
     )
 
 
-@app.get("/", tags=["platform"], summary="Describe the API surface")
+def frontend_index():
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+
+    return None
+
+
+@app.get("/", tags=["platform"], summary="Serve the frontend or describe the API surface")
 def root():
+    index_response = frontend_index()
+    if index_response:
+        return index_response
+
     return {
         "name": app.title,
         "status": "online",
@@ -218,9 +243,9 @@ def serve_frontend(full_path: str):
         else:
             return FileResponse(requested_file)
 
-    index_file = FRONTEND_DIST / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
+    index_response = frontend_index()
+    if index_response:
+        return index_response
 
     return JSONResponse(
         status_code=404,

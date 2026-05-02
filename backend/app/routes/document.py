@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile
 
-from ..services import document_service
+from ..services import case_service, document_service
 
 router = APIRouter(tags=["documents"])
 
