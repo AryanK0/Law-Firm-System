@@ -290,7 +290,7 @@ def get_overview():
 
     return {
         "firm": {
-            "name": "Pearson Specter Systems",
+            "name": "PSL Law",
             "tagline": "Legal operations workspace for matters, access control, billing, documents, and support activity.",
         },
         "summary": summary,
