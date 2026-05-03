@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from fastapi import HTTPException
 from ..db import call_procedure_one, fetch_all, fetch_one
@@ -5,17 +6,14 @@ from ..db import call_procedure_one, fetch_all, fetch_one
 
 
 def get_analytics():
-    case_status = fetch_all(
-        """
+    queries = {
+        "case_status": (fetch_all, """
         SELECT COALESCE(status, 'Unspecified') AS name, COUNT(*) AS value
         FROM Cases
         GROUP BY COALESCE(status, 'Unspecified')
         ORDER BY value DESC, name
-        """
-    )
-
-    billing = fetch_all(
-        """
+        """),
+        "billing": (fetch_all, """
         SELECT
           case_code AS name,
           COALESCE(SUM(amount), 0) AS amount
@@ -23,39 +21,42 @@ def get_analytics():
         GROUP BY case_code
         ORDER BY amount DESC
         LIMIT 6
-        """
-    )
-
-    ticket_status = fetch_all(
-        """
+        """),
+        "ticket_status": (fetch_all, """
         SELECT COALESCE(status, 'Unspecified') AS name, COUNT(*) AS value
         FROM Ticket
         GROUP BY COALESCE(status, 'Unspecified')
         ORDER BY value DESC, name
-        """
-    )
-
-    roles = fetch_all(
-        """
+        """),
+        "roles": (fetch_all, """
         SELECT
           role_name AS name,
           COUNT(employee_id) AS value
         FROM vw_employee_directory
         GROUP BY role_name
         ORDER BY MIN(hierarchy_level), role_name
-        """
-    )
-
-    summary_data = fetch_one(
-        """
+        """),
+        "summary_data": (fetch_one, """
         SELECT
             (SELECT COUNT(*) FROM Cases) AS total_cases,
             (SELECT COUNT(*) FROM Cases WHERE status <> 'Closed') AS open_cases,
             (SELECT COUNT(*) FROM Ticket) AS total_tickets,
             (SELECT COUNT(*) FROM Ticket WHERE breach_flag = TRUE) AS breached_tickets,
             (SELECT COUNT(*) FROM Document) AS documents
-        """
-    )
+        """)
+    }
+
+    results = {}
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {k: executor.submit(func, q) for k, (func, q) in queries.items()}
+        for k, future in futures.items():
+            results[k] = future.result()
+
+    case_status = results["case_status"]
+    billing = results["billing"]
+    ticket_status = results["ticket_status"]
+    roles = results["roles"]
+    summary_data = results["summary_data"]
 
     summary = {
         "total_cases": summary_data["total_cases"],
@@ -81,8 +82,8 @@ def get_analytics():
 
 
 def get_overview():
-    summary_data = fetch_one(
-        """
+    queries = {
+        "summary_data": (fetch_one, """
         SELECT
             (SELECT COUNT(*) FROM Employee WHERE status = 'Active') AS active_people,
             (SELECT COUNT(*) FROM Cases WHERE status <> 'Closed') AS open_matters,
@@ -92,22 +93,8 @@ def get_overview():
             (SELECT COALESCE(SUM(amount), 0) FROM Billing) AS tracked_revenue,
             (SELECT COUNT(*) FROM Billing WHERE status = 'Pending') AS pending_bills,
             (SELECT COUNT(*) FROM vw_ticket_overview WHERE status <> 'Resolved' AND sla_state IN ('Overdue', 'Due Soon')) AS sla_risk
-        """
-    )
-
-    summary = {
-        "active_people": summary_data["active_people"],
-        "open_matters": summary_data["open_matters"],
-        "upcoming_hearings": summary_data["upcoming_hearings"],
-        "open_tickets": summary_data["open_tickets"],
-        "active_clients": summary_data["active_clients"],
-        "tracked_revenue": float(summary_data["tracked_revenue"] or 0),
-        "pending_bills": summary_data["pending_bills"],
-        "sla_risk": summary_data["sla_risk"],
-    }
-
-    featured_people = fetch_all(
-        """
+        """),
+        "featured_people": (fetch_all, """
         SELECT
           employee_id,
           name,
@@ -119,19 +106,13 @@ def get_overview():
           access_level
         FROM vw_employee_directory
         ORDER BY hierarchy_level, name
-        """
-    )
-
-    role_access = fetch_all(
-        """
+        """),
+        "role_access": (fetch_all, """
         SELECT role_id, role_name, hierarchy_level, access_level, permissions
         FROM vw_role_access_matrix
         ORDER BY hierarchy_level, role_name
-        """
-    )
-
-    priority_matters = fetch_all(
-        """
+        """),
+        "priority_matters": (fetch_all, """
         SELECT
           case_id,
           COALESCE(case_code, CONCAT('Case #', case_id)) AS case_code,
@@ -158,11 +139,8 @@ def get_overview():
           end_date,
           case_id DESC
         LIMIT 8
-        """
-    )
-
-    upcoming_hearings = fetch_all(
-        """
+        """),
+        "upcoming_hearings": (fetch_all, """
         SELECT
           hearing_id,
           date,
@@ -176,11 +154,8 @@ def get_overview():
         WHERE date >= CURDATE()
         ORDER BY date, hearing_id
         LIMIT 6
-        """
-    )
-
-    recent_documents = fetch_all(
-        """
+        """),
+        "recent_documents": (fetch_all, """
         SELECT
           document_id,
           created_at,
@@ -192,11 +167,8 @@ def get_overview():
         FROM vw_document_register
         ORDER BY created_at DESC, document_id DESC
         LIMIT 6
-        """
-    )
-
-    support_watch = fetch_all(
-        """
+        """),
+        "support_watch": (fetch_all, """
         SELECT
           ticket_id,
           description,
@@ -220,11 +192,8 @@ def get_overview():
           resolution_deadline,
           ticket_id DESC
         LIMIT 6
-        """
-    )
-
-    department_coverage = fetch_all(
-        """
+        """),
+        "department_coverage": (fetch_all, """
         SELECT
           d.department_name AS name,
           COUNT(e.employee_id) AS headcount
@@ -232,11 +201,8 @@ def get_overview():
         LEFT JOIN Employee e ON d.department_id = e.department_id
         GROUP BY d.department_id, d.department_name
         ORDER BY headcount DESC, d.department_name
-        """
-    )
-
-    client_portfolio = fetch_all(
-        """
+        """),
+        "client_portfolio": (fetch_all, """
         SELECT
           client_id,
           client_name,
@@ -247,11 +213,8 @@ def get_overview():
         WHERE matter_count > 0
         ORDER BY matter_count DESC, billed_total DESC, client_name
         LIMIT 6
-        """
-    )
-
-    recent_interactions = fetch_all(
-        """
+        """),
+        "recent_interactions": (fetch_all, """
         SELECT
           ci.interaction_id,
           ci.interaction_type,
@@ -264,11 +227,8 @@ def get_overview():
         LEFT JOIN Employee e ON ci.employee_id = e.employee_id
         ORDER BY ci.datetime DESC, ci.interaction_id DESC
         LIMIT 6
-        """
-    )
-
-    billing_watch_rows = fetch_all(
-        """
+        """),
+        "billing_watch_rows": (fetch_all, """
         SELECT
           bill_id,
           amount,
@@ -288,8 +248,37 @@ def get_overview():
           amount DESC,
           bill_id DESC
         LIMIT 6
-        """
-    )
+        """)
+    }
+
+    results = {}
+    with ThreadPoolExecutor(max_workers=11) as executor:
+        futures = {k: executor.submit(func, q) for k, (func, q) in queries.items()}
+        for k, future in futures.items():
+            results[k] = future.result()
+
+    summary_data = results["summary_data"]
+    summary = {
+        "active_people": summary_data["active_people"],
+        "open_matters": summary_data["open_matters"],
+        "upcoming_hearings": summary_data["upcoming_hearings"],
+        "open_tickets": summary_data["open_tickets"],
+        "active_clients": summary_data["active_clients"],
+        "tracked_revenue": float(summary_data["tracked_revenue"] or 0),
+        "pending_bills": summary_data["pending_bills"],
+        "sla_risk": summary_data["sla_risk"],
+    }
+
+    featured_people = results["featured_people"]
+    role_access = results["role_access"]
+    priority_matters = results["priority_matters"]
+    upcoming_hearings = results["upcoming_hearings"]
+    recent_documents = results["recent_documents"]
+    support_watch = results["support_watch"]
+    department_coverage = results["department_coverage"]
+    client_portfolio = results["client_portfolio"]
+    recent_interactions = results["recent_interactions"]
+    billing_watch_rows = results["billing_watch_rows"]
 
     return {
         "firm": {
