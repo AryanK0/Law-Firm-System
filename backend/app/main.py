@@ -9,7 +9,7 @@ from pymysql import MySQLError
 
 from .config import ensure_upload_dir, get_env
 from .db import fetch_one, get_connection_info
-from .routes import access, case, dbms, document, employee, ticket
+from .routes import access, case, document, operations
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
@@ -147,10 +147,8 @@ if (FRONTEND_DIST / "assets").exists():
 
 app.include_router(case.router)
 app.include_router(document.router)
-app.include_router(employee.router)
-app.include_router(ticket.router)
 app.include_router(access.router)
-app.include_router(dbms.router)
+app.include_router(operations.router)
 
 
 @app.exception_handler(MySQLError)
