@@ -416,9 +416,15 @@ def close_case(*, case_id: int, employee_id: int):
             detail="You do not have permission to close this matter.",
         )
 
-    # Perform the update
+    # Perform the update. Set end_date to the later of CURDATE() or start_date
+    # to satisfy the chk_case_dates constraint.
     execute(
-        "UPDATE Cases SET status = 'Closed', end_date = CURDATE() WHERE case_id = %s",
+        """
+        UPDATE Cases 
+        SET status = 'Closed', 
+            end_date = CASE WHEN CURDATE() > start_date THEN CURDATE() ELSE start_date END 
+        WHERE case_id = %s
+        """,
         (case_id,),
     )
 
