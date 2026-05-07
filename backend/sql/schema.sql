@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS railway
+CREATE DATABASE IF NOT EXISTS lawfirm
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE railway;
+USE lawfirm;
 
 CREATE TABLE Department (
   department_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -265,3 +265,10 @@ CREATE INDEX idx_ticket_logs_ticket_time ON Ticket_Logs(ticket_id, timestamp);
 CREATE INDEX idx_access_control_lookup ON Access_Control(employee_id, resource_type, resource_id);
 CREATE INDEX idx_conflict_lookup ON Conflict_Check(employee_id, client_id);
 CREATE INDEX idx_audit_log_lookup ON Audit_Log(table_name, record_id, timestamp);
+
+-- Visual Summary for Workbench/IDE
+SELECT 'DATABASE TABLES' AS section;
+SELECT table_name AS Name, table_rows AS Approx_Rows, table_collation AS Collation 
+FROM information_schema.tables 
+WHERE table_schema = 'lawfirm' AND table_type = 'BASE TABLE'
+ORDER BY table_name;

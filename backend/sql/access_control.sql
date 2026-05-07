@@ -1,4 +1,4 @@
-USE railway;
+USE lawfirm;
 
 CREATE TABLE IF NOT EXISTS Hierarchy_Level (
   hierarchy_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -507,3 +507,13 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+-- Visual Summary for Workbench/IDE
+SELECT 'SECURITY SYSTEM OBJECTS' AS section;
+SELECT routine_type AS Type, routine_name AS Name 
+FROM information_schema.routines 
+WHERE routine_schema = 'lawfirm' AND routine_name LIKE 'fn_can_%' 
+   OR routine_name LIKE 'sp_%access%'
+ORDER BY Type, Name;
+
+SELECT title AS Role, rank_no AS Power_Rank FROM Hierarchy_Level ORDER BY rank_no DESC;

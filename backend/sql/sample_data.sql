@@ -1,4 +1,4 @@
-USE railway;
+USE lawfirm;
 
 -- DEPARTMENTS
 INSERT INTO Department (department_id, department_name) VALUES
@@ -588,3 +588,14 @@ INSERT INTO Transaction_Log (
     NULL,
     '2026-04-10 16:45:00'
   );
+
+-- Visual Summary for Workbench/IDE
+SELECT 'SAMPLE DATA IMPORT' AS Status, 'Employees' AS Category, COUNT(*) AS Total FROM Employee
+UNION ALL
+SELECT 'SAMPLE DATA IMPORT', 'Clients', COUNT(*) FROM Client
+UNION ALL
+SELECT 'SAMPLE DATA IMPORT', 'Cases', COUNT(*) FROM Cases
+UNION ALL
+SELECT 'SAMPLE DATA IMPORT', 'Billings', COUNT(*) FROM Billing;
+
+SELECT name AS Sample_Employee, email FROM Employee LIMIT 5;

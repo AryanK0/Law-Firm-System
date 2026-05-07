@@ -1,4 +1,4 @@
-USE lawfirm;
+USE railway;
 
 SELECT 'HIERARCHY LEVELS' AS section;
 SELECT hierarchy_id, title, rank_no, can_assign_case, can_approve_billing,
@@ -40,16 +40,6 @@ SELECT av.violation_id, e.name AS employee_name, av.attempted_resource_type,
 FROM Access_Violation_Log av
 LEFT JOIN Employee e ON e.employee_id = av.employee_id
 ORDER BY av.timestamp DESC;
-
-SELECT 'SYSTEM INVENTORY' AS section;
-SELECT 'PROCEDURE' AS Type, routine_name AS Name FROM information_schema.routines WHERE routine_schema = 'lawfirm' AND routine_type = 'PROCEDURE'
-UNION ALL
-SELECT 'FUNCTION', routine_name FROM information_schema.routines WHERE routine_schema = 'lawfirm' AND routine_type = 'FUNCTION'
-UNION ALL
-SELECT 'TRIGGER', trigger_name FROM information_schema.triggers WHERE trigger_schema = 'lawfirm'
-UNION ALL
-SELECT 'VIEW', table_name FROM information_schema.views WHERE table_schema = 'lawfirm'
-ORDER BY Type, Name;
 
 SELECT 'DELEGATED ACCESS' AS section;
 SELECT da.delegation_id, source.name AS from_employee, target.name AS to_employee,

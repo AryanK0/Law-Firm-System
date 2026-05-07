@@ -11,6 +11,7 @@ import {
   getDocumentDownloadUrl,
   getCaseStatusHistory,
   getCaseTeam,
+  closeCase,
   type CaseBillingResponse,
   type CaseDetailRecord,
   type CaseDocumentsResponse,
@@ -68,6 +69,7 @@ export default function CaseDetailPage() {
   const [history, setHistory] = useState<CaseStatusHistoryResponse | null>(null);
   const [billing, setBilling] = useState<CaseBillingResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [closing, setClosing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -113,6 +115,24 @@ export default function CaseDetailPage() {
       active = false;
     };
   }, [parsedCaseId, user.id]);
+
+  const handleCloseCase = async () => {
+    if (!detail || closing) return;
+    if (!window.confirm("Are you sure you want to close this matter? This will set the end date to today and prevent further edits.")) return;
+
+    setClosing(true);
+    try {
+      const updated = await closeCase(detail.case_id, user.id);
+      setDetail(updated);
+      // Refresh history too
+      const historyData = await getCaseStatusHistory(detail.case_id, user.id);
+      setHistory(historyData);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not close case.");
+    } finally {
+      setClosing(false);
+    }
+  };
 
   const accessDenied = useMemo(
     () => (error ?? "").toLowerCase().includes("access"),
@@ -211,6 +231,18 @@ export default function CaseDetailPage() {
             <SummaryCard label="Hours" value={detail.metrics.total_hours} />
           </div>
         </div>
+
+        {detail.status !== "Closed" && (
+          <div className="mt-8 flex border-t border-white/5 pt-6">
+            <button
+              onClick={handleCloseCase}
+              disabled={closing}
+              className="page-button-primary bg-red-500/80 hover:bg-red-500 text-white border-red-500/50"
+            >
+              {closing ? "Closing..." : "Close Matter"}
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="card-premium p-6">

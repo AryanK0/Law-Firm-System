@@ -1,4 +1,4 @@
-USE railway;
+USE lawfirm;
 
 -- --- From backend/sql/procedures.sql ---
 DELIMITER $$
@@ -413,6 +413,13 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+-- Visual Summary for Workbench/IDE
+SELECT 'STORED PROCEDURES & TRIGGERS' AS section;
+SELECT 'PROCEDURE' AS Type, routine_name AS Name FROM information_schema.routines WHERE routine_schema = 'lawfirm' AND routine_type = 'PROCEDURE'
+UNION ALL
+SELECT 'TRIGGER', trigger_name FROM information_schema.triggers WHERE trigger_schema = 'lawfirm'
+ORDER BY Type, Name;
 
 -- --- From backend/sql/triggers.sql ---
 DELIMITER $$

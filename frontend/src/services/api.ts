@@ -735,3 +735,11 @@ export async function uploadDocument(
     body: formData,
   }, searchParams);
 }
+
+export function closeCase(caseId: number, employeeId: number) {
+  return requestJson<CaseDetailRecord>(
+    `/cases/${caseId}/close`,
+    { method: "POST" },
+    withEmployee(employeeId),
+  );
+}

@@ -1,4 +1,4 @@
-﻿USE railway;
+USE lawfirm;
 -- Consolidated DBMS feature layer: functions, transaction logs, logical locks, recovery, checkpoints, cursor reports, and DBMS console views.
 
 -- Stored functions
@@ -1649,4 +1649,13 @@ SELECT
 FROM Transaction_Log
 WHERE status IN ('Recovered', 'Failed')
 ORDER BY created_at DESC, txn_id DESC;
+
+-- Visual Summary for Workbench/IDE
+SELECT 'DBMS SYSTEM VIEWS' AS section;
+SELECT table_name AS View_Name FROM information_schema.views WHERE table_schema = 'lawfirm';
+
+SELECT 'SYSTEM FUNCTIONS' AS section;
+SELECT routine_name AS Function_Name FROM information_schema.routines 
+WHERE routine_schema = 'lawfirm' AND routine_type = 'FUNCTION' AND routine_name NOT LIKE 'fn_can_%'
+ORDER BY Function_Name;
 

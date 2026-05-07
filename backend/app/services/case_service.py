@@ -399,3 +399,27 @@ def approve_billing_entry(*, bill_id: int, approver_id: int):
         **entry,
         "amount": float(entry["amount"] or 0),
     }
+
+
+def close_case(*, case_id: int, employee_id: int):
+    # Security check: Does the user have permission to close cases?
+    # Managing Partners and Partners have OVERRIDE_ACCESS which includes CLOSE_CASE.
+    # Other staff must have explicit CLOSE_CASE permission for this specific case.
+    has_permission = fetch_one(
+        "SELECT fn_can_access_case(%s, %s, 'CLOSE_CASE') AS allowed",
+        (employee_id, case_id),
+    )
+
+    if not has_permission or not has_permission["allowed"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to close this matter.",
+        )
+
+    # Perform the update
+    execute(
+        "UPDATE Cases SET status = 'Closed', end_date = CURDATE() WHERE case_id = %s",
+        (case_id,),
+    )
+
+    return get_case_detail(case_id)

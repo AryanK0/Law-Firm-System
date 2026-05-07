@@ -151,3 +151,11 @@ def create_case(payload: CaseInput):
 @router.get("/analytics", tags=["cases"], summary="Return chart-ready metrics for the dashboard")
 def analytics():
     return overview_service.get_analytics()
+
+
+@router.post("/cases/{case_id}/close", tags=["cases"], summary="Close a matter")
+def close_case(case_id: int, employee_id: int):
+    try:
+        return case_service.close_case(case_id=case_id, employee_id=employee_id)
+    except MySQLError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -144,7 +144,7 @@ $sqlSections = foreach ($file in $sqlFiles) {
 $combinedSql = $sqlSections -join $separator
 
 if ($ResetDatabase) {
-  $combinedSql = "DROP DATABASE IF EXISTS railway;$separator$combinedSql"
+  $combinedSql = "DROP DATABASE IF EXISTS lawfirm;$separator$combinedSql"
 }
 
 $arguments = @(
