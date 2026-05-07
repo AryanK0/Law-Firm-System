@@ -1,4 +1,8 @@
 {
   "installCommand": "python -m pip install -r requirements.txt && npm install",
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/backend/app/main.py" },
+    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
+  ]
 }
