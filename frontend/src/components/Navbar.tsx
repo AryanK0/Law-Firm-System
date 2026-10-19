@@ -57,40 +57,47 @@ export function Navbar({
     <nav
       className="sticky top-0 z-50 border-b backdrop-blur-md"
       style={{
-        backgroundColor: "rgba(11, 17, 32, 0.8)",
-        borderColor: "rgba(255, 255, 255, 0.08)",
+        backgroundColor: "rgba(15, 23, 42, 0.95)",
+        borderColor: "#1e293b",
       }}
     >
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-3.5 xl:flex-row xl:items-center xl:justify-between">
         <button
           type="button"
           onClick={() => onNavigate("dashboard")}
-          className="flex items-center gap-3 text-left"
+          className="flex items-center gap-3 text-left group"
         >
-          <span className="icon-accent rounded-lg p-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-400 group-hover:border-blue-400 transition-colors">
             <BriefcaseBusiness size={18} />
           </span>
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            PSL Law
-          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-bold tracking-tight text-white font-heading">
+                PEARSON SPECTER LITT
+              </span>
+              <span className="rounded bg-blue-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-blue-300 border border-blue-700/40">
+                ENTERPRISE
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono tracking-tight">
+              Enterprise Legal Console • Core Java 21 & MySQL
+            </p>
+          </div>
         </button>
 
-        <div className="flex flex-wrap items-center gap-3 lg:gap-4 xl:flex-1 xl:justify-center">
+        <div className="flex flex-wrap items-center gap-1.5 lg:gap-2 xl:flex-1 xl:justify-center">
           {visibleNavItems.map((item) => (
             <button
               key={item.page}
               type="button"
               onClick={() => onNavigate(item.page)}
-              className={`nav-pill relative px-4 py-2.5 text-sm font-medium smooth-transition ${
+              className={`relative px-3.5 py-2 text-xs font-semibold rounded-md transition-colors ${
                 activePage === item.page
-                  ? "border-primary/30 bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
               }`}
             >
               {item.label}
-              {activePage === item.page ? (
-                <span className="absolute inset-x-4 bottom-1 h-0.5 rounded-full bg-primary" />
-              ) : null}
             </button>
           ))}
         </div>

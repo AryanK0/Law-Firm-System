@@ -1,0 +1,6 @@
+target/
+logs/
+storage/snapshots/*.ser
+storage/exports/*.csv
+storage/s3_vault/*
+!storage/s3_vault/.gitkeep

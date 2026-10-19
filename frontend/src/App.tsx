@@ -104,6 +104,25 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+
+      <footer className="border-t border-slate-800/80 bg-[#0b0f19] py-6 px-6 text-xs text-slate-400">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-200">PEARSON SPECTER LITT</span>
+            <span className="text-slate-600">|</span>
+            <span>Enterprise Legal Cloud Platform</span>
+          </div>
+          <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px]">
+            <span>Production v2.4</span>
+            <span>•</span>
+            <span>Java 21 LTS Core</span>
+            <span>•</span>
+            <span>MySQL 8.3 Live</span>
+            <span>•</span>
+            <span>JavaFX Desktop Client</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
