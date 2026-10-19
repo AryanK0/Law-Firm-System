@@ -356,6 +356,52 @@ interface UploadResponse {
   file_url: string;
 }
 
+export interface PresignUploadResponse {
+  case_id: number;
+  file_name: string;
+  confidentiality_level: string;
+  s3_key: string;
+  upload_url: string;
+  method: string;
+  headers: Record<string, string>;
+  encryption: string;
+}
+
+export interface ConfirmUploadPayload {
+  case_id: number;
+  file_name: string;
+  s3_key: string;
+  confidentiality_level?: string;
+  file_size_bytes?: number;
+  sha256_checksum?: string;
+}
+
+export interface SearchHit {
+  document_id: number;
+  case_id: number;
+  case_code?: string;
+  case_title?: string;
+  file_name: string;
+  snippet: string;
+  score: number;
+}
+
+export interface SearchResults {
+  query: string;
+  total_matches: number;
+  hits: SearchHit[];
+}
+
+export interface LegalHoldRecord {
+  case_id: number;
+  title?: string;
+  legal_hold: boolean;
+  legal_hold_reason?: string | null;
+  legal_hold_by?: number | null;
+  legal_hold_at?: string | null;
+  message?: string;
+}
+
 export interface CreateCasePayload {
   title: string;
   description?: string;
@@ -488,6 +534,56 @@ export interface AccessDashboardResponse {
   requests: Array<Record<string, string | number | boolean | null>>;
 }
 
+export interface AuthUserResponse {
+  employee_id: number;
+  id: number;
+  name: string;
+  role_name: string;
+  hierarchy_level: number;
+  department_name?: string | null;
+  email?: string | null;
+  clearance_rank: number;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUserResponse;
+}
+
+let currentAuthToken: string | null =
+  typeof window !== "undefined"
+    ? localStorage.getItem("lfms_access_token")
+    : null;
+
+let currentEmployeeId: number | null =
+  typeof window !== "undefined"
+    ? Number(localStorage.getItem("lfms_employee_id")) || null
+    : null;
+
+export function setAuthToken(token: string | null, employeeId?: number | null) {
+  currentAuthToken = token;
+  if (typeof window !== "undefined") {
+    if (token) {
+      localStorage.setItem("lfms_access_token", token);
+    } else {
+      localStorage.removeItem("lfms_access_token");
+    }
+    if (typeof employeeId === "number") {
+      currentEmployeeId = employeeId;
+      localStorage.setItem("lfms_employee_id", String(employeeId));
+    }
+  }
+}
+
+export function getAuthToken() {
+  return currentAuthToken;
+}
+
+export function getCurrentEmployeeId() {
+  return currentEmployeeId;
+}
+
 function buildPath(path: string, searchParams?: URLSearchParams) {
   if (!searchParams || Array.from(searchParams.keys()).length === 0) {
     return `${API_BASE_URL}${path}`;
@@ -496,17 +592,8 @@ function buildPath(path: string, searchParams?: URLSearchParams) {
   return `${API_BASE_URL}${path}?${searchParams.toString()}`;
 }
 
-function withEmployee(employeeId: number) {
-  const searchParams = new URLSearchParams();
-  searchParams.set("employee_id", String(employeeId));
-  return searchParams;
-}
-
-export function getDocumentDownloadUrl(documentId: number, employeeId?: number) {
-  return buildPath(
-    `/documents/${documentId}/download`,
-    typeof employeeId === "number" ? withEmployee(employeeId) : undefined,
-  );
+export function getDocumentDownloadUrl(documentId: number, _employeeId?: number) {
+  return buildPath(`/documents/${documentId}/download`);
 }
 
 async function requestJson<T>(
@@ -514,7 +601,73 @@ async function requestJson<T>(
   init?: RequestInit,
   searchParams?: URLSearchParams,
 ): Promise<T> {
-  const response = await fetch(buildPath(path, searchParams), init);
+  // 1. Recover token from localStorage if missing in memory
+  if (!currentAuthToken && typeof window !== "undefined") {
+    currentAuthToken = localStorage.getItem("lfms_access_token");
+  }
+
+  // 2. If still missing and not an auth call, acquire persona token immediately
+  if (!currentAuthToken && !path.startsWith("/auth/") && typeof window !== "undefined") {
+    const targetEmpId = currentEmployeeId || Number(localStorage.getItem("lfms_employee_id")) || 1;
+    try {
+      const authRes = await fetch(buildPath("/auth/switch-persona"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: targetEmpId }),
+        credentials: "include",
+      });
+      if (authRes.ok) {
+        const tokenData = (await authRes.json()) as TokenResponse;
+        if (tokenData?.access_token) {
+          setAuthToken(tokenData.access_token, targetEmpId);
+        }
+      }
+    } catch {
+      // Continue to fetch attempt
+    }
+  }
+
+  const headers = new Headers(init?.headers || {});
+  if (currentAuthToken && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${currentAuthToken}`);
+  }
+  if (currentEmployeeId && !headers.has("X-Employee-Id")) {
+    headers.set("X-Employee-Id", String(currentEmployeeId));
+  }
+
+  let response = await fetch(buildPath(path, searchParams), {
+    ...init,
+    headers,
+    credentials: "include",
+  });
+
+  // 3. Self-healing: if 401 Unauthorized received, renew token and retry once
+  if (response.status === 401 && !path.startsWith("/auth/") && typeof window !== "undefined") {
+    const targetEmpId = currentEmployeeId || Number(localStorage.getItem("lfms_employee_id")) || 1;
+    try {
+      const retryAuthRes = await fetch(buildPath("/auth/switch-persona"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: targetEmpId }),
+        credentials: "include",
+      });
+      if (retryAuthRes.ok) {
+        const refreshedTokenData = (await retryAuthRes.json()) as TokenResponse;
+        if (refreshedTokenData?.access_token) {
+          setAuthToken(refreshedTokenData.access_token, targetEmpId);
+          headers.set("Authorization", `Bearer ${refreshedTokenData.access_token}`);
+          headers.set("X-Employee-Id", String(targetEmpId));
+          response = await fetch(buildPath(path, searchParams), {
+            ...init,
+            headers,
+            credentials: "include",
+          });
+        }
+      }
+    } catch {
+      // Proceed to standard error handling
+    }
+  }
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;
@@ -534,60 +687,72 @@ async function requestJson<T>(
   return (await response.json()) as T;
 }
 
-export function getCases(employeeId: number) {
-  return requestJson<CaseRecord[]>("/cases", undefined, withEmployee(employeeId));
+// --- Auth Endpoints ---
+
+export async function loginWithCredentials(employeeId: number, password = "Password123!") {
+  const data = await requestJson<TokenResponse>("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ employee_id: employeeId, password }),
+  });
+  setAuthToken(data.access_token, data.user.employee_id);
+  return data;
 }
 
-export function getCaseDetail(caseId: number, employeeId: number) {
-  return requestJson<CaseDetailRecord>(
-    `/cases/${caseId}`,
-    undefined,
-    withEmployee(employeeId),
-  );
+export async function switchPersona(employeeId: number) {
+  const data = await requestJson<TokenResponse>("/auth/switch-persona", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ employee_id: employeeId }),
+  });
+  setAuthToken(data.access_token, data.user.employee_id);
+  return data;
 }
 
-export function getCaseTeam(caseId: number, employeeId: number) {
-  return requestJson<CaseTeamResponse>(
-    `/cases/${caseId}/team`,
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getAuthMe() {
+  return requestJson<AuthUserResponse>("/auth/me");
 }
 
-export function getCaseDocuments(caseId: number, employeeId: number) {
-  return requestJson<CaseDocumentsResponse>(
-    `/cases/${caseId}/documents`,
-    undefined,
-    withEmployee(employeeId),
-  );
+export async function logoutUser() {
+  try {
+    await requestJson<{ message: string }>("/auth/logout", { method: "POST" });
+  } finally {
+    setAuthToken(null, null);
+  }
 }
 
-export function getCaseStatusHistory(caseId: number, employeeId: number) {
-  return requestJson<CaseStatusHistoryResponse>(
-    `/cases/${caseId}/status-history`,
-    undefined,
-    withEmployee(employeeId),
-  );
+// --- Case & Operational Endpoints ---
+
+export function getCases(_employeeId?: number) {
+  return requestJson<CaseRecord[]>("/cases");
 }
 
-export function getCaseBilling(caseId: number, employeeId: number) {
-  return requestJson<CaseBillingResponse>(
-    `/cases/${caseId}/billing`,
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getCaseDetail(caseId: number, _employeeId?: number) {
+  return requestJson<CaseDetailRecord>(`/cases/${caseId}`);
+}
+
+export function getCaseTeam(caseId: number, _employeeId?: number) {
+  return requestJson<CaseTeamResponse>(`/cases/${caseId}/team`);
+}
+
+export function getCaseDocuments(caseId: number, _employeeId?: number) {
+  return requestJson<CaseDocumentsResponse>(`/cases/${caseId}/documents`);
+}
+
+export function getCaseStatusHistory(caseId: number, _employeeId?: number) {
+  return requestJson<CaseStatusHistoryResponse>(`/cases/${caseId}/status-history`);
+}
+
+export function getCaseBilling(caseId: number, _employeeId?: number) {
+  return requestJson<CaseBillingResponse>(`/cases/${caseId}/billing`);
 }
 
 export function getClients() {
   return requestJson<ClientRecord[]>("/clients");
 }
 
-export function getDocuments(employeeId?: number) {
-  return requestJson<DocumentRecord[]>(
-    "/documents",
-    undefined,
-    typeof employeeId === "number" ? withEmployee(employeeId) : undefined,
-  );
+export function getDocuments(_employeeId?: number) {
+  return requestJson<DocumentRecord[]>("/documents");
 }
 
 export function getAnalytics() {
@@ -642,62 +807,42 @@ export function createClient(payload: CreateClientPayload) {
   });
 }
 
-export function getDbmsTransactions(employeeId: number) {
-  return requestJson<DbmsTransactionsResponse>(
-    "/dbms/transactions",
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getDbmsTransactions(_employeeId?: number) {
+  return requestJson<DbmsTransactionsResponse>("/dbms/transactions");
 }
 
-export function getDbmsLocks(employeeId: number) {
-  return requestJson<DbmsLockRecord[]>("/dbms/locks", undefined, withEmployee(employeeId));
+export function getDbmsLocks(_employeeId?: number) {
+  return requestJson<DbmsLockRecord[]>("/dbms/locks");
 }
 
-export function getDbmsCheckpoints(employeeId: number) {
-  return requestJson<DbmsCheckpointRecord[]>(
-    "/dbms/checkpoint/list",
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getDbmsCheckpoints(_employeeId?: number) {
+  return requestJson<DbmsCheckpointRecord[]>("/dbms/checkpoint/list");
 }
 
-export function createDbmsCheckpoint(employeeId: number, payload: CreateCheckpointPayload = {}) {
+export function createDbmsCheckpoint(_employeeId?: number, payload: CreateCheckpointPayload = {}) {
   return requestJson<DbmsCheckpointRecord>("/dbms/checkpoint/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  }, withEmployee(employeeId));
+  });
 }
 
-export function recoverDbmsTransaction(employeeId: number, txnId: number) {
+export function recoverDbmsTransaction(_employeeId: number | undefined, txnId: number) {
   return requestJson<DbmsTransactionRecord>(`/dbms/recovery/${txnId}`, {
     method: "POST",
-  }, withEmployee(employeeId));
+  });
 }
 
-export function getDbmsCaseReports(employeeId: number) {
-  return requestJson<DbmsCaseReportRecord[]>(
-    "/dbms/reports/cases",
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getDbmsCaseReports(_employeeId?: number) {
+  return requestJson<DbmsCaseReportRecord[]>("/dbms/reports/cases");
 }
 
-export function getDbmsEmployeeReports(employeeId: number) {
-  return requestJson<DbmsEmployeeReportRecord[]>(
-    "/dbms/reports/employees",
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getDbmsEmployeeReports(_employeeId?: number) {
+  return requestJson<DbmsEmployeeReportRecord[]>("/dbms/reports/employees");
 }
 
-export function getDbmsTicketReports(employeeId: number) {
-  return requestJson<DbmsTicketReportRecord[]>(
-    "/dbms/reports/tickets",
-    undefined,
-    withEmployee(employeeId),
-  );
+export function getDbmsTicketReports(_employeeId?: number) {
+  return requestJson<DbmsTicketReportRecord[]>("/dbms/reports/tickets");
 }
 
 export function getAccessDashboard() {
@@ -715,31 +860,386 @@ export function updateCaseAccess(payload: UpdateCaseAccessPayload) {
 export async function uploadDocument(
   caseId: number,
   file: File,
-  uploadedBy?: number,
+  _uploadedBy?: number,
   confidentialityLevel = "Internal",
-) {
-  const formData = new FormData();
-  formData.append("file", file);
+): Promise<UploadResponse> {
+  try {
+    // 1. Request S3 Pre-Signed Upload PUT URL
+    const presign = await requestJson<PresignUploadResponse>("/documents/presign-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        case_id: caseId,
+        file_name: file.name,
+        content_type: file.type || "application/octet-stream",
+        confidentiality_level: confidentialityLevel,
+      }),
+    });
 
-  const searchParams = new URLSearchParams({
-    case_id: String(caseId),
-    confidentiality_level: confidentialityLevel,
-  });
+    // 2. Direct upload to S3/MinIO via Pre-Signed URL
+    const uploadHeaders: Record<string, string> = {
+      "Content-Type": file.type || "application/octet-stream",
+      ...(presign.headers || {}),
+    };
 
-  if (typeof uploadedBy === "number") {
-    searchParams.set("uploaded_by", String(uploadedBy));
+    const s3Resp = await fetch(presign.upload_url, {
+      method: presign.method || "PUT",
+      headers: uploadHeaders,
+      body: file,
+    });
+
+    if (!s3Resp.ok) {
+      throw new Error(`S3 direct upload failed with status ${s3Resp.status}`);
+    }
+
+    // 3. Confirm S3 upload with backend to register document and trigger OCR
+    const confirmed = await requestJson<{
+      document_id: number;
+      case_id: number;
+      file_name: string;
+      s3_key: string;
+      message: string;
+    }>("/documents/confirm-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        case_id: caseId,
+        file_name: file.name,
+        s3_key: presign.s3_key,
+        confidentiality_level: confidentialityLevel,
+        file_size_bytes: file.size,
+      }),
+    });
+
+    return {
+      message: "Uploaded to S3",
+      document_id: confirmed.document_id,
+      file_name: file.name,
+      file_path: presign.s3_key,
+      file_url: `/documents/${confirmed.document_id}/download`,
+    };
+  } catch (_err) {
+    // Resilient fallback to multipart upload if S3 direct upload fails
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const searchParams = new URLSearchParams({
+      case_id: String(caseId),
+      confidentiality_level: confidentialityLevel,
+    });
+
+    return requestJson<UploadResponse>("/upload-document/", {
+      method: "POST",
+      body: formData,
+    }, searchParams);
   }
-
-  return requestJson<UploadResponse>("/upload-document/", {
-    method: "POST",
-    body: formData,
-  }, searchParams);
 }
 
-export function closeCase(caseId: number, employeeId: number) {
+export function searchDocuments(query: string, caseId?: number) {
+  const params = new URLSearchParams({ q: query });
+  if (caseId) params.set("case_id", String(caseId));
+  return requestJson<SearchResults>("/documents/search", {}, params);
+}
+
+export function setCaseLegalHold(caseId: number, legalHold: boolean, reason?: string) {
+  return requestJson<LegalHoldRecord>(`/cases/${caseId}/legal-hold`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ legal_hold: legalHold, reason }),
+  });
+}
+
+export function getCaseLegalHold(caseId: number) {
+  return requestJson<LegalHoldRecord>(`/cases/${caseId}/legal-hold`);
+}
+
+export function deleteDocument(documentId: number) {
+  return requestJson<{ message: string; document_id: number }>(`/documents/${documentId}`, {
+    method: "DELETE",
+  });
+}
+
+export function closeCase(caseId: number, _employeeId?: number) {
   return requestJson<CaseDetailRecord>(
     `/cases/${caseId}/close`,
     { method: "POST" },
-    withEmployee(employeeId),
   );
 }
+
+// --------------------------------------------------------------------------
+// Phase 4: Trust Accounting (IOLTA), LEDES 1998B, & Conflict Checking
+// --------------------------------------------------------------------------
+
+export interface TrustAccountRecord {
+  account_id: number;
+  account_number: string;
+  account_name: string;
+  account_type: "IOLTA_TRUST" | "OPERATING";
+  bank_name: string;
+  current_balance: number;
+  version: number;
+  transaction_count: number;
+  created_at: string;
+}
+
+export interface ThreeWayReconciliationResponse {
+  reconciliation_id: number;
+  account_id: number;
+  account_name: string;
+  statement_date: string;
+  bank_statement_balance: number;
+  general_ledger_balance: number;
+  client_ledger_balance: number;
+  variance: number;
+  status: "BALANCED" | "DISCREPANCY";
+  is_balanced: boolean;
+  client_count: number;
+  client_breakdown: Array<{
+    client_id: number;
+    client_name: string;
+    trust_balance: number;
+  }>;
+  reconciled_at: string;
+  notes: string | null;
+}
+
+export interface ClientTrustSummaryResponse {
+  client_id: number;
+  client_name: string;
+  trust_balance: number;
+  transaction_count: number;
+  transactions: Array<{
+    transaction_id: number;
+    type: string;
+    amount: number;
+    client_running_balance: number;
+    payee_or_payor: string;
+    reference_number: string | null;
+    description: string | null;
+    created_at: string;
+  }>;
+}
+
+export interface LedesInvoiceResponse {
+  bill_id: number;
+  invoice_number: string;
+  file_name: string;
+  total_amount: number;
+  line_item_count: number;
+  is_valid: boolean;
+  validation_errors: string[];
+  file_content: string;
+}
+
+export interface UtbmsReferenceResponse {
+  task_codes: Array<{ code: string; description: string }>;
+  activity_codes: Array<{ code: string; description: string }>;
+  expense_codes: Array<{ code: string; description: string }>;
+}
+
+export interface ConflictMatch {
+  match_type: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "ETHICAL_WALL_REQUIRED" | "LOW";
+  matched_name: string;
+  organization?: string | null;
+  entity_type: string;
+  client_id?: number;
+  case_id?: number;
+  case_title?: string;
+  case_status?: string;
+  attorney_name?: string;
+  description: string;
+}
+
+export interface ConflictCheckResponse {
+  query: string;
+  search_terms: string[];
+  status: "CLEARED" | "CONFLICT_DETECTED" | "REQUIRES_ETHICAL_WALL" | "REVIEW_RECOMMENDED";
+  risk_level: "CLEARED" | "CRITICAL" | "HIGH" | "MODERATE" | "LOW";
+  risk_score: number;
+  match_count: number;
+  matches: ConflictMatch[];
+  ethical_rule: string;
+  ethical_wall_required: boolean;
+  recommendation: string;
+  checked_at: string;
+}
+
+export interface AdversePartyRecord {
+  party_id: number;
+  case_id: number;
+  party_name: string;
+  party_type: string;
+  corporate_affiliate: string | null;
+  added_at: string;
+}
+
+export function getTrustAccounts() {
+  return requestJson<TrustAccountRecord[]>("/trust/accounts");
+}
+
+export function depositTrustFunds(payload: {
+  account_id: number;
+  client_id: number;
+  amount: number;
+  payee_or_payor: string;
+  case_id?: number;
+  reference_number?: string;
+  description?: string;
+}) {
+  return requestJson<{
+    transaction_id: number;
+    account_id: number;
+    client_id: number;
+    amount: number;
+    account_running_balance: number;
+    client_running_balance: number;
+    message: string;
+  }>("/trust/deposit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function disburseTrustFunds(payload: {
+  account_id: number;
+  client_id: number;
+  amount: number;
+  payee_or_payor: string;
+  case_id?: number;
+  reference_number?: string;
+  description?: string;
+}) {
+  return requestJson<{
+    transaction_id: number;
+    amount: number;
+    account_running_balance: number;
+    client_running_balance: number;
+    message: string;
+  }>("/trust/disburse", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function transferEarnedFee(payload: {
+  iolta_account_id: number;
+  operating_account_id: number;
+  client_id: number;
+  amount: number;
+  case_id?: number;
+  reference_number?: string;
+  invoice_number?: string;
+}) {
+  return requestJson<{
+    message: string;
+    amount: number;
+    iolta_balance: number;
+    operating_balance: number;
+    client_remaining_trust: number;
+    transfer_reference: string;
+  }>("/trust/transfer-earned-fee", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function executeThreeWayReconciliation(payload: {
+  account_id: number;
+  statement_date: string;
+  bank_statement_balance: number;
+  notes?: string;
+}) {
+  return requestJson<ThreeWayReconciliationResponse>("/trust/reconciliation/three-way", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getClientTrustSummary(clientId: number) {
+  return requestJson<ClientTrustSummaryResponse>(`/trust/clients/${clientId}`);
+}
+
+export function getLedesInvoice(billId: number) {
+  return requestJson<LedesInvoiceResponse>(`/billing/${billId}/ledes`);
+}
+
+export function getLedesDownloadUrl(billId: number) {
+  return `${API_BASE_URL}/billing/${billId}/ledes/download`;
+}
+
+export function getUtbmsCodes() {
+  return requestJson<UtbmsReferenceResponse>("/billing/utbms-codes");
+}
+
+export function checkConflict(payload: {
+  query: string;
+  target_matter_type?: string;
+  proposed_client_name?: string;
+  proposed_adverse_party?: string;
+}) {
+  return requestJson<ConflictCheckResponse>("/conflicts/check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function addCaseAdverseParty(caseId: number, payload: {
+  party_name: string;
+  party_type?: string;
+  corporate_affiliate?: string;
+}) {
+  return requestJson<{
+    party_id: number;
+    case_id: number;
+    party_name: string;
+    message: string;
+  }>(`/conflicts/cases/${caseId}/adverse-parties`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getCaseAdverseParties(caseId: number) {
+  return requestJson<AdversePartyRecord[]>(`/conflicts/cases/${caseId}/adverse-parties`);
+}
+
+export interface SystemTelemetryResponse {
+  status: string;
+  cache: {
+    backend: string;
+    redis_connected: boolean;
+    hits: number;
+    misses: number;
+    total_queries: number;
+    hit_ratio_percent: number;
+    keys_in_memory: number;
+  };
+  metrics: {
+    uptime_seconds: number;
+    total_requests: number;
+    status_2xx: number;
+    status_4xx: number;
+    status_5xx: number;
+    slow_requests_gt_1s: number;
+    avg_latency_ms: number;
+    p95_latency_ms: number;
+  };
+}
+
+export function getSystemTelemetry() {
+  return requestJson<SystemTelemetryResponse>("/system/telemetry");
+}
+
+export function clearSystemCache() {
+  return requestJson<{ message: string; status: string }>("/system/cache/clear", {
+    method: "POST",
+  });
+}
+

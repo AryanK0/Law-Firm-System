@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { KeyRound, Save, ShieldCheck, UserCheck, Workflow } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  KeyRound,
+  Lock,
+  Save,
+  ShieldAlert,
+  ShieldCheck,
+  UserCheck,
+  Workflow,
+  X,
+} from "lucide-react";
 
 import { useAuth } from "../content/AuthContext";
 import {
@@ -99,21 +110,45 @@ function coerceBoolean(value: unknown) {
   return value === true || value === 1 || value === "1" || value === "true" || value === "TRUE";
 }
 
-function valueText(value: unknown, column: string) {
+function renderCell(value: unknown, column: string) {
   if (value === null || value === undefined || value === "") {
-    return "-";
+    return <span className="text-slate-600 font-mono">-</span>;
   }
 
   if (column === "permission_name" || column === "requested_permission") {
     const raw = String(value);
-    return permissionLabels[raw] ?? raw.replace(/_/g, " ");
+    const label = permissionLabels[raw] ?? raw.replace(/_/g, " ");
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/10 px-2 py-0.5 text-xs font-semibold text-sky-300 border border-sky-500/20">
+        {label}
+      </span>
+    );
   }
 
   if (isBooleanColumn(column) || typeof value === "boolean") {
-    return coerceBoolean(value) ? "Yes" : "No";
+    const isGranted = coerceBoolean(value);
+    return isGranted ? (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
+        <Check size={11} className="stroke-[3]" />
+        Granted
+      </span>
+    ) : (
+      <span className="inline-flex items-center rounded-full bg-slate-800/80 px-2.5 py-0.5 text-[10px] font-medium text-slate-500 border border-white/5">
+        Restricted
+      </span>
+    );
   }
 
-  return String(value);
+  if (column === "violation_reason" || column === "action_taken") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-amber-300">
+        <AlertTriangle size={13} className="shrink-0 text-amber-400" />
+        {String(value)}
+      </span>
+    );
+  }
+
+  return <span className="font-medium text-slate-200">{String(value)}</span>;
 }
 
 function columnText(column: string) {
@@ -132,28 +167,28 @@ function DataTable({
   return (
     <section className="card-premium p-6">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
-          {rows.length}
+        <h2 className="text-lg font-bold font-heading text-foreground">{title}</h2>
+        <span className="rounded-full bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 text-xs font-bold text-cyan-300">
+          {rows.length} records
         </span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-[0.16em] text-slate-400">
+          <thead className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-2">
             <tr>
               {columns.map((column) => (
-                <th key={column} className="px-3 py-3">
+                <th key={column} className="px-3.5 py-3">
                   {columnText(column)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-white/5">
             {rows.slice(0, 12).map((row, index) => (
-              <tr key={index}>
+              <tr key={index} className="transition-colors hover:bg-white/[0.02]">
                 {columns.map((column) => (
-                  <td key={column} className="max-w-[260px] px-3 py-3 text-slate-300">
-                    <span>{valueText(row[column], column)}</span>
+                  <td key={column} className="max-w-[260px] px-3.5 py-3 text-slate-300">
+                    {renderCell(row[column], column)}
                   </td>
                 ))}
               </tr>
@@ -163,7 +198,7 @@ function DataTable({
       </div>
       {rows.length === 0 ? (
         <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-muted-foreground">
-          No rows available.
+          No records found in this register.
         </p>
       ) : null}
     </section>

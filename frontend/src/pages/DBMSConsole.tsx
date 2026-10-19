@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  Activity,
+  Cpu,
   Database,
   FileClock,
+  Layers,
   LockKeyhole,
   RefreshCcw,
   RotateCcw,
   ShieldAlert,
+  Trash2,
+  Zap,
 } from "lucide-react";
 
 import { useAuth } from "../content/AuthContext";
@@ -17,12 +22,15 @@ import {
   getDbmsLocks,
   getDbmsTicketReports,
   getDbmsTransactions,
+  getSystemTelemetry,
+  clearSystemCache,
   type DbmsCaseReportRecord,
   type DbmsCheckpointRecord,
   type DbmsEmployeeReportRecord,
   type DbmsLockRecord,
   type DbmsTicketReportRecord,
   type DbmsTransactionsResponse,
+  type SystemTelemetryResponse,
 } from "../services/api";
 
 const emptyTransactions: DbmsTransactionsResponse = {
@@ -103,6 +111,7 @@ export default function DBMSConsole() {
   const [caseReports, setCaseReports] = useState<DbmsCaseReportRecord[]>([]);
   const [employeeReports, setEmployeeReports] = useState<DbmsEmployeeReportRecord[]>([]);
   const [ticketReports, setTicketReports] = useState<DbmsTicketReportRecord[]>([]);
+  const [telemetry, setTelemetry] = useState<SystemTelemetryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -116,6 +125,7 @@ export default function DBMSConsole() {
       caseReportData,
       employeeReportData,
       ticketReportData,
+      telemetryData,
     ] = await Promise.all([
       getDbmsLocks(user.id),
       getDbmsTransactions(user.id),
@@ -123,6 +133,7 @@ export default function DBMSConsole() {
       getDbmsCaseReports(user.id),
       getDbmsEmployeeReports(user.id),
       getDbmsTicketReports(user.id),
+      getSystemTelemetry().catch(() => null),
     ]);
 
     setLocks(lockData);
@@ -131,6 +142,9 @@ export default function DBMSConsole() {
     setCaseReports(caseReportData);
     setEmployeeReports(employeeReportData);
     setTicketReports(ticketReportData);
+    if (telemetryData) {
+      setTelemetry(telemetryData);
+    }
   }, [user.id]);
 
   useEffect(() => {
@@ -167,6 +181,20 @@ export default function DBMSConsole() {
       setMessage("Systems view refreshed.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Refresh failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    setBusy(true);
+    try {
+      await clearSystemCache();
+      setMessage("System cache cleared across Redis and in-memory tiers.");
+      const updated = await getSystemTelemetry();
+      setTelemetry(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Cache flush failed.");
     } finally {
       setBusy(false);
     }
@@ -209,6 +237,121 @@ export default function DBMSConsole() {
       {message ? (
         <div className="mb-6 card-premium p-5 text-sm text-emerald-300">{message}</div>
       ) : null}
+
+      {/* Phase 5: Resilient Infrastructure & Observability */}
+      <section className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Cache Telemetry */}
+        <div className="card-premium p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="eyebrow">Caching Layer</p>
+              <h2 className="mt-1 text-xl font-semibold text-foreground">Redis & Resilience Tier</h2>
+            </div>
+            <span className="icon-accent rounded-xl p-2 text-cyan-400">
+              <Zap size={18} />
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <span className="text-xs text-slate-400">Active Storage Backend:</span>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                telemetry?.cache.redis_connected
+                  ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
+                  : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
+              }`}
+            >
+              {telemetry?.cache.redis_connected ? "Redis Distributed" : "In-Memory Fallback Active"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Hit Ratio</p>
+              <p className="mt-1 text-lg font-bold text-emerald-400">
+                {telemetry?.cache.hit_ratio_percent ?? 0}%
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Cache Hits</p>
+              <p className="mt-1 text-lg font-bold text-foreground">
+                {telemetry?.cache.hits ?? 0}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Cache Misses</p>
+              <p className="mt-1 text-lg font-bold text-slate-400">
+                {telemetry?.cache.misses ?? 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-xs text-slate-400">
+              Keys in store: <b className="text-foreground">{telemetry?.cache.keys_in_memory ?? 0}</b>
+            </span>
+            <button
+              type="button"
+              onClick={handleClearCache}
+              disabled={busy}
+              className="page-button-secondary text-xs flex items-center gap-1.5 py-1 px-3 text-rose-300 hover:text-rose-200"
+            >
+              <Trash2 size={13} />
+              Flush Cache
+            </button>
+          </div>
+        </div>
+
+        {/* Tracing & Latency Telemetry */}
+        <div className="card-premium p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="eyebrow">Distributed Tracing</p>
+              <h2 className="mt-1 text-xl font-semibold text-foreground">Latency & Observability</h2>
+            </div>
+            <span className="icon-accent rounded-xl p-2 text-primary">
+              <Activity size={18} />
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <span className="text-xs text-slate-400">System Uptime:</span>
+            <span className="font-mono text-xs font-semibold text-slate-200">
+              {Math.floor((telemetry?.metrics.uptime_seconds ?? 0) / 60)}m {(telemetry?.metrics.uptime_seconds ?? 0) % 60}s
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Avg Latency</p>
+              <p className="mt-1 text-lg font-bold text-cyan-300">
+                {telemetry?.metrics.avg_latency_ms ?? 0}ms
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">P95 Latency</p>
+              <p className="mt-1 text-lg font-bold text-primary">
+                {telemetry?.metrics.p95_latency_ms ?? 0}ms
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400">Requests</p>
+              <p className="mt-1 text-lg font-bold text-foreground">
+                {telemetry?.metrics.total_requests ?? 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
+            <span>
+              HTTP 2xx: <b className="text-emerald-400">{telemetry?.metrics.status_2xx ?? 0}</b> • 4xx: <b className="text-amber-400">{telemetry?.metrics.status_4xx ?? 0}</b> • 5xx: <b className="text-rose-400">{telemetry?.metrics.status_5xx ?? 0}</b>
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Slow (&gt;1s): <b className={(telemetry?.metrics.slow_requests_gt_1s ?? 0) > 0 ? "text-amber-400" : "text-slate-400"}>{telemetry?.metrics.slow_requests_gt_1s ?? 0}</b>
+            </span>
+          </div>
+        </div>
+      </section>
 
       <section className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((item) => (

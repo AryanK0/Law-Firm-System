@@ -1,0 +1,119 @@
+# ==============================================================================
+# Tier-1 Enterprise CI/CD Pipeline - SOC-2 Compliant Automated Quality Gate
+# Validates: Multi-phase Pytest test suites, TypeScript compilation, Docker builds
+# ==============================================================================
+
+name: LFMS Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Backend Automated Test Matrix & Domain Verification
+  # ----------------------------------------------------------------------------
+  backend-test:
+    name: Backend Test Suite (Python 3.12 + MySQL 8.0 + Redis 7)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: lawfirm
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -prootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        command: redis-server --requirepass redispassword
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli -a redispassword ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12 Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Enterprise Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Full Multi-Phase Automated Test Suite (Phases 1-6)
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: mysql+asyncmy://root:rootpassword@127.0.0.1:3306/lawfirm
+          REDIS_URL: redis://:redispassword@127.0.0.1:6379/0
+          JWT_SECRET: test-suite-secret-key-32-chars-minimum-soc2
+        run: |
+          python -m pytest backend/tests -v --durations=10
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Frontend TypeScript Verification & Production Bundle Compilation
+  # ----------------------------------------------------------------------------
+  frontend-build:
+    name: Frontend Build & Static Analysis (Node 22 + React 19 + Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compile TypeScript & Build Production Bundle
+        working-directory: frontend
+        run: npm run build
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Docker Multi-Stage Build & Compose Orchestration Gate
+  # ----------------------------------------------------------------------------
+  docker-validation:
+    name: Docker Multi-Stage Container & Compose Gate
+    runs-on: ubuntu-latest
+    needs: [ backend-test, frontend-build ]
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+      - name: Build Multi-Stage Backend Docker Image
+        run: docker build -t lfms-backend:latest ./backend
+
+      - name: Build Multi-Stage Frontend Nginx Docker Image
+        run: docker build -t lfms-frontend:latest ./frontend

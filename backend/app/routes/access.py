@@ -1,21 +1,31 @@
-from fastapi import APIRouter, HTTPException, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from pymysql import MySQLError
 
+from ..core.auth import AuthenticatedUser, get_current_user
+from ..core.database import get_db
+from ..domain.access_domain import (
+    approve_access_request_domain,
+    check_access_domain,
+    request_access_domain,
+)
 from ..services import access_service
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/access", tags=["access"])
 
 
 class AccessCheckInput(BaseModel):
-    employee_id: int
+    employee_id: int | None = None
     resource_type: str
     resource_id: int
     action: str
 
 
 class AccessRequestInput(BaseModel):
-    employee_id: int
+    employee_id: int | None = None
     resource_type: str
     resource_id: int
     permission: str
@@ -23,11 +33,11 @@ class AccessRequestInput(BaseModel):
 
 
 class AccessApprovalInput(BaseModel):
-    approver_id: int
+    approver_id: int | None = None
 
 
 class DelegationInput(BaseModel):
-    from_employee: int
+    from_employee: int | None = None
     to_employee: int
     permission: str
     valid_to: str
@@ -35,7 +45,7 @@ class DelegationInput(BaseModel):
 
 
 class CaseAccessUpdateInput(BaseModel):
-    approver_id: int
+    approver_id: int | None = None
     employee_id: int
     case_id: int
     case_role: str | None = None
@@ -53,46 +63,64 @@ def get_access_dashboard():
 
 
 @router.post("/check")
-def check_access(payload: AccessCheckInput, request: Request):
-    try:
-        return access_service.check_access(
-            payload.employee_id,
-            payload.resource_type,
-            payload.resource_id,
-            payload.action,
-            request.client.host if request.client else None,
-        )
-    except MySQLError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+async def check_access(
+    payload: AccessCheckInput,
+    request: Request,
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    emp_id = payload.employee_id or user.employee_id
+    return await check_access_domain(
+        db=db,
+        employee_id=emp_id,
+        resource_type=payload.resource_type,
+        resource_id=payload.resource_id,
+        action=payload.action,
+        ip_address=request.client.host if request.client else None,
+    )
 
 
 @router.post("/request")
-def request_access(payload: AccessRequestInput):
-    try:
-        return access_service.request_access(
-            payload.employee_id,
-            payload.resource_type,
-            payload.resource_id,
-            payload.permission,
-            payload.reason,
-        )
-    except MySQLError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+async def request_access(
+    payload: AccessRequestInput,
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    emp_id = payload.employee_id or user.employee_id
+    return await request_access_domain(
+        db=db,
+        employee_id=emp_id,
+        resource_type=payload.resource_type,
+        resource_id=payload.resource_id,
+        permission=payload.permission,
+        reason=payload.reason,
+    )
 
 
 @router.post("/approve/{request_id}")
-def approve_request(request_id: int, payload: AccessApprovalInput):
-    try:
-        return access_service.approve_request(request_id, payload.approver_id)
-    except MySQLError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+async def approve_request(
+    request_id: int,
+    payload: AccessApprovalInput,
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    approver_id = payload.approver_id or user.employee_id
+    return await approve_access_request_domain(
+        db=db,
+        request_id=request_id,
+        approver_id=approver_id,
+    )
 
 
 @router.post("/delegations")
-def delegate_access(payload: DelegationInput):
+def delegate_access(
+    payload: DelegationInput,
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
+):
+    from_emp = payload.from_employee or user.employee_id
     try:
         return access_service.delegate_access(
-            payload.from_employee,
+            from_emp,
             payload.to_employee,
             payload.permission,
             payload.valid_to,
@@ -103,10 +131,14 @@ def delegate_access(payload: DelegationInput):
 
 
 @router.post("/case-access")
-def update_case_access(payload: CaseAccessUpdateInput):
+def update_case_access(
+    payload: CaseAccessUpdateInput,
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
+):
+    approver_id = payload.approver_id or user.employee_id
     try:
         return access_service.update_case_access(
-            payload.approver_id,
+            approver_id,
             payload.employee_id,
             payload.case_id,
             payload.case_role,

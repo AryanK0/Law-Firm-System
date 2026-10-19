@@ -13,6 +13,8 @@ const Documents = lazy(() => import("./content/Upload"));
 const Tickets = lazy(() => import("./pages/Tickets"));
 const AccessControlDashboard = lazy(() => import("./pages/AccessControlDashboard"));
 const DBMSConsole = lazy(() => import("./pages/DBMSConsole"));
+const TrustAccounting = lazy(() => import("./pages/TrustAccounting"));
+const ConflictCheck = lazy(() => import("./pages/ConflictCheck"));
 
 function getActivePage(pathname: string): AppPage {
   if (pathname.startsWith("/cases")) {
@@ -21,6 +23,14 @@ function getActivePage(pathname: string): AppPage {
 
   if (pathname.startsWith("/clients")) {
     return "clients";
+  }
+
+  if (pathname.startsWith("/trust")) {
+    return "trust";
+  }
+
+  if (pathname.startsWith("/conflicts")) {
+    return "conflicts";
   }
 
   if (pathname.startsWith("/documents")) {
@@ -49,7 +59,7 @@ function canViewSystemsOversight(user: { id: number; name: string; role: string 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, users, setRole } = useAuth();
+  const { user, users, setRole, selectUser } = useAuth();
   const activePage = useMemo(() => getActivePage(location.pathname), [location.pathname]);
 
   const navigateToPage = (page: AppPage) => {
@@ -64,6 +74,7 @@ export default function App() {
         user={user}
         users={users}
         setRole={setRole}
+        selectUser={selectUser}
       />
 
       <main className="mx-auto max-w-7xl px-6 py-16">
@@ -80,6 +91,8 @@ export default function App() {
             <Route path="/cases/:caseId" element={<CaseDetail />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:clientId" element={<ClientDetail />} />
+            <Route path="/trust" element={<TrustAccounting />} />
+            <Route path="/conflicts" element={<ConflictCheck />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/access-control" element={<AccessControlDashboard />} />

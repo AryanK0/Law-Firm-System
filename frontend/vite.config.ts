@@ -6,6 +6,10 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      "/auth": "http://127.0.0.1:8000",
+      "/system": "http://127.0.0.1:8000",
+      "/trust": "http://127.0.0.1:8000",
+      "/conflicts": "http://127.0.0.1:8000",
       "/analytics": "http://127.0.0.1:8000",
       "/access": "http://127.0.0.1:8000",
       "/billing": "http://127.0.0.1:8000",
@@ -20,6 +24,10 @@ export default defineConfig({
       "/tickets": "http://127.0.0.1:8000",
       "/upload-document": "http://127.0.0.1:8000",
       "/uploads": "http://127.0.0.1:8000",
+      "/ws": {
+        target: "ws://127.0.0.1:8000",
+        ws: true,
+      },
     },
   },
 });

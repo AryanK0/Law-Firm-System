@@ -9,7 +9,9 @@ from pymysql import MySQLError
 
 from .config import ensure_upload_dir, get_env
 from .db import fetch_one, get_connection_info
-from .routes import access, case, document, operations
+from .core.telemetry import StructuredLoggingAndTracingMiddleware
+from .core.ratelimit import RateLimitMiddleware
+from .routes import access, auth, case, conflict, document, operations, system, trust
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
@@ -136,6 +138,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(StructuredLoggingAndTracingMiddleware)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 if (FRONTEND_DIST / "assets").exists():
@@ -145,10 +149,14 @@ if (FRONTEND_DIST / "assets").exists():
         name="frontend-assets",
     )
 
+app.include_router(auth.router)
 app.include_router(case.router)
 app.include_router(document.router)
 app.include_router(access.router)
 app.include_router(operations.router)
+app.include_router(trust.router)
+app.include_router(conflict.router)
+app.include_router(system.router)
 
 
 @app.exception_handler(MySQLError)

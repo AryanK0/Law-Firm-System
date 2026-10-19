@@ -475,8 +475,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="mt-8 grid items-center gap-6 xl:grid-cols-[minmax(0,1fr)_220px]">
-              <div className="h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[320px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                   <PieChart margin={{ top: 10, right: 18, bottom: 10, left: 18 }}>
                     <Pie
                       data={caseMix}
@@ -550,8 +550,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="mt-8">
-              <div className="h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[320px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                   <BarChart
                     data={analytics.billing}
                     margin={{ top: 10, right: 8, bottom: 12, left: -18 }}

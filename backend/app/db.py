@@ -61,34 +61,72 @@ def get_connection_info():
     }
 
 
+import threading
+
+_pool_lock = threading.Lock()
 _connection_pool = []
+_MAX_POOL_SIZE = 10
+
 
 def get_connection():
     config = _connection_config()
     config.pop("_source", None)
-    
-    while _connection_pool:
-        conn = _connection_pool.pop()
-        try:
-            conn.ping(reconnect=False)
-            return conn
-        except Exception:
-            pass
-            
+
+    with _pool_lock:
+        while _connection_pool:
+            conn = _connection_pool.pop()
+            try:
+                conn.ping(reconnect=False)
+                return conn
+            except Exception:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
     return pymysql.connect(**config)
 
-def release_connection(conn):
-    _connection_pool.append(conn)
+
+def release_connection(conn, discard: bool = False):
+    if not conn:
+        return
+    if discard:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        return
+
+    try:
+        conn.rollback()
+    except Exception:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        return
+
+    with _pool_lock:
+        if len(_connection_pool) < _MAX_POOL_SIZE:
+            _connection_pool.append(conn)
+        else:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 
 def fetch_all(query, params=None):
     conn = get_connection()
+    success = False
     try:
         with conn.cursor() as cursor:
             cursor.execute(query, params or ())
-            return cursor.fetchall()
+            rows = cursor.fetchall()
+            success = True
+            return rows
     finally:
-        release_connection(conn)
+        release_connection(conn, discard=not success)
 
 
 def fetch_one(query, params=None):
@@ -98,16 +136,20 @@ def fetch_one(query, params=None):
 
 def execute(query, params=None):
     conn = get_connection()
+    success = False
     try:
         with conn.cursor() as cursor:
             cursor.execute(query, params or ())
-            return cursor.lastrowid
+            row_id = cursor.lastrowid
+            success = True
+            return row_id
     finally:
-        release_connection(conn)
+        release_connection(conn, discard=not success)
 
 
 def call_procedure(name, params=None):
     conn = get_connection()
+    success = False
     try:
         with conn.cursor() as cursor:
             cursor.callproc(name, params or ())
@@ -118,9 +160,10 @@ def call_procedure(name, params=None):
                 if not cursor.nextset():
                     break
 
+            success = True
             return result_sets
     finally:
-        release_connection(conn)
+        release_connection(conn, discard=not success)
 
 
 def call_procedure_one(name, params=None):
@@ -128,3 +171,4 @@ def call_procedure_one(name, params=None):
         if result_set:
             return result_set[0]
     return None
+

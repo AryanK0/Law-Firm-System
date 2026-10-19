@@ -2,7 +2,7 @@ import { BriefcaseBusiness, ChevronDown } from "lucide-react";
 
 import type { Role, User } from "../types/user";
 
-export type AppPage = "dashboard" | "cases" | "clients" | "documents" | "tickets" | "access" | "dbms";
+export type AppPage = "dashboard" | "cases" | "clients" | "documents" | "tickets" | "trust" | "conflicts" | "access" | "dbms";
 
 interface NavbarProps {
   activePage: AppPage;
@@ -10,6 +10,7 @@ interface NavbarProps {
   user: User;
   users: User[];
   setRole: (role: Role) => void;
+  selectUser?: (userId: number) => void;
 }
 
 export const pageRoutes: Record<AppPage, string> = {
@@ -18,6 +19,8 @@ export const pageRoutes: Record<AppPage, string> = {
   clients: "/clients",
   documents: "/documents",
   tickets: "/tickets",
+  trust: "/trust",
+  conflicts: "/conflicts",
   access: "/access-control",
   dbms: "/dbms",
 };
@@ -26,6 +29,8 @@ const navItems: Array<{ label: string; page: AppPage }> = [
   { label: "Dashboard", page: "dashboard" },
   { label: "Cases", page: "cases" },
   { label: "Clients", page: "clients" },
+  { label: "Trust & IOLTA", page: "trust" },
+  { label: "Conflict Check", page: "conflicts" },
   { label: "Documents", page: "documents" },
   { label: "Tickets", page: "tickets" },
   { label: "Access Control", page: "access" },
@@ -42,6 +47,7 @@ export function Navbar({
   user,
   users,
   setRole,
+  selectUser,
 }: NavbarProps) {
   const visibleNavItems = navItems.filter(
     (item) => item.page !== "dbms" || canViewSystemsOversight(user),
@@ -95,14 +101,22 @@ export function Navbar({
           </span>
           <div className="relative">
             <select
-              value={user.role}
-              onChange={(event) => setRole(event.target.value as Role)}
+              value={user.id}
+              onChange={(event) => {
+                const selectedId = Number(event.target.value);
+                if (selectUser) {
+                  selectUser(selectedId);
+                } else {
+                  const candidate = users.find((u) => u.id === selectedId);
+                  if (candidate) setRole(candidate.role);
+                }
+              }}
               className="toolbar-select w-full pr-8"
             >
               {users.map((candidate) => (
                 <option
-                  key={candidate.role}
-                  value={candidate.role}
+                  key={candidate.id}
+                  value={candidate.id}
                   className="bg-gray-900 text-white"
                 >
                   {candidate.name} | {candidate.role}
