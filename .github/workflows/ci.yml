@@ -20,6 +20,20 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: lawfirm
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -prootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        command: [--lower-case-table-names=1]
+
       redis:
         image: redis:7-alpine
         command: redis-server --requirepass redispassword
@@ -35,16 +49,6 @@ jobs:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
-      - name: Start MySQL 8.0 with Case-Insensitive Table Names
-        run: |
-          docker run -d \
-            --name mysql \
-            -p 3306:3306 \
-            -e MYSQL_ROOT_PASSWORD=rootpassword \
-            -e MYSQL_DATABASE=lawfirm \
-            mysql:8.0 \
-            mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --lower-case-table-names=1
-
       - name: Set up Python 3.12 Runtime
         uses: actions/setup-python@v5
         with:
@@ -58,27 +62,27 @@ jobs:
 
       - name: Initialize MySQL Database Schema & Seed Data
         run: |
-          echo "Waiting for MySQL container to become ready..."
-          for i in $(seq 1 40); do
-            if docker exec mysql mysqladmin ping -u root -prootpassword --silent; then
-              echo "MySQL is up and ready!"
+          echo "Waiting for MySQL service container to be fully accessible..."
+          for i in $(seq 1 30); do
+            if mysqladmin ping -h 127.0.0.1 -u root -prootpassword --silent; then
+              echo "MySQL is reachable and ping succeeded!"
               break
             fi
-            echo "Waiting for MySQL ($i/40)..."
+            echo "Waiting for MySQL connection ($i/30)..."
             sleep 2
           done
           echo "Importing schema.sql..."
-          docker exec -i mysql mysql -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/schema.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/schema.sql
           echo "Importing access_control.sql..."
-          docker exec -i mysql mysql -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/access_control.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/access_control.sql
           echo "Importing dbms_features.sql..."
-          docker exec -i mysql mysql -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/dbms_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/dbms_features.sql
           echo "Importing advanced_features.sql..."
-          docker exec -i mysql mysql -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/advanced_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/advanced_features.sql
           echo "Importing sample_data.sql..."
-          docker exec -i mysql mysql -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
-          echo "Verifying tables and lowercase case-insensitivity..."
-          docker exec mysql mysql -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee;"
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
+          echo "Verifying case-insensitive table queries..."
+          mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee;"
 
       - name: Run Full Multi-Phase Automated Test Suite (Phases 1-6)
         env:
