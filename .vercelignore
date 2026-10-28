@@ -5,8 +5,15 @@
 .pytest_cache
 backend-java
 backend/tests
+backend/sql
 storage
 uploads
 powershell.exe
 node_modules
 *.log
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.md
+docs
