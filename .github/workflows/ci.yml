@@ -32,7 +32,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-        command: [--lower-case-table-names=1]
 
       redis:
         image: redis:7-alpine
@@ -81,6 +80,8 @@ jobs:
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/advanced_features.sql
           echo "Importing sample_data.sql..."
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
+          echo "Importing case_sensitivity_compat.sql..."
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/case_sensitivity_compat.sql
           echo "Verifying case-insensitive table queries..."
           mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee;"
 
