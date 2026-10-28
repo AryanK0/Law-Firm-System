@@ -60,6 +60,13 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Initialize MySQL Database Schema & Seed Data
+        env:
+          DATABASE_URL: mysql+aiomysql://root:rootpassword@127.0.0.1:3306/lawfirm
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: lawfirm
+          DB_USER: root
+          DB_PASSWORD: rootpassword
         run: |
           echo "Waiting for MySQL service container to be fully accessible..."
           for i in $(seq 1 30); do
@@ -81,7 +88,7 @@ jobs:
           echo "Importing sample_data.sql..."
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
           echo "Importing case_sensitivity_compat.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/case_sensitivity_compat.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 --force lawfirm < backend/sql/case_sensitivity_compat.sql
           echo "Verifying case-insensitive table queries..."
           mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee;"
 
