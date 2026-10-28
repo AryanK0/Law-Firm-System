@@ -6,28 +6,49 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/auth": "http://127.0.0.1:8000",
-      "/system": "http://127.0.0.1:8000",
-      "/trust": "http://127.0.0.1:8000",
-      "/conflicts": "http://127.0.0.1:8000",
-      "/analytics": "http://127.0.0.1:8000",
-      "/access": "http://127.0.0.1:8000",
-      "/billing": "http://127.0.0.1:8000",
-      "/cases": "http://127.0.0.1:8000",
-      "/clients": "http://127.0.0.1:8000",
-      "/documents": "http://127.0.0.1:8000",
-      "/dbms": "http://127.0.0.1:8000",
-      "/employees": "http://127.0.0.1:8000",
-      "/health": "http://127.0.0.1:8000",
-      "/overview": "http://127.0.0.1:8000",
-      "/roles": "http://127.0.0.1:8000",
-      "/tickets": "http://127.0.0.1:8000",
+      "/auth":            "http://127.0.0.1:8000",
+      "/system":          "http://127.0.0.1:8000",
+      "/trust":           "http://127.0.0.1:8000",
+      "/conflicts":       "http://127.0.0.1:8000",
+      "/analytics":       "http://127.0.0.1:8000",
+      "/access":          "http://127.0.0.1:8000",
+      "/billing":         "http://127.0.0.1:8000",
+      "/cases":           "http://127.0.0.1:8000",
+      "/clients":         "http://127.0.0.1:8000",
+      "/documents":       "http://127.0.0.1:8000",
+      "/dbms":            "http://127.0.0.1:8000",
+      "/employees":       "http://127.0.0.1:8000",
+      "/health":          "http://127.0.0.1:8000",
+      "/overview":        "http://127.0.0.1:8000",
+      "/roles":           "http://127.0.0.1:8000",
+      "/tickets":         "http://127.0.0.1:8000",
       "/upload-document": "http://127.0.0.1:8000",
-      "/uploads": "http://127.0.0.1:8000",
+      "/uploads":         "http://127.0.0.1:8000",
+      "/api":             "http://127.0.0.1:8000",
       "/ws": {
         target: "ws://127.0.0.1:8000",
         ws: true,
       },
     },
   },
+  build: {
+    target: "es2020",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes("node_modules")) {
+            if (id.includes("recharts")) {
+              return "charts";
+            }
+            if (id.includes("lucide-react")) {
+              return "icons";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
 });
+

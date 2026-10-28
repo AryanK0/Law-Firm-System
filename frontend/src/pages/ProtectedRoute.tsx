@@ -25,14 +25,12 @@ export default function ProtectedRoute({
 
   if (blockedByLevel || blockedByRole) {
     return (
-      <div className="app-panel-solid border-rose-900/10 bg-rose-50/80 p-8 text-rose-900">
-        <div className="app-kicker text-rose-700">Access control</div>
-        <h2 className="mt-3 font-display text-4xl leading-none text-rose-950">
-          Access denied
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-rose-800">
-          {user.role} does not have permission to open this section with the
-          current demo role selection.
+      <div className="card-premium p-8 border" style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.05)" }}>
+        <p className="eyebrow mb-3" style={{ color: "#f87171" }}>Access Restricted</p>
+        <h2 className="text-2xl font-bold text-white mb-2">Permission Denied</h2>
+        <p className="text-sm text-slate-400 max-w-xl">
+          Your current role (<strong className="text-white">{user.role}</strong>) does not have permission to access this section.
+          Contact your system administrator if you believe this is an error.
         </p>
       </div>
     );

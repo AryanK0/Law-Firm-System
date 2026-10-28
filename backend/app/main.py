@@ -11,7 +11,7 @@ from .config import ensure_upload_dir, get_env
 from .db import fetch_one, get_connection_info
 from .core.telemetry import StructuredLoggingAndTracingMiddleware
 from .core.ratelimit import RateLimitMiddleware
-from .routes import access, auth, case, conflict, document, operations, system, trust
+from .routes import access, ai_search, auth, case, conflict, document, operations, system, trust
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
@@ -27,6 +27,10 @@ def parse_cors_origins():
     return [
         "http://127.0.0.1:5173",
         "http://localhost:5173",
+        "http://127.0.0.1:5174",
+        "http://localhost:5174",
+        "https://*.vercel.app",
+        "https://lfms.vercel.app",
     ]
 
 TAGS_METADATA = [
@@ -157,6 +161,7 @@ app.include_router(operations.router)
 app.include_router(trust.router)
 app.include_router(conflict.router)
 app.include_router(system.router)
+app.include_router(ai_search.router)
 
 
 @app.exception_handler(MySQLError)
