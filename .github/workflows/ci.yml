@@ -78,19 +78,21 @@ jobs:
             sleep 2
           done
           echo "Importing schema.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/schema.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/schema.sql
           echo "Importing access_control.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/access_control.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/access_control.sql
           echo "Importing dbms_features.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/dbms_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/dbms_features.sql
           echo "Importing advanced_features.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/advanced_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/advanced_features.sql
           echo "Importing sample_data.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/sample_data.sql
           echo "Importing case_sensitivity_compat.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 --force lawfirm < backend/sql/case_sensitivity_compat.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/case_sensitivity_compat.sql
+          echo "Running Alembic migrations..."
+          python -m alembic upgrade head
           echo "Verifying case-insensitive table queries..."
-          mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee;"
+          mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee; SELECT count(*) AS trust_count FROM trust_account;"
 
       - name: Run Full Multi-Phase Automated Test Suite (Phases 1-6)
         env:
