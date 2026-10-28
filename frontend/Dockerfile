@@ -11,8 +11,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 # Optimize layer caching for npm dependencies
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package*.json ./
+RUN npm install
 
 # Copy frontend source code & build configuration
 COPY . .

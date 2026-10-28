@@ -59,10 +59,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Initialize MySQL Database Schema & Seed Data
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -u root -prootpassword --silent; do
+            echo "Waiting for MySQL service to become ready..."
+            sleep 1
+          done
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/schema.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/access_control.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/dbms_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/advanced_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/sample_data.sql
+
       - name: Run Full Multi-Phase Automated Test Suite (Phases 1-6)
         env:
           ENVIRONMENT: test
-          DATABASE_URL: mysql+asyncmy://root:rootpassword@127.0.0.1:3306/lawfirm
+          DATABASE_URL: mysql+aiomysql://root:rootpassword@127.0.0.1:3306/lawfirm
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: lawfirm
+          DB_USER: root
+          DB_PASSWORD: rootpassword
           REDIS_URL: redis://:redispassword@127.0.0.1:6379/0
           JWT_SECRET: test-suite-secret-key-32-chars-minimum-soc2
         run: |

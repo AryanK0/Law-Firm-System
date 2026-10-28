@@ -20,7 +20,7 @@ def _connection_config():
         if "://" not in database_url:
             database_url = "mysql://" + database_url
         parsed = urlparse(database_url)
-        if parsed.scheme not in {"mysql", "mysql2", "mysql+pymysql", "mysql+aiomysql"}:
+        if parsed.scheme not in {"mysql", "mysql2", "mysql+pymysql", "mysql+aiomysql", "mysql+asyncmy"}:
             raise RuntimeError(
                 f"Unsupported database URL scheme: {parsed.scheme or 'missing'}"
             )
