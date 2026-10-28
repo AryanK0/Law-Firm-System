@@ -1,0 +1,12 @@
+.git
+.github
+.history
+.vscode
+.pytest_cache
+backend-java
+backend/tests
+storage
+uploads
+powershell.exe
+node_modules
+*.log

@@ -84,10 +84,9 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install Frontend Dependencies
-        working-directory: frontend
+      - name: Install Dependencies
         run: npm ci
 
       - name: Compile TypeScript & Build Production Bundle
