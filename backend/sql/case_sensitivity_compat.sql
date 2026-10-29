@@ -84,6 +84,33 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `audit_log` AS SELECT * FROM `Audit_Log`', 'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `case_report` AS SELECT * FROM `Case_Report`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `employee_report` AS SELECT * FROM `Employee_Report`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `ticket_report` AS SELECT * FROM `Ticket_Report`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `transaction_log` AS SELECT * FROM `Transaction_Log`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `delegated_access` AS SELECT * FROM `Delegated_Access`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `access_violation_log` AS SELECT * FROM `Access_Violation_Log`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `system_checkpoint` AS SELECT * FROM `System_Checkpoint`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `lock_log` AS SELECT * FROM `Lock_Log`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `access_request` AS SELECT * FROM `Access_Request`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `Trust_Account` AS SELECT * FROM `trust_account`', 'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 

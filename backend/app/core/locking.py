@@ -6,18 +6,33 @@ from typing import AsyncGenerator
 
 # Optional Redis client for distributed locking
 REDIS_URL = os.getenv("REDIS_URL", None)
-_redis_client = None
-if REDIS_URL:
+_redis_clients: dict[asyncio.AbstractEventLoop, any] = {}
+
+
+def _get_redis_client():
+    if not REDIS_URL:
+        return None
     try:
         import redis.asyncio as aioredis
-        _redis_client = aioredis.from_url(REDIS_URL, decode_responses=True)
+        loop = asyncio.get_running_loop()
+        if loop not in _redis_clients:
+            _redis_clients[loop] = aioredis.from_url(REDIS_URL, decode_responses=True)
+        return _redis_clients[loop]
     except Exception:
-        _redis_client = None
+        return None
+
 
 # In-memory distributed lock dictionary fallback with lock expiration tracking
-_local_locks: dict[str, asyncio.Lock] = {}
+_local_locks: dict[tuple[asyncio.AbstractEventLoop, str], asyncio.Lock] = {}
 _lock_metadata: dict[str, dict] = {}
-_registry_guard = asyncio.Lock()
+_registry_guards: dict[asyncio.AbstractEventLoop, asyncio.Lock] = {}
+
+
+def _get_registry_guard() -> asyncio.Lock:
+    loop = asyncio.get_running_loop()
+    if loop not in _registry_guards:
+        _registry_guards[loop] = asyncio.Lock()
+    return _registry_guards[loop]
 
 
 class LockTimeoutError(Exception):
@@ -38,8 +53,9 @@ async def distributed_lock(
     Replaces the MySQL Lock_Log table.
     """
     lock_key = f"lock:{resource_type}:{resource_id}"
+    redis_client = _get_redis_client()
 
-    if _redis_client:
+    if redis_client:
         # Redlock / Redis SET NX PX pattern
         start_time = time.monotonic()
         acquired = False
@@ -47,7 +63,7 @@ async def distributed_lock(
         px_ms = int(lease_seconds * 1000)
 
         while not acquired:
-            acquired = await _redis_client.set(lock_key, token, nx=True, px=px_ms)
+            acquired = await redis_client.set(lock_key, token, nx=True, px=px_ms)
             if acquired:
                 break
             if time.monotonic() - start_time >= timeout_seconds:
@@ -68,15 +84,19 @@ async def distributed_lock(
             end
             """
             try:
-                await _redis_client.eval(unlock_lua, 1, lock_key, token)
+                await redis_client.eval(unlock_lua, 1, lock_key, token)
             except Exception:
                 pass
     else:
-        # Asyncio lock fallback
-        async with _registry_guard:
-            if lock_key not in _local_locks:
-                _local_locks[lock_key] = asyncio.Lock()
-            lock = _local_locks[lock_key]
+        # Asyncio lock fallback (loop-aware)
+        loop = asyncio.get_running_loop()
+        registry_guard = _get_registry_guard()
+        dict_key = (loop, lock_key)
+
+        async with registry_guard:
+            if dict_key not in _local_locks:
+                _local_locks[dict_key] = asyncio.Lock()
+            lock = _local_locks[dict_key]
 
         try:
             await asyncio.wait_for(lock.acquire(), timeout=timeout_seconds)
@@ -101,12 +121,13 @@ async def distributed_lock(
 
 async def get_active_locks() -> list[dict]:
     """Return currently active locks for DBMS monitoring / UI display."""
-    if _redis_client:
+    redis_client = _get_redis_client()
+    if redis_client:
         try:
-            keys = await _redis_client.keys("lock:*")
+            keys = await redis_client.keys("lock:*")
             records = []
             for k in keys:
-                val = await _redis_client.get(k)
+                val = await redis_client.get(k)
                 parts = k.split(":")
                 records.append({
                     "lock_id": hash(k) % 100000,
