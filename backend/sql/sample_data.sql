@@ -602,4 +602,9 @@ SELECT 'SAMPLE DATA IMPORT', 'Billings', COUNT(*) FROM Billing;
 
 SELECT name AS Sample_Employee, email FROM Employee LIMIT 5;
 
+-- Seed initial IOLTA escrow deposit to ensure three-way reconciliation balance
+INSERT INTO trust_transaction (transaction_id, account_id, client_id, transaction_type, amount, running_balance, client_running_balance, payee_or_payor, description, cleared, created_by)
+VALUES (1, 1, 1, 'DEPOSIT', 250000.00, 250000.00, 250000.00, 'TechCorp Initial Escrow', 'Initial retainer deposit into escrow trust', 1, 1)
+ON DUPLICATE KEY UPDATE amount=VALUES(amount);
+
 SET FOREIGN_KEY_CHECKS = 1;
