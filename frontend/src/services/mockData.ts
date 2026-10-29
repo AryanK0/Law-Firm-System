@@ -1,10 +1,17 @@
 import type {
   AccessDashboardResponse,
+  AdversePartyRecord,
   AnalyticsResponse,
   AuthUserResponse,
+  CaseBillingResponse,
   CaseDetailRecord,
+  CaseDocumentsResponse,
   CaseRecord,
+  CaseStatusHistoryResponse,
+  CaseTeamResponse,
   ClientRecord,
+  ClientTrustSummaryResponse,
+  ConflictCheckResponse,
   DbmsCaseReportRecord,
   DbmsCheckpointRecord,
   DbmsEmployeeReportRecord,
@@ -13,11 +20,14 @@ import type {
   DbmsTransactionsResponse,
   DocumentRecord,
   EmployeeRecord,
+  LedesInvoiceResponse,
   OverviewResponse,
   SystemTelemetryResponse,
+  ThreeWayReconciliationResponse,
   TicketRecord,
   TokenResponse,
   TrustAccountRecord,
+  UtbmsReferenceResponse,
 } from "./api";
 
 export const mockOverview: OverviewResponse = {
@@ -854,6 +864,49 @@ export const mockTokenResponse: TokenResponse = {
   user: mockAuthUser,
 };
 
+export function getMockClientTrustSummary(clientId: number): ClientTrustSummaryResponse {
+  const c = mockClients.find((x) => x.client_id === clientId) || mockClients[0];
+  const balance = clientId === 1 ? 100000.0 : clientId === 2 ? 75000.0 : 75000.0;
+  return {
+    client_id: c.client_id,
+    client_name: c.name || "Client #" + clientId,
+    trust_balance: balance,
+    transaction_count: 3,
+    transactions: [
+      {
+        transaction_id: 1,
+        type: "DEPOSIT",
+        amount: balance + 50000,
+        client_running_balance: balance + 50000,
+        reference_number: "IOLTA-DEP-001",
+        payee_or_payor: c.organization || c.name || "Client",
+        description: "Initial retainer deposit for legal services",
+        created_at: "2026-01-15T10:00:00",
+      },
+      {
+        transaction_id: 2,
+        type: "DISBURSEMENT",
+        amount: 25000,
+        client_running_balance: balance + 25000,
+        reference_number: "IOLTA-DISB-001",
+        payee_or_payor: "Filing Fees & Expert Witnesses",
+        description: "Court filing fees and deposition transcripts",
+        created_at: "2026-02-10T14:30:00",
+      },
+      {
+        transaction_id: 3,
+        type: "FEE_TRANSFER",
+        amount: 25000,
+        client_running_balance: balance,
+        reference_number: "IOLTA-XFR-001",
+        payee_or_payor: "PSL Law Operating Account",
+        description: "Earned attorney fee transfer following approved invoice",
+        created_at: "2026-03-01T16:00:00",
+      },
+    ],
+  };
+}
+
 export function getMockCaseDetail(caseId: number): CaseDetailRecord {
   const c = mockCases.find((x) => x.case_id === caseId) || mockCases[0];
   return {
@@ -923,19 +976,76 @@ export function resolveMockData(path: string, _method = "GET", _body?: any): any
     const parts = cleanPath.split("/");
     const id = Number(parts[2]) || 1;
     if (parts.length === 3) return getMockCaseDetail(id);
-    if (parts[3] === "team") return { case_id: id, team: mockEmployees.slice(0, 4) };
-    if (parts[3] === "documents") return mockDocuments;
+    if (parts[3] === "team") {
+      const teamResp: CaseTeamResponse = {
+        case_id: id,
+        team: [
+          {
+            employee_id: 2,
+            role_in_case: "Lead Partner",
+            assigned_by: 1,
+            assigned_by_name: "Jessica Pearson",
+            name: "Harvey Specter",
+            email: "harvey.specter@pearsonspecter.example",
+            phone: "+1-212-555-0102",
+            status: "Active",
+            employment_type: "Equity",
+            department_name: "Litigation",
+            role_name: "Partner",
+            hierarchy_level: 2,
+          },
+          {
+            employee_id: 5,
+            role_in_case: "Lead Senior",
+            assigned_by: 2,
+            assigned_by_name: "Harvey Specter",
+            name: "Katrina Bennett",
+            email: "katrina.bennett@pearsonspecter.example",
+            phone: "+1-212-555-0105",
+            status: "Active",
+            employment_type: "Full-Time",
+            department_name: "Litigation",
+            role_name: "Senior Associate",
+            hierarchy_level: 3,
+          },
+        ],
+      };
+      return teamResp;
+    }
+    if (parts[3] === "documents") {
+      const docResp: CaseDocumentsResponse = {
+        case_id: id,
+        documents: mockDocuments,
+      };
+      return docResp;
+    }
     if (parts[3] === "status-history") {
-      return [
-        { history_id: 1, old_status: "Drafting", new_status: "Open", changed_at: "2026-01-10T10:00:00" },
-        { history_id: 2, old_status: "Open", new_status: "Hearing Scheduled", changed_at: "2026-02-15T14:30:00" },
-      ];
+      const histResp: CaseStatusHistoryResponse = {
+        case_id: id,
+        history: [
+          { history_id: 1, old_status: "Drafting", new_status: "Open", changed_by: 1, changed_by_name: "Jessica Pearson", timestamp: "2026-01-10T10:00:00" },
+          { history_id: 2, old_status: "Open", new_status: "Hearing Scheduled", changed_by: 2, changed_by_name: "Harvey Specter", timestamp: "2026-02-15T14:30:00" },
+        ],
+      };
+      return histResp;
     }
     if (parts[3] === "billing") {
-      return [
-        { bill_id: 1, amount: 125000, status: "Approved", version: 1, generated_at: "2026-02-01T00:00:00" },
-        { bill_id: 2, amount: 88500, status: "Pending", version: 1, generated_at: "2026-03-01T00:00:00" },
-      ];
+      const billingResp: CaseBillingResponse = {
+        case_id: id,
+        summary: {
+          bill_count: 2,
+          total_amount: 213500,
+          approved_amount: 125000,
+          pending_amount: 88500,
+          total_hours: 185.5,
+          time_log_count: 14,
+        },
+        entries: [
+          { bill_id: 1, amount: 125000, status: "Approved", generated_by: 5, generated_by_name: "Katrina Bennett", approved_by: 2, approved_by_name: "Harvey Specter" },
+          { bill_id: 2, amount: 88500, status: "Pending", generated_by: 6, generated_by_name: "Mike Ross", approved_by: null, approved_by_name: null },
+        ],
+      };
+      return billingResp;
     }
     if (parts[3] === "legal-hold") {
       return { case_id: id, legal_hold: false, title: "Matter " + id };
@@ -957,42 +1067,73 @@ export function resolveMockData(path: string, _method = "GET", _body?: any): any
     ];
   }
 
+  // --- Trust & IOLTA Endpoints ---
   if (cleanPath === "/trust/accounts") return mockTrustAccounts;
+  if (cleanPath.startsWith("/trust/clients/")) {
+    const clientId = Number(cleanPath.split("/")[3]) || 1;
+    return getMockClientTrustSummary(clientId);
+  }
   if (cleanPath.startsWith("/trust/summary")) {
-    return {
-      client_id: 1,
-      client_name: "Liberty Rail Holdings",
-      total_escrow_balance: 100000.0,
-      transactions: [
-        {
-          transaction_id: 1,
-          transaction_type: "DEPOSIT",
-          amount: 100000.0,
-          running_balance: 250000.0,
-          reference_number: "IOLTA-INIT-001",
-          payee_or_payor: "Liberty Rail Holdings",
-          created_at: "2026-01-10T10:00:00",
-        },
-      ],
-    };
+    const clientId = Number(cleanPath.split("/")[3]) || 1;
+    return getMockClientTrustSummary(clientId);
   }
   if (cleanPath.startsWith("/trust/reconciliation")) {
-    return {
+    const reconResp: ThreeWayReconciliationResponse = {
       reconciliation_id: 1,
       account_id: 1,
+      account_name: "Primary Client Trust Account (IOLTA)",
       statement_date: "2026-03-31",
       bank_statement_balance: 250000.0,
       general_ledger_balance: 250000.0,
       client_ledger_balance: 250000.0,
       variance: 0.0,
       status: "BALANCED",
-      reconciled_by: 1,
+      is_balanced: true,
+      client_count: 3,
+      client_breakdown: [
+        { client_id: 1, client_name: "Liberty Rail Holdings", trust_balance: 100000.0 },
+        { client_id: 2, client_name: "Blue Ridge Capital", trust_balance: 75000.0 },
+        { client_id: 3, client_name: "Monarch Aviation Group", trust_balance: 75000.0 },
+      ],
       reconciled_at: "2026-03-31T23:59:59",
       notes: "Three-way fiduciary reconciliation balanced with zero variance.",
     };
+    return reconResp;
   }
-  if (cleanPath === "/trust/utbms-codes") {
+  if (cleanPath === "/trust/deposit") {
     return {
+      transaction_id: 99,
+      account_id: 1,
+      client_id: 1,
+      amount: 50000.0,
+      account_running_balance: 300000.0,
+      client_running_balance: 150000.0,
+      message: "Deposit credited to IOLTA Client Trust Account.",
+    };
+  }
+  if (cleanPath === "/trust/disburse") {
+    return {
+      transaction_id: 100,
+      amount: 15000.0,
+      account_running_balance: 235000.0,
+      client_running_balance: 85000.0,
+      message: "Disbursement executed under ABA Model Rule 1.15.",
+    };
+  }
+  if (cleanPath === "/trust/transfer-earned-fee") {
+    return {
+      message: "Earned attorney fee transferred to Operating Account.",
+      amount: 25000.0,
+      iolta_balance: 225000.0,
+      operating_balance: 775000.0,
+      client_remaining_trust: 75000.0,
+      transfer_reference: "XFR-EARNED-FEE-20260329",
+    };
+  }
+
+  // --- Billing & LEDES ---
+  if (cleanPath === "/billing/utbms-codes") {
+    const utbmsResp: UtbmsReferenceResponse = {
       task_codes: [
         { code: "L110", description: "Fact Investigation/Development" },
         { code: "L120", description: "Analysis/Strategy" },
@@ -1011,6 +1152,97 @@ export function resolveMockData(path: string, _method = "GET", _body?: any): any
         { code: "E105", description: "Telephone" },
         { code: "E108", description: "Postage" },
       ],
+    };
+    return utbmsResp;
+  }
+  if (cleanPath.startsWith("/billing/") && cleanPath.endsWith("/ledes")) {
+    const billId = Number(cleanPath.split("/")[2]) || 1;
+    const ledesResp: LedesInvoiceResponse = {
+      bill_id: billId,
+      invoice_number: "INV-2026-0042",
+      file_name: "INV_2026_0042_ledes1998b.txt",
+      total_amount: 125000.0,
+      line_item_count: 6,
+      is_valid: true,
+      validation_errors: [],
+      file_content: "INVOICE_DATE[]|INVOICE_NUMBER[INV-2026-0042]|CLIENT_ID[1]|LAW_FIRM_MATTER_ID[MAT-2026-001]|INVOICE_TOTAL[125000.00]|BILLING_START_DATE[20260101]|BILLING_END_DATE[20260131]|LINE_ITEM_NUMBER[1]...",
+    };
+    return ledesResp;
+  }
+
+  // --- Conflicts ---
+  if (cleanPath.startsWith("/conflicts/cases/") && cleanPath.endsWith("/adverse-parties")) {
+    const caseId = Number(cleanPath.split("/")[3]) || 1;
+    const parties: AdversePartyRecord[] = [
+      {
+        party_id: 1,
+        case_id: caseId,
+        party_name: "Apex Global Competitor LLC",
+        party_type: "Adverse Party",
+        corporate_affiliate: "Apex Transport Holdings Inc.",
+        added_at: "2026-01-15T10:00:00",
+      },
+    ];
+    return parties;
+  }
+  if (cleanPath.startsWith("/conflicts/check")) {
+    const conflictResp: ConflictCheckResponse = {
+      query: "General adverse check",
+      search_terms: ["Apex", "Global"],
+      status: "CLEARED",
+      risk_level: "CLEARED",
+      risk_score: 0.0,
+      match_count: 0,
+      matches: [],
+      ethical_rule: "ABA Model Rule 1.7 & 1.9 Conflict of Interest Clearance",
+      ethical_wall_required: false,
+      recommendation: "Clearance granted. No active adverse party representation conflict identified.",
+      checked_at: new Date().toISOString(),
+    };
+    return conflictResp;
+  }
+
+  // --- AI Document / Semantic Search ---
+  if (cleanPath === "/api/search" || cleanPath.startsWith("/documents/search")) {
+    return {
+      query: "contract clause",
+      total: 3,
+      total_matches: 3,
+      results: [
+        {
+          id: 101,
+          title: "Antitrust Pre-Trial Defense Brief",
+          case_code: "MAT-2026-001",
+          snippet: "Cross-corridor market power and regulatory carve-outs under Clayton Act § 7.",
+          score: 0.96,
+          file_name: "Liberty_Rail_Antitrust_Defense_Brief_v3.pdf",
+        },
+        {
+          id: 102,
+          title: "Emergency Motion for Injunction",
+          case_code: "MAT-2026-002",
+          snippet: "Uncapped poison-pill fiduciary protections under Delaware General Corporation Law.",
+          score: 0.91,
+          file_name: "Blue_Ridge_Delaware_Chancery_Injunction_Motion.pdf",
+        },
+        {
+          id: 103,
+          title: "Due Diligence Audit & IP Assessment",
+          case_code: "MAT-2026-005",
+          snippet: "Patent portfolio freedom-to-operate and clinical trial indemnification provisions.",
+          score: 0.88,
+          file_name: "Sterling_Biotech_Due_Diligence_Report_Final.pdf",
+        },
+      ],
+      hits: mockDocuments.map((d) => ({
+        document_id: d.document_id,
+        case_id: d.case_id || 1,
+        case_code: "MAT-2026-001",
+        case_title: "Antitrust matter",
+        file_name: d.file_name || "Brief.pdf",
+        snippet: "Verified legal clause matching query parameters with zero indemnity exposure.",
+        score: 0.94,
+      })),
     };
   }
 
@@ -1032,34 +1264,6 @@ export function resolveMockData(path: string, _method = "GET", _body?: any): any
       status: "ok",
       database: "connected (enterprise mode)",
       database_time: new Date().toISOString(),
-    };
-  }
-
-  if (cleanPath.startsWith("/conflicts/check")) {
-    return {
-      clean_clearance: true,
-      has_conflict: false,
-      risk_score: 0.05,
-      adverse_matches: [],
-      prior_representation_matches: [],
-      reasoning: "No conflict of interest identified across all adverse registries.",
-      checked_at: new Date().toISOString(),
-    };
-  }
-
-  if (cleanPath.startsWith("/documents/search")) {
-    return {
-      query: "contract",
-      total_matches: mockDocuments.length,
-      hits: mockDocuments.map((d) => ({
-        document_id: d.document_id,
-        case_id: d.case_id || 1,
-        case_code: "MAT-2026-001",
-        case_title: "Antitrust matter",
-        file_name: d.file_name || "Brief.pdf",
-        snippet: "Verified legal clause matching query parameters with zero indemnity exposure.",
-        score: 0.94,
-      })),
     };
   }
 
