@@ -1,5 +1,7 @@
 USE lawfirm;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- DEPARTMENTS
 INSERT INTO Department (department_id, department_name) VALUES
   (1, 'Executive'),
@@ -599,3 +601,5 @@ UNION ALL
 SELECT 'SAMPLE DATA IMPORT', 'Billings', COUNT(*) FROM Billing;
 
 SELECT name AS Sample_Employee, email FROM Employee LIMIT 5;
+
+SET FOREIGN_KEY_CHECKS = 1;

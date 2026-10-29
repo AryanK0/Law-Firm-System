@@ -50,3 +50,48 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `case_access` AS SELECT * FROM `Case_Access`', 'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `partner_collaboration` AS SELECT * FROM `Partner_Collaboration`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `court` AS SELECT * FROM `Court`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `hearing` AS SELECT * FROM `Hearing`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `client_interaction` AS SELECT * FROM `Client_Interaction`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `ticket_logs` AS SELECT * FROM `Ticket_Logs`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `it_system_log` AS SELECT * FROM `IT_System_Log`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `permission` AS SELECT * FROM `Permission`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `role_permission` AS SELECT * FROM `Role_Permission`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `access_control` AS SELECT * FROM `Access_Control`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `conflict_check` AS SELECT * FROM `Conflict_Check`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `audit_log` AS SELECT * FROM `Audit_Log`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `Trust_Account` AS SELECT * FROM `trust_account`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `Trust_Transaction` AS SELECT * FROM `trust_transaction`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `Three_Way_Reconciliation` AS SELECT * FROM `three_way_reconciliation`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(@val = 0, 'CREATE OR REPLACE VIEW `Case_Adverse_Party` AS SELECT * FROM `case_adverse_party`', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

@@ -54,6 +54,13 @@ CREATE TABLE Cases (
   created_by INT,
   start_date DATE,
   end_date DATE,
+  version INT NOT NULL DEFAULT 1,
+  legal_hold BOOLEAN NOT NULL DEFAULT FALSE,
+  legal_hold_reason TEXT NULL,
+  legal_hold_by INT NULL,
+  legal_hold_at DATETIME NULL,
+  opposing_party VARCHAR(200) NULL,
+  opposing_counsel VARCHAR(200) NULL,
   CONSTRAINT chk_case_dates CHECK (end_date IS NULL OR start_date IS NULL OR end_date >= start_date),
   CONSTRAINT fk_case_client FOREIGN KEY (client_id) REFERENCES Client(client_id),
   CONSTRAINT fk_case_lead_partner FOREIGN KEY (lead_partner_id) REFERENCES Employee(employee_id) ON DELETE SET NULL,
@@ -116,6 +123,15 @@ CREATE TABLE Document (
   confidentiality_level VARCHAR(50) NOT NULL DEFAULT 'Internal',
   file_path TEXT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  version INT NOT NULL DEFAULT 1,
+  s3_key VARCHAR(500) NULL,
+  s3_bucket VARCHAR(100) NULL,
+  sha256_checksum VARCHAR(64) NULL,
+  encryption_status VARCHAR(50) NOT NULL DEFAULT 'AES-256',
+  ocr_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+  extracted_text TEXT NULL,
+  is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+  file_size_bytes BIGINT NULL,
   CONSTRAINT fk_document_case FOREIGN KEY (case_id) REFERENCES Cases(case_id) ON DELETE CASCADE,
   CONSTRAINT fk_document_uploader FOREIGN KEY (uploaded_by) REFERENCES Employee(employee_id) ON DELETE SET NULL
 );
@@ -139,6 +155,7 @@ CREATE TABLE Billing (
   approved_by INT,
   amount DECIMAL(10,2) NOT NULL,
   status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+  version INT NOT NULL DEFAULT 1,
   CONSTRAINT chk_billing_amount CHECK (amount >= 0),
   CONSTRAINT fk_billing_case FOREIGN KEY (case_id) REFERENCES Cases(case_id) ON DELETE CASCADE,
   CONSTRAINT fk_billing_generator FOREIGN KEY (generated_by) REFERENCES Employee(employee_id) ON DELETE SET NULL,
@@ -152,6 +169,13 @@ CREATE TABLE Time_Log (
   hours DECIMAL(5,2) NOT NULL,
   work_description TEXT,
   approved_by INT,
+  log_date DATE NULL,
+  rate_per_hour DECIMAL(10,2) NOT NULL DEFAULT 350.00,
+  task_code VARCHAR(20) NULL,
+  activity_code VARCHAR(20) NULL,
+  expense_code VARCHAR(20) NULL,
+  line_item_type VARCHAR(10) NOT NULL DEFAULT 'F',
+  adjustment_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   CONSTRAINT chk_time_log_hours CHECK (hours > 0 AND hours <= 24),
   CONSTRAINT fk_time_log_employee FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE CASCADE,
   CONSTRAINT fk_time_log_case FOREIGN KEY (case_id) REFERENCES Cases(case_id) ON DELETE CASCADE,
@@ -266,6 +290,80 @@ CREATE INDEX idx_ticket_logs_ticket_time ON Ticket_Logs(ticket_id, timestamp);
 CREATE INDEX idx_access_control_lookup ON Access_Control(employee_id, resource_type, resource_id);
 CREATE INDEX idx_conflict_lookup ON Conflict_Check(employee_id, client_id);
 CREATE INDEX idx_audit_log_lookup ON Audit_Log(table_name, record_id, timestamp);
+
+
+-- Phase 4 Tables: Trust Accounting (IOLTA), Reconciliation, and Conflict Parties
+CREATE TABLE IF NOT EXISTS `trust_account` (
+  `account_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `account_number` VARCHAR(50) NOT NULL UNIQUE,
+  `account_name` VARCHAR(100) NOT NULL,
+  `account_type` VARCHAR(50) NOT NULL,
+  `bank_name` VARCHAR(100) NOT NULL,
+  `current_balance` DECIMAL(14,2) NOT NULL DEFAULT 0.00,
+  `version` INT NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `trust_transaction` (
+  `transaction_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `account_id` INT NOT NULL,
+  `client_id` INT NULL,
+  `case_id` INT NULL,
+  `transaction_type` VARCHAR(50) NOT NULL,
+  `amount` DECIMAL(14,2) NOT NULL,
+  `running_balance` DECIMAL(14,2) NOT NULL,
+  `client_running_balance` DECIMAL(14,2) NOT NULL DEFAULT 0.00,
+  `reference_number` VARCHAR(100) NULL,
+  `payee_or_payor` VARCHAR(200) NOT NULL,
+  `description` TEXT NULL,
+  `cleared` BOOLEAN NOT NULL DEFAULT TRUE,
+  `created_by` INT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_trust_tx_account` FOREIGN KEY (`account_id`) REFERENCES `trust_account` (`account_id`),
+  CONSTRAINT `fk_trust_tx_client` FOREIGN KEY (`client_id`) REFERENCES `Client` (`client_id`),
+  CONSTRAINT `fk_trust_tx_case` FOREIGN KEY (`case_id`) REFERENCES `Cases` (`case_id`),
+  CONSTRAINT `fk_trust_tx_creator` FOREIGN KEY (`created_by`) REFERENCES `Employee` (`employee_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `three_way_reconciliation` (
+  `reconciliation_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `account_id` INT NOT NULL,
+  `statement_date` DATE NOT NULL,
+  `bank_statement_balance` DECIMAL(14,2) NOT NULL,
+  `general_ledger_balance` DECIMAL(14,2) NOT NULL,
+  `client_ledger_balance` DECIMAL(14,2) NOT NULL,
+  `variance` DECIMAL(14,2) NOT NULL,
+  `status` VARCHAR(50) NOT NULL,
+  `reconciled_by` INT NOT NULL,
+  `reconciled_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `notes` TEXT NULL,
+  CONSTRAINT `fk_reconcile_account` FOREIGN KEY (`account_id`) REFERENCES `trust_account` (`account_id`),
+  CONSTRAINT `fk_reconcile_employee` FOREIGN KEY (`reconciled_by`) REFERENCES `Employee` (`employee_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `case_adverse_party` (
+  `party_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `case_id` INT NOT NULL,
+  `party_name` VARCHAR(200) NOT NULL,
+  `party_type` VARCHAR(50) NOT NULL,
+  `corporate_affiliate` VARCHAR(200) NULL,
+  `added_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_adverse_party_case` FOREIGN KEY (`case_id`) REFERENCES `Cases` (`case_id`)
+);
+
+-- Seed IOLTA and Operating accounts
+INSERT INTO `trust_account` (`account_id`, `account_number`, `account_name`, `account_type`, `bank_name`, `current_balance`, `version`)
+VALUES
+  (1, 'IOLTA-CHASE-0019482', 'Primary Client Trust Account (IOLTA)', 'IOLTA_TRUST', 'JPMorgan Chase Bank, N.A.', 250000.00, 1),
+  (2, 'OP-CHASE-0083921', 'Firm General Operating Account', 'OPERATING', 'JPMorgan Chase Bank, N.A.', 750000.00, 1)
+ON DUPLICATE KEY UPDATE `current_balance`=VALUES(`current_balance`);
+
+-- Stamp Alembic version
+CREATE TABLE IF NOT EXISTS `alembic_version` (
+  `version_num` VARCHAR(32) NOT NULL PRIMARY KEY
+);
+INSERT INTO `alembic_version` (`version_num`) VALUES ('51d131db1d8f')
+ON DUPLICATE KEY UPDATE `version_num`='51d131db1d8f';
 
 -- Visual Summary for Workbench/IDE
 SELECT 'DATABASE TABLES' AS section;

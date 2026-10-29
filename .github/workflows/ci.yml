@@ -87,6 +87,8 @@ jobs:
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/advanced_features.sql
           echo "Importing sample_data.sql..."
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/sample_data.sql
+          echo "Importing phase4_features.sql..."
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/phase4_features.sql
           echo "Importing case_sensitivity_compat.sql..."
           mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/case_sensitivity_compat.sql
           echo "Running Alembic migrations..."
