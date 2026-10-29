@@ -78,6 +78,24 @@ const columnLabels: Record<string, string> = {
   can_upload_docs: "can upload documents",
   can_approve_docs: "can approve documents",
   can_assign_members: "can assign members",
+  case_code: "matter code",
+  employee_name: "assigned personnel",
+  case_role: "matter assignment",
+  requester_name: "requester",
+  resource_type: "resource",
+  resource_id: "record id",
+  requested_permission: "requested permission",
+  approved_by_name: "approver",
+  from_employee_name: "delegator",
+  to_employee_name: "delegatee",
+  valid_from: "effective from",
+  valid_to: "expires at",
+  violation_id: "violation ref",
+  attempted_resource_type: "target resource",
+  attempted_resource_id: "resource ref",
+  attempted_action: "attempted operation",
+  severity: "severity tier",
+  reason: "violation reason",
 };
 
 const permissionLabels: Record<string, string> = {
@@ -139,7 +157,47 @@ function renderCell(value: unknown, column: string) {
     );
   }
 
-  if (column === "violation_reason" || column === "action_taken") {
+  if (column === "severity") {
+    const sev = String(value).toUpperCase();
+    const isCritical = sev === "CRITICAL";
+    const isHigh = sev === "HIGH";
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold border ${
+          isCritical
+            ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+            : isHigh
+            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+            : "bg-sky-500/15 text-sky-300 border-sky-500/30"
+        }`}
+      >
+        <AlertTriangle size={11} />
+        {sev}
+      </span>
+    );
+  }
+
+  if (column === "status") {
+    const st = String(value);
+    const isGood = st === "Approved" || st === "Active";
+    const isPending = st === "Pending";
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+          isGood
+            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+            : isPending
+            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+            : "bg-rose-500/15 text-rose-300 border-rose-500/30"
+        }`}
+      >
+        {isGood ? <Check size={11} className="stroke-[3]" /> : null}
+        {st}
+      </span>
+    );
+  }
+
+  if (column === "violation_reason" || column === "action_taken" || column === "reason") {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs text-amber-300">
         <AlertTriangle size={13} className="shrink-0 text-amber-400" />

@@ -21,6 +21,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../content/AuthContext";
 
 import { CardComponent } from "../components/CardComponent";
 import {
@@ -190,6 +191,7 @@ function EmptyPanel({ message }: { message: string }) {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsResponse>(emptyAnalytics);
   const [overview, setOverview] = useState<OverviewResponse>(emptyOverview);
   const [clients, setClients] = useState<ClientRecord[]>([]);
@@ -199,7 +201,7 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([getAnalytics(), getOverview(), getClients()])
+    Promise.all([getAnalytics(), getOverview(user.id), getClients()])
       .then(([analyticsData, overviewData, clientData]) => {
         if (!active) {
           return;
@@ -224,7 +226,7 @@ export default function Dashboard() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [user.id]);
 
   const caseMix = useMemo(() => analytics.case_status.slice(0, 6), [analytics.case_status]);
   const roleMix = useMemo(

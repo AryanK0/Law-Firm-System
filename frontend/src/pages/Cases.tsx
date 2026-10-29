@@ -292,6 +292,42 @@ export default function CasesPage() {
         </button>
       </div>
 
+      {/* Persona Access & Ethical Wall Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-500/20 bg-sky-950/20 px-5 py-3.5 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300">
+            <Shield size={16} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">{user.name}</span>
+              <span className="rounded-md bg-sky-400/10 px-2 py-0.5 text-xs font-semibold text-sky-300 border border-sky-400/20">
+                {user.role} • Rank {user.hierarchy} ({user.accessLabel})
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {user.id === 1
+                ? "Executive Privilege: Complete firm-wide access to all corporate and litigation matters."
+                : user.id === 2
+                ? "Partner Authority: Filtered to high-stakes litigation matters where assigned as Lead Partner."
+                : user.id === 5
+                ? "Senior Counsel: Filtered to active dispute arbitration and defense matters with lead drafting clearance."
+                : user.id === 6
+                ? "Associate Access: Filtered to staffed discovery research and chancery motions under partner supervision."
+                : user.id === 7
+                ? "Support Access: Partitioned to assigned deposition and filing coordination matters (ABA Model Rule 1.6)."
+                : "Systems Administration: Technical oversight, audit logging, and DBMS infrastructure access."}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-slate-400">Authorized Matters:</span>
+          <span className="rounded-full bg-cyan-400/10 px-2.5 py-0.5 text-xs font-bold text-cyan-300 border border-cyan-400/30">
+            {cases.length} Visible
+          </span>
+        </div>
+      </div>
+
       {/* KPI Stats Ribbon */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="card-premium p-5 relative overflow-hidden">

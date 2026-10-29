@@ -704,35 +704,387 @@ export const mockTrustAccounts: TrustAccountRecord[] = [
 
 export const mockAccessDashboard: AccessDashboardResponse = {
   hierarchy: [
-    { role_id: 1, role_name: "Managing Partner", hierarchy_level: 1, description: "Firm-wide executive authority" },
-    { role_id: 2, role_name: "Partner", hierarchy_level: 2, description: "Matter lead partner authority" },
-    { role_id: 3, role_name: "Senior Associate", hierarchy_level: 3, description: "Senior litigation counsel" },
-    { role_id: 4, role_name: "Associate", hierarchy_level: 4, description: "Staff attorney" },
+    {
+      title: "Managing Partner",
+      rank_no: 8,
+      can_assign_case: true,
+      can_approve_billing: true,
+      can_override_access: true,
+      can_run_recovery: true,
+    },
+    {
+      title: "Partner",
+      rank_no: 7,
+      can_assign_case: true,
+      can_approve_billing: true,
+      can_override_access: true,
+      can_run_recovery: false,
+    },
+    {
+      title: "Senior Associate",
+      rank_no: 6,
+      can_assign_case: true,
+      can_approve_billing: false,
+      can_override_access: false,
+      can_run_recovery: false,
+    },
+    {
+      title: "Associate",
+      rank_no: 5,
+      can_assign_case: false,
+      can_approve_billing: false,
+      can_override_access: false,
+      can_run_recovery: false,
+    },
+    {
+      title: "Paralegal",
+      rank_no: 4,
+      can_assign_case: false,
+      can_approve_billing: false,
+      can_override_access: false,
+      can_run_recovery: false,
+    },
+    {
+      title: "IT Admin",
+      rank_no: 3,
+      can_assign_case: false,
+      can_approve_billing: false,
+      can_override_access: true,
+      can_run_recovery: true,
+    },
+    {
+      title: "Finance Admin",
+      rank_no: 2,
+      can_assign_case: false,
+      can_approve_billing: true,
+      can_override_access: false,
+      can_run_recovery: false,
+    },
+    {
+      title: "Intern",
+      rank_no: 1,
+      can_assign_case: false,
+      can_approve_billing: false,
+      can_override_access: false,
+      can_run_recovery: false,
+    },
   ],
   permissions: [
-    { permission_id: 1, permission_name: "case:read", description: "Read case record" },
-    { permission_id: 2, permission_name: "case:write", description: "Modify case details" },
-    { permission_id: 3, permission_name: "billing:approve", description: "Sign off on client invoices" },
-    { permission_id: 4, permission_name: "trust:disburse", description: "Disburse client trust funds" },
+    { permission_id: 1, permission_name: "VIEW_CASE", description: "View matter profile and general docket" },
+    { permission_id: 2, permission_name: "EDIT_CASE", description: "Modify matter status, description, and timeline" },
+    { permission_id: 3, permission_name: "ASSIGN_CASE", description: "Staff and assign attorneys to matter teams" },
+    { permission_id: 4, permission_name: "VIEW_DOCUMENT", description: "Read case exhibits and discovery documents" },
+    { permission_id: 5, permission_name: "UPLOAD_DOCUMENT", description: "Deposit new exhibits into WORM storage" },
+    { permission_id: 6, permission_name: "DELETE_DOCUMENT", description: "Expunge document versions from repository" },
+    { permission_id: 7, permission_name: "VIEW_BILLING", description: "Inspect UTBMS LEDES invoices and time entries" },
+    { permission_id: 8, permission_name: "APPROVE_BILLING", description: "Partner sign-off on client invoices and rates" },
+    { permission_id: 9, permission_name: "OVERRIDE_ACCESS", description: "Firm-wide executive bypass for ethical review" },
+    { permission_id: 10, permission_name: "ACCESS_AUDIT_LOG", description: "Inspect immutable tamper-evident security logs" },
+    { permission_id: 11, permission_name: "CLOSE_CASE", description: "Execute formal matter closure and escrow sweep" },
   ],
   matrix: [
-    { role_name: "Managing Partner", permissions: "case:read, case:write, billing:approve, trust:disburse" },
-    { role_name: "Partner", permissions: "case:read, case:write, billing:approve" },
-    { role_name: "Senior Associate", permissions: "case:read, case:write" },
-    { role_name: "Associate", permissions: "case:read" },
+    { title: "Managing Partner", permission_name: "VIEW_CASE", allowed: true },
+    { title: "Managing Partner", permission_name: "EDIT_CASE", allowed: true },
+    { title: "Managing Partner", permission_name: "ASSIGN_CASE", allowed: true },
+    { title: "Managing Partner", permission_name: "VIEW_DOCUMENT", allowed: true },
+    { title: "Managing Partner", permission_name: "UPLOAD_DOCUMENT", allowed: true },
+    { title: "Managing Partner", permission_name: "DELETE_DOCUMENT", allowed: true },
+    { title: "Managing Partner", permission_name: "VIEW_BILLING", allowed: true },
+    { title: "Managing Partner", permission_name: "APPROVE_BILLING", allowed: true },
+    { title: "Managing Partner", permission_name: "OVERRIDE_ACCESS", allowed: true },
+    { title: "Managing Partner", permission_name: "ACCESS_AUDIT_LOG", allowed: true },
+    { title: "Managing Partner", permission_name: "CLOSE_CASE", allowed: true },
+    { title: "Partner", permission_name: "VIEW_CASE", allowed: true },
+    { title: "Partner", permission_name: "EDIT_CASE", allowed: true },
+    { title: "Partner", permission_name: "ASSIGN_CASE", allowed: true },
+    { title: "Partner", permission_name: "VIEW_DOCUMENT", allowed: true },
+    { title: "Partner", permission_name: "UPLOAD_DOCUMENT", allowed: true },
+    { title: "Partner", permission_name: "DELETE_DOCUMENT", allowed: false },
+    { title: "Partner", permission_name: "VIEW_BILLING", allowed: true },
+    { title: "Partner", permission_name: "APPROVE_BILLING", allowed: true },
+    { title: "Partner", permission_name: "OVERRIDE_ACCESS", allowed: false },
+    { title: "Partner", permission_name: "ACCESS_AUDIT_LOG", allowed: true },
+    { title: "Partner", permission_name: "CLOSE_CASE", allowed: true },
+    { title: "Senior Associate", permission_name: "VIEW_CASE", allowed: true },
+    { title: "Senior Associate", permission_name: "EDIT_CASE", allowed: true },
+    { title: "Senior Associate", permission_name: "ASSIGN_CASE", allowed: true },
+    { title: "Senior Associate", permission_name: "VIEW_DOCUMENT", allowed: true },
+    { title: "Senior Associate", permission_name: "UPLOAD_DOCUMENT", allowed: true },
+    { title: "Senior Associate", permission_name: "VIEW_BILLING", allowed: true },
+    { title: "Senior Associate", permission_name: "APPROVE_BILLING", allowed: false },
+    { title: "Senior Associate", permission_name: "OVERRIDE_ACCESS", allowed: false },
+    { title: "Senior Associate", permission_name: "CLOSE_CASE", allowed: false },
+    { title: "Associate", permission_name: "VIEW_CASE", allowed: true },
+    { title: "Associate", permission_name: "EDIT_CASE", allowed: true },
+    { title: "Associate", permission_name: "ASSIGN_CASE", allowed: false },
+    { title: "Associate", permission_name: "VIEW_DOCUMENT", allowed: true },
+    { title: "Associate", permission_name: "UPLOAD_DOCUMENT", allowed: true },
+    { title: "Associate", permission_name: "VIEW_BILLING", allowed: false },
+    { title: "Associate", permission_name: "APPROVE_BILLING", allowed: false },
+    { title: "Associate", permission_name: "OVERRIDE_ACCESS", allowed: false },
+    { title: "Paralegal", permission_name: "VIEW_CASE", allowed: true },
+    { title: "Paralegal", permission_name: "EDIT_CASE", allowed: false },
+    { title: "Paralegal", permission_name: "ASSIGN_CASE", allowed: false },
+    { title: "Paralegal", permission_name: "VIEW_DOCUMENT", allowed: true },
+    { title: "Paralegal", permission_name: "UPLOAD_DOCUMENT", allowed: true },
+    { title: "Paralegal", permission_name: "VIEW_BILLING", allowed: false },
+    { title: "Paralegal", permission_name: "APPROVE_BILLING", allowed: false },
+    { title: "Paralegal", permission_name: "OVERRIDE_ACCESS", allowed: false },
+    { title: "IT Admin", permission_name: "VIEW_CASE", allowed: false },
+    { title: "IT Admin", permission_name: "VIEW_LOCKS", allowed: true },
+    { title: "IT Admin", permission_name: "CREATE_CHECKPOINT", allowed: true },
+    { title: "IT Admin", permission_name: "RUN_RECOVERY", allowed: true },
+    { title: "IT Admin", permission_name: "ACCESS_AUDIT_LOG", allowed: true },
+    { title: "IT Admin", permission_name: "OVERRIDE_ACCESS", allowed: true },
   ],
   case_access: [
-    { case_id: 1, employee_id: 2, name: "Harvey Specter", role: "Lead Partner", access: "Full" },
-    { case_id: 1, employee_id: 5, name: "Katrina Bennett", role: "Lead Senior", access: "Full" },
+    {
+      case_access_id: 1,
+      case_id: 1,
+      case_code: "MAT-2026-001",
+      title: "Liberty Rail antitrust readiness",
+      employee_id: 2,
+      employee_name: "Harvey Specter",
+      case_role: "Lead Partner",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 2,
+      case_id: 1,
+      case_code: "MAT-2026-001",
+      title: "Liberty Rail antitrust readiness",
+      employee_id: 5,
+      employee_name: "Katrina Bennett",
+      case_role: "Lead Senior Counsel",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 3,
+      case_id: 1,
+      case_code: "MAT-2026-001",
+      title: "Liberty Rail antitrust readiness",
+      employee_id: 6,
+      employee_name: "Mike Ross",
+      case_role: "Staff Associate",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: false,
+    },
+    {
+      case_access_id: 4,
+      case_id: 1,
+      case_code: "MAT-2026-001",
+      title: "Liberty Rail antitrust readiness",
+      employee_id: 7,
+      employee_name: "Rachel Zane",
+      case_role: "Paralegal Support",
+      can_view: true,
+      can_edit: false,
+      can_upload_docs: true,
+      can_assign_members: false,
+    },
+    {
+      case_access_id: 5,
+      case_id: 2,
+      case_code: "MAT-2026-002",
+      title: "Blue Ridge proxy defense",
+      employee_id: 2,
+      employee_name: "Harvey Specter",
+      case_role: "Lead Partner",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 6,
+      case_id: 2,
+      case_code: "MAT-2026-002",
+      title: "Blue Ridge proxy defense",
+      employee_id: 6,
+      employee_name: "Mike Ross",
+      case_role: "Staff Associate",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: false,
+    },
+    {
+      case_access_id: 7,
+      case_id: 3,
+      case_code: "MAT-2026-003",
+      title: "Monarch Aviation labor arbitration",
+      employee_id: 5,
+      employee_name: "Katrina Bennett",
+      case_role: "Lead Senior Counsel",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 8,
+      case_id: 4,
+      case_code: "MAT-2026-004",
+      title: "Apex Energy cross-border acquisition",
+      employee_id: 2,
+      employee_name: "Harvey Specter",
+      case_role: "Lead Partner",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 9,
+      case_id: 5,
+      case_code: "MAT-2026-005",
+      title: "Sterling Biotech clinical trial IP defense",
+      employee_id: 2,
+      employee_name: "Harvey Specter",
+      case_role: "Lead Partner",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 10,
+      case_id: 5,
+      case_code: "MAT-2026-005",
+      title: "Sterling Biotech clinical trial IP defense",
+      employee_id: 5,
+      employee_name: "Katrina Bennett",
+      case_role: "Lead Senior Counsel",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
+    {
+      case_access_id: 11,
+      case_id: 6,
+      case_code: "MAT-2026-006",
+      title: "Falcon Logistics fleet regulatory compliance",
+      employee_id: 5,
+      employee_name: "Katrina Bennett",
+      case_role: "Lead Senior Counsel",
+      can_view: true,
+      can_edit: true,
+      can_upload_docs: true,
+      can_assign_members: true,
+    },
   ],
   clearances: [
-    { clearance_id: 5, name: "Level 5 (Top Secret)", rank: 5, clearance_rank: 5 },
-    { clearance_id: 4, name: "Level 4 (Secret)", rank: 4, clearance_rank: 4 },
-    { clearance_id: 3, name: "Level 3 (Confidential)", rank: 3, clearance_rank: 3 },
+    { clearance_id: 5, name: "Level 5 (Top Secret)", rank: 5, clearance_rank: 5, numeric_rank: 5 },
+    { clearance_id: 4, name: "Level 4 (Secret)", rank: 4, clearance_rank: 4, numeric_rank: 4 },
+    { clearance_id: 3, name: "Level 3 (Confidential)", rank: 3, clearance_rank: 3, numeric_rank: 3 },
+    { clearance_id: 2, name: "Level 2 (Restricted)", rank: 2, clearance_rank: 2, numeric_rank: 2 },
+    { clearance_id: 1, name: "Level 1 (Public)", rank: 1, clearance_rank: 1, numeric_rank: 1 },
   ],
-  violations: [],
-  delegations: [],
-  requests: [],
+  requests: [
+    {
+      request_id: 101,
+      requester_name: "Mike Ross",
+      resource_type: "Matter",
+      resource_id: 3,
+      requested_permission: "VIEW_CASE",
+      status: "Approved",
+      approved_by_name: "Jessica Pearson",
+    },
+    {
+      request_id: 102,
+      requester_name: "Rachel Zane",
+      resource_type: "Document",
+      resource_id: 105,
+      requested_permission: "VIEW_DOCUMENT",
+      status: "Pending",
+      approved_by_name: "-",
+    },
+    {
+      request_id: 103,
+      requester_name: "Katrina Bennett",
+      resource_type: "Matter",
+      resource_id: 4,
+      requested_permission: "EDIT_CASE",
+      status: "Approved",
+      approved_by_name: "Harvey Specter",
+    },
+    {
+      request_id: 104,
+      requester_name: "Mike Ross",
+      resource_type: "Trust Account",
+      resource_id: 1,
+      requested_permission: "APPROVE_BILLING",
+      status: "Rejected",
+      approved_by_name: "Jessica Pearson",
+    },
+  ],
+  delegations: [
+    {
+      delegation_id: 201,
+      from_employee_name: "Harvey Specter",
+      to_employee_name: "Katrina Bennett",
+      permission_name: "APPROVE_BILLING",
+      valid_from: "2026-03-20",
+      valid_to: "2026-04-10",
+      status: "Active",
+    },
+    {
+      delegation_id: 202,
+      from_employee_name: "Jessica Pearson",
+      to_employee_name: "Harvey Specter",
+      permission_name: "OVERRIDE_ACCESS",
+      valid_from: "2026-01-01",
+      valid_to: "2026-12-31",
+      status: "Active",
+    },
+    {
+      delegation_id: 203,
+      from_employee_name: "Katrina Bennett",
+      to_employee_name: "Mike Ross",
+      permission_name: "UPLOAD_DOCUMENT",
+      valid_from: "2026-03-15",
+      valid_to: "2026-05-01",
+      status: "Active",
+    },
+  ],
+  violations: [
+    {
+      violation_id: 301,
+      employee_name: "Mike Ross",
+      attempted_resource_type: "Trust_Account",
+      attempted_resource_id: 1,
+      attempted_action: "DISBURSE",
+      severity: "HIGH",
+      reason: "Fiduciary trust disbursement attempted without Partner clearance rank",
+    },
+    {
+      violation_id: 302,
+      employee_name: "Rachel Zane",
+      attempted_resource_type: "Document",
+      attempted_resource_id: 103,
+      attempted_action: "DELETE",
+      severity: "CRITICAL",
+      reason: "WORM Vault deletion blocked by active Litigation Legal Hold",
+    },
+    {
+      violation_id: 303,
+      employee_name: "Benjamin",
+      attempted_resource_type: "Matter",
+      attempted_resource_id: 2,
+      attempted_action: "VIEW_CONFIDENTIAL",
+      severity: "MEDIUM",
+      reason: "Partitioned client privilege boundary access denied for IT role",
+    },
+  ],
 };
 
 export const mockDbmsTransactions: DbmsTransactionsResponse = {
@@ -965,13 +1317,86 @@ export function getMockCaseDetail(caseId: number): CaseDetailRecord {
   };
 }
 
+export function getEmpIdFromPath(path: string): number {
+  if (path.includes("?")) {
+    const params = new URLSearchParams(path.split("?")[1]);
+    const parsed = Number(params.get("employee_id"));
+    if (parsed) return parsed;
+  }
+  if (typeof window !== "undefined") {
+    const stored = Number(localStorage.getItem("lfms_employee_id"));
+    if (stored) return stored;
+  }
+  return 1;
+}
+
+export function getFilteredCasesForEmployee(employeeId: number): CaseRecord[] {
+  // 1: Jessica Pearson (Managing Partner) -> Firm-wide executive visibility (All 6 matters)
+  if (employeeId === 1) {
+    return mockCases;
+  }
+  // 2: Harvey Specter (Partner) -> Lead Litigation Partner on matters 1, 2, 4, 5 (4 matters)
+  if (employeeId === 2) {
+    return mockCases.filter((c) => [1, 2, 4, 5].includes(c.case_id));
+  }
+  // 5: Katrina Bennett (Senior Associate) -> Lead Senior Counsel on matters 1, 3, 5, 6 (4 matters)
+  if (employeeId === 5) {
+    return mockCases.filter((c) => [1, 3, 5, 6].includes(c.case_id));
+  }
+  // 6: Mike Ross (Associate) -> Staff Associate on matters 1, 2 (2 matters)
+  if (employeeId === 6) {
+    return mockCases.filter((c) => [1, 2].includes(c.case_id));
+  }
+  // 7: Rachel Zane (Paralegal) -> Support on matter 1 (1 matter)
+  if (employeeId === 7) {
+    return mockCases.filter((c) => [1].includes(c.case_id));
+  }
+  // 8: Benjamin (IT Admin) -> Technical infrastructure/eDiscovery on matter 1 (1 matter)
+  if (employeeId === 8) {
+    return mockCases.filter((c) => [1].includes(c.case_id));
+  }
+  return mockCases.filter(
+    (c) => c.lead_partner_id === employeeId || c.lead_senior_id === employeeId || c.case_id === 1
+  );
+}
+
+export function getFilteredOverviewForEmployee(employeeId: number): OverviewResponse {
+  const userCases = getFilteredCasesForEmployee(employeeId);
+  const userTrackedRevenue = userCases.reduce((sum, c) => sum + (c.billed_total || 0), 0);
+
+  const priorityMatters = userCases.slice(0, 4).map((c) => ({
+    case_id: c.case_id,
+    case_code: c.case_code || `MAT-2026-00${c.case_id}`,
+    title: c.title || "",
+    case_type: c.case_type || "Litigation",
+    status: c.status || "Open",
+    confidentiality_level: c.confidentiality_level || "Internal",
+    client_name: c.client_name || "Enterprise Client",
+    lead_partner_name: c.lead_partner_name || "Harvey Specter",
+    lead_senior_name: c.lead_senior_name || "Katrina Bennett",
+    start_date: c.start_date || "2026-01-10",
+    end_date: c.end_date || "2026-06-30",
+  }));
+
+  return {
+    ...mockOverview,
+    summary: {
+      ...mockOverview.summary,
+      open_matters: userCases.length,
+      tracked_revenue: userTrackedRevenue,
+    },
+    priority_matters: priorityMatters,
+  };
+}
+
 export function resolveMockData(path: string, _method = "GET", _body?: any): any {
   const cleanPath = path.split("?")[0];
+  const empId = getEmpIdFromPath(path);
 
-  if (cleanPath === "/overview") return mockOverview;
+  if (cleanPath === "/overview") return getFilteredOverviewForEmployee(empId);
   if (cleanPath === "/analytics") return mockAnalytics;
   if (cleanPath === "/clients") return mockClients;
-  if (cleanPath === "/cases") return mockCases;
+  if (cleanPath === "/cases") return getFilteredCasesForEmployee(empId);
   if (cleanPath.startsWith("/cases/")) {
     const parts = cleanPath.split("/");
     const id = Number(parts[2]) || 1;
