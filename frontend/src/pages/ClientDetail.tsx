@@ -8,7 +8,7 @@ import { getCases, getClients, type CaseRecord, type ClientRecord } from "../ser
 
 function splitContactInfo(contactInfo: string | null) {
   const parts = (contactInfo ?? "")
-    .split("|")
+ .split("|")
     .map((part) => part.trim())
     .filter(Boolean);
 
@@ -29,7 +29,7 @@ export default function ClientDetailPage() {
 
   useEffect(() => {
     if (!Number.isFinite(parsedClientId)) {
-      setError("Invalid client id.");
+ setError("Invalid client id.");
       setLoading(false);
       return;
     }
@@ -44,7 +44,7 @@ export default function ClientDetailPage() {
 
         const matchedClient = clientData.find((item) => item.client_id === parsedClientId) ?? null;
         if (!matchedClient) {
-          setError("Client not found.");
+ setError("Client not found.");
           setClient(null);
           setCases([]);
           return;
@@ -112,15 +112,15 @@ export default function ClientDetailPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-semibold text-primary">
-                Client #{String(client.client_id).padStart(3, "0")}
+ Client #{String(client.client_id).padStart(3, "0")}
               </span>
               <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                {client.organization ? "Corporate" : "Individual"}
+ {client.organization ? "Corporate" : "Individual"}
               </span>
             </div>
 
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
-              {client.organization || client.name || "Unnamed client"}
+ {client.organization || client.name || "Unnamed client"}
             </h1>
 
             {client.organization && client.name ? (
@@ -129,11 +129,11 @@ export default function ClientDetailPage() {
 
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Email</p>
+                <p className="text-[11px] tracking-normal text-slate-400">Email</p>
                 <p className="mt-2 text-sm text-foreground">{contact.email}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Phone</p>
+                <p className="text-[11px] tracking-normal text-slate-400">Phone</p>
                 <p className="mt-2 text-sm text-foreground">{contact.phone}</p>
               </div>
             </div>
@@ -141,11 +141,11 @@ export default function ClientDetailPage() {
 
           <div className="grid min-w-[260px] grid-cols-2 gap-3">
             <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Visible Matters</p>
+              <p className="text-[11px] tracking-normal text-slate-400">Visible Matters</p>
               <p className="mt-1 text-xl font-semibold text-foreground">{cases.length}</p>
             </div>
             <div className="rounded-2xl bg-white/[0.03] p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Visible Billing</p>
+              <p className="text-[11px] tracking-normal text-slate-400">Visible Billing</p>
               <p className="mt-1 text-xl font-semibold text-foreground">{formatCurrency(totalBilling)}</p>
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function ClientDetailPage() {
       <section className="card-premium p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="eyebrow">Matter Portfolio</p>
+            
             <h2 className="mt-2 text-2xl font-semibold text-foreground">Client matters</h2>
           </div>
           <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
@@ -175,26 +175,26 @@ export default function ClientDetailPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-sm font-semibold text-primary">
-                        {formatCaseCode(caseItem.case_code, `Matter #${caseItem.case_id}`)}
+ {formatCaseCode(caseItem.case_code, `Matter #${caseItem.case_id}`)}
                       </span>
                       <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                        {caseItem.status || "Unknown"}
+ {caseItem.status || "Unknown"}
                       </span>
                       <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                        {caseItem.case_type || "General"}
+ {caseItem.case_type || "General"}
                       </span>
                     </div>
 
                     <h3 className="mt-3 text-lg font-semibold text-foreground">
-                      {caseItem.title || "Untitled matter"}
+ {caseItem.title || "Untitled matter"}
                     </h3>
                     <p className="mt-2 text-sm text-slate-300">
-                      {truncate(caseItem.description, 180) || "No description available."}
+ {truncate(caseItem.description, 180) || "No description available."}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-400">
                       <span>Opened {formatDate(caseItem.start_date)}</span>
-                      <span>Lead {caseItem.lead_partner_name || "Unassigned"}</span>
+ <span>Lead {caseItem.lead_partner_name || "Unassigned"}</span>
                     </div>
                   </div>
 

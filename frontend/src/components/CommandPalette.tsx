@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search, Briefcase, Users, FileText, Scale, Shield, Ticket, Settings,
-  ArrowRight, Command, CornerDownLeft, ChevronRight, Zap,
+  Command, CornerDownLeft, Zap,
 } from "lucide-react";
 
 export type CommandAction = {
@@ -23,14 +23,14 @@ interface CommandPaletteProps {
 }
 
 const NAV_ACTIONS = (navigate: ReturnType<typeof useNavigate>): CommandAction[] => [
-  { id: "nav-dashboard",  label: "Go to Dashboard",     description: "Firm overview & analytics",            icon: Zap,      accent: "#38bdf8", action: () => navigate("/dashboard"),      keywords: ["home","main"],                 group: "Navigate" },
-  { id: "nav-cases",      label: "Open Cases",          description: "Browse active and closed matters",     icon: Briefcase, accent: "#3b82f6", action: () => navigate("/cases"),          keywords: ["matters","legal"],             group: "Navigate" },
-  { id: "nav-clients",    label: "Open Clients",        description: "Client relationship management",       icon: Users,    accent: "#0ea5e9", action: () => navigate("/clients"),        keywords: ["contacts","crm"],              group: "Navigate" },
-  { id: "nav-trust",      label: "Trust & IOLTA",       description: "Trust accounting & ledgers",           icon: Shield,   accent: "#10b981", action: () => navigate("/trust"),          keywords: ["finance","iolta","accounting"], group: "Navigate" },
-  { id: "nav-conflicts",  label: "Conflict Check",      description: "Check for adverse party conflicts",    icon: Scale,    accent: "#22d3ee", action: () => navigate("/conflicts"),      keywords: ["adverse","check"],             group: "Navigate" },
-  { id: "nav-documents",  label: "Documents",           description: "Upload & manage legal documents",      icon: FileText, accent: "#f59e0b", action: () => navigate("/documents"),      keywords: ["files","upload","docs"],       group: "Navigate" },
-  { id: "nav-tickets",    label: "Support Tickets",     description: "Internal IT & operations queue",       icon: Ticket,   accent: "#f43f5e", action: () => navigate("/tickets"),        keywords: ["support","help","it"],         group: "Navigate" },
-  { id: "nav-access",     label: "Access Control",      description: "Role-based permissions & hierarchy",   icon: Settings, accent: "#6366f1", action: () => navigate("/access-control"), keywords: ["roles","permissions","rbac"],   group: "Navigate" },
+  { id: "nav-dashboard",  label: "Go to Dashboard",     description: "Firm overview and analytics",          icon: Zap,       accent: "var(--color-accent)",     action: () => navigate("/dashboard"),      keywords: ["home","main"],                 group: "Navigate" },
+  { id: "nav-cases",      label: "Open Cases",          description: "Browse active and closed matters",     icon: Briefcase, accent: "var(--color-accent-hi)",  action: () => navigate("/cases"),          keywords: ["matters","legal"],             group: "Navigate" },
+  { id: "nav-clients",    label: "Open Clients",        description: "Client relationship management",       icon: Users,     accent: "var(--color-accent)",     action: () => navigate("/clients"),        keywords: ["contacts","crm"],              group: "Navigate" },
+  { id: "nav-trust",      label: "Trust & IOLTA",       description: "Trust accounting and ledgers",         icon: Shield,    accent: "var(--color-success)",    action: () => navigate("/trust"),          keywords: ["finance","iolta","accounting"], group: "Navigate" },
+  { id: "nav-conflicts",  label: "Conflict Check",      description: "Check for adverse party conflicts",    icon: Scale,     accent: "var(--color-accent-hi)",  action: () => navigate("/conflicts"),      keywords: ["adverse","check"],             group: "Navigate" },
+  { id: "nav-documents",  label: "Documents",           description: "Upload and manage legal documents",    icon: FileText,  accent: "var(--color-accent-2)",   action: () => navigate("/documents"),      keywords: ["files","upload","docs"],       group: "Navigate" },
+  { id: "nav-tickets",    label: "Support Tickets",     description: "Internal IT and operations queue",     icon: Ticket,    accent: "var(--color-error)",      action: () => navigate("/tickets"),        keywords: ["support","help","it"],         group: "Navigate" },
+  { id: "nav-access",     label: "Access Control",      description: "Role-based permissions and hierarchy", icon: Settings,  accent: "var(--color-accent)",     action: () => navigate("/access-control"), keywords: ["roles","permissions","rbac"],  group: "Navigate" },
 ];
 
 function matchScore(action: CommandAction, query: string): number {
@@ -90,7 +90,6 @@ export function CommandPalette({ open, onClose, extraActions = [] }: CommandPale
 
   if (!open) return null;
 
-  // Group results
   const groups: Record<string, CommandAction[]> = {};
   for (const a of filtered) {
     if (!groups[a.group]) groups[a.group] = [];
@@ -101,35 +100,27 @@ export function CommandPalette({ open, onClose, extraActions = [] }: CommandPale
 
   return (
     <div
-      className="fixed inset-0 z-[99999] flex items-start justify-center pt-[16vh]"
-      style={{ background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 z-[99999] flex items-start justify-center pt-[16vh] bg-black/70"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[560px] mx-4 rounded-2xl overflow-hidden"
-        style={{
-          background: "rgba(4,10,24,0.98)",
-          border: "1px solid rgba(56,189,248,0.16)",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.8), 0 0 80px rgba(37,99,235,0.18)",
-        }}
+        className="glass-heavy w-full max-w-[560px] mx-4 overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div
-          className="flex items-center gap-3 px-5 py-4 border-b"
-          style={{ borderColor: "rgba(56,189,248,0.10)" }}
-        >
-          <Search size={18} className="text-slate-500 flex-shrink-0" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-rule">
+          <Search size={18} className="text-ink-muted flex-shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
+            aria-label="Search actions, pages, clients"
             placeholder="Search actions, pages, clients…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm outline-none"
+            className="flex-1 bg-transparent text-ink placeholder:text-ink-muted text-sm focus-visible:outline-none"
           />
-          <div className="flex items-center gap-1.5 text-slate-600">
-            <kbd className="text-[10px] bg-white/5 border border-white/10 rounded px-1.5 py-0.5 font-mono">ESC</kbd>
+          <div className="flex items-center gap-1.5 text-ink-muted">
+            <kbd className="text-xs bg-paper-2 border border-rule rounded px-1.5 py-0.5">ESC</kbd>
           </div>
         </div>
 
@@ -137,13 +128,13 @@ export function CommandPalette({ open, onClose, extraActions = [] }: CommandPale
         <div className="max-h-[380px] overflow-y-auto py-2">
           {filtered.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-slate-500">No results for "{query}"</p>
-              <p className="text-xs text-slate-600 mt-1">Try searching for a page, case, or action</p>
+              <p className="text-sm text-ink-muted">No results for “{query}”</p>
+              <p className="text-xs text-ink-muted mt-1">Try searching for a page, case, or action</p>
             </div>
           ) : (
             Object.entries(groups).map(([group, actions]) => (
               <div key={group}>
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-600 px-5 pt-3 pb-1.5">
+                <p className="text-xs font-medium text-ink-muted px-5 pt-3 pb-1.5">
                   {group}
                 </p>
                 {actions.map((action) => {
@@ -156,29 +147,24 @@ export function CommandPalette({ open, onClose, extraActions = [] }: CommandPale
                       type="button"
                       onClick={() => execute(action)}
                       onMouseEnter={() => setSelected(idx)}
-                      className="w-full flex items-center gap-3.5 px-4 py-2.5 text-left transition-all duration-100"
+                      className={`w-full flex items-center gap-3.5 px-4 py-2.5 text-left transition-colors duration-150 border-l-2 ${
+                        isSelected ? "bg-paper-2" : "bg-transparent border-transparent"
+                      }`}
                       style={{
-                        background: isSelected ? "rgba(37,99,235,0.12)" : "transparent",
-                        borderLeft: isSelected ? `2px solid ${action.accent ?? "#3b82f6"}` : "2px solid transparent",
+                        borderLeftColor: isSelected ? (action.accent ?? "var(--color-accent)") : "transparent",
                       }}
                     >
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: `${action.accent ?? "#3b82f6"}18`,
-                          border: `1px solid ${action.accent ?? "#3b82f6"}30`,
-                        }}
-                      >
-                        <Icon size={15} style={{ color: action.accent ?? "#3b82f6" }} />
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-paper-2 border border-rule">
+                        <Icon size={15} style={{ color: action.accent ?? "var(--color-accent)" }} aria-hidden="true" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white leading-none">{action.label}</p>
+                        <p className="text-sm font-medium text-ink leading-none">{action.label}</p>
                         {action.description && (
-                          <p className="text-xs text-slate-500 mt-0.5 truncate">{action.description}</p>
+                          <p className="text-xs text-ink-muted mt-0.5 truncate">{action.description}</p>
                         )}
                       </div>
                       {isSelected && (
-                        <CornerDownLeft size={13} className="text-slate-500 flex-shrink-0" />
+                        <CornerDownLeft size={13} className="text-ink-muted flex-shrink-0" aria-hidden="true" />
                       )}
                     </button>
                   );
@@ -189,25 +175,21 @@ export function CommandPalette({ open, onClose, extraActions = [] }: CommandPale
         </div>
 
         {/* Footer */}
-        <div
-          className="flex items-center justify-between px-5 py-2.5 border-t"
-          style={{ borderColor: "rgba(56,189,248,0.08)", background: "rgba(255,255,255,0.01)" }}
-        >
-          <div className="flex items-center gap-3 text-[10px] text-slate-600">
+        <div className="flex items-center justify-between px-5 py-2.5 border-t border-rule bg-paper-2">
+          <div className="flex items-center gap-3 text-xs text-ink-muted">
             <span className="flex items-center gap-1.5">
-              <kbd className="bg-white/5 border border-white/10 rounded px-1 py-0.5 font-mono">↑</kbd>
-              <kbd className="bg-white/5 border border-white/10 rounded px-1 py-0.5 font-mono">↓</kbd>
+              <kbd className="bg-paper border border-rule rounded px-1 py-0.5">↑</kbd>
+              <kbd className="bg-paper border border-rule rounded px-1 py-0.5">↓</kbd>
               navigate
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="bg-white/5 border border-white/10 rounded px-1 py-0.5 font-mono">↵</kbd>
+              <kbd className="bg-paper border border-rule rounded px-1 py-0.5">↵</kbd>
               select
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
-            <Command size={10} />
-            <span className="font-mono">K</span>
-            <span>to open</span>
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <Command size={11} aria-hidden="true" />
+            <span>K to open</span>
           </div>
         </div>
       </div>

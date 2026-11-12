@@ -1,379 +1,553 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BriefcaseBusiness,
-  Scale,
-  Shield,
-  BarChart3,
-  Users,
-  FileText,
   ArrowRight,
-  ChevronRight,
-  Zap,
-  Lock,
-  Globe,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 const STATS = [
-  { value: "99.9%", label: "Uptime SLA",        color: "#38bdf8", icon: Zap },
-  { value: "256-bit", label: "AES Encryption",   color: "#22d3ee", icon: Lock },
-  { value: "50+",   label: "Jurisdictions",       color: "#f59e0b", icon: Globe },
-  { value: "10k+",  label: "Active Matters",      color: "#10b981", icon: FileText },
+  { value: "99.9%", label: "Uptime SLA" },
+  { value: "256-bit", label: "AES Encryption" },
+  { value: "50+", label: "Jurisdictions" },
+  { value: "10k+", label: "Active Matters" },
 ];
 
-const FEATURES = [
+const HERO_LEDGER = [
   {
-    icon: Scale,
-    title: "Intelligent Case Management",
-    desc: "End-to-end matter lifecycle — intake, milestones, billing, and closure in one unified workspace.",
-    accent: "#2563eb",
-    accentRgb: "37,99,235",
+    matter: "Liberty Rail Antitrust",
+    detail: "185.5 hrs",
+    status: "Matched",
+    open: false,
+    amount: "$420,000.00",
+  },
+  {
+    matter: "Blue Ridge Proxy Defense",
+    detail: "142.0 hrs",
+    status: "Matched",
+    open: false,
+    amount: "$385,000.00",
+  },
+  {
+    matter: "Monarch Aviation Labor",
+    detail: "94.0 hrs",
+    status: "1 open review",
+    open: true,
+    amount: "$195,000.00",
+  },
+  {
+    matter: "Sterling Biotech IP",
+    detail: "118.0 hrs",
+    status: "Matched",
+    open: false,
+    amount: "$248,500.00",
+  },
+];
+
+const MODULES = [
+  {
+    id: "cases",
     tag: "Core",
+    title: "Intelligent Case Management",
+    desc: "Full matter lifecycle covering intake, milestones, billing, and closure in one unified workspace.",
+    rows: [
+      { label: "Concurrency control", detail: "Optimistic version locking prevents overwrite collisions" },
+      { label: "Matter hearings", detail: "Automated court docket synchronization across jurisdictions" },
+      { label: "Legal holds", detail: "Immutable evidence freeze under litigation hold orders" },
+    ],
   },
   {
-    icon: Users,
-    title: "Client Intelligence Hub",
-    desc: "360° client profiles with relationship mapping, conflict detection, and engagement analytics.",
-    accent: "#0ea5e9",
-    accentRgb: "14,165,233",
+    id: "crm",
     tag: "CRM",
+    title: "Client Intelligence Hub",
+    desc: "Complete client profiles with relationship mapping, conflict detection, and engagement analytics.",
+    rows: [
+      { label: "Conflict screening", detail: "Real-time adverse party graph checks before onboarding" },
+      { label: "Ethical walls", detail: "Automatic barrier enforcement across matter teams" },
+      { label: "Engagement ledger", detail: "Client contact log paired with historical matter velocity" },
+    ],
   },
   {
-    icon: Shield,
-    title: "Trust & IOLTA Compliance",
-    desc: "Automated three-way reconciliation, ABA-compliant ledgers, and real-time audit trails.",
-    accent: "#10b981",
-    accentRgb: "16,185,129",
+    id: "trust",
     tag: "Finance",
+    title: "Trust and IOLTA Compliance",
+    desc: "Automated three-way reconciliation, ABA-compliant ledgers, and real-time audit trails.",
+    rows: [
+      { label: "Bank vs. sub-ledger", detail: "Zero-variance verification across pooled client accounts" },
+      { label: "Overdraft prevention", detail: "Database trigger blocks disbursements exceeding client escrow" },
+      { label: "LEDES 1998B billing", detail: "Exportable UTBMS task and activity coded invoices" },
+    ],
   },
   {
-    icon: BarChart3,
-    title: "Enterprise Analytics",
-    desc: "Real-time revenue dashboards, attorney performance metrics, and predictive billing insights.",
-    accent: "#f59e0b",
-    accentRgb: "245,158,11",
+    id: "analytics",
     tag: "Insights",
+    title: "Enterprise Analytics",
+    desc: "Live revenue dashboards, attorney utilization metrics, and billing readiness tracking.",
+    rows: [
+      { label: "Practice revenue", detail: "Partner and senior counsel portfolio billing aggregation" },
+      { label: "Ticket SLA watch", detail: "Escalation tracking for urgent compliance requests" },
+      { label: "Audit visibility", detail: "Timestamped ledger of all permission changes and approvals" },
+    ],
   },
 ];
 
 const TRUST_ITEMS = [
-  "SOC 2 Type II certified infrastructure",
-  "Role-based access with audit logging",
-  "ABA ethics compliance baked in",
-  "Multi-jurisdiction support",
+  {
+    title: "SOC 2 Type II certified infrastructure",
+    note: "Continuous control monitoring across identity, storage, and session boundaries.",
+  },
+  {
+    title: "Role-based access with audit logging",
+    note: "Eight hierarchical clearance levels mapped to append-only verification records.",
+  },
+  {
+    title: "ABA ethics compliance baked in",
+    note: "Model Rule 1.15 property safekeeping and Rule 1.6 confidentiality screening.",
+  },
+  {
+    title: "Multi-jurisdiction support",
+    note: "Fifty-plus court venues, state bar trust schedules, and localized tax rules.",
+  },
+];
+
+const FAQS = [
+  {
+    q: "How does IOLTA three-way reconciliation work?",
+    a: "Every deposit, earned-fee transfer, and client disbursement posts simultaneously to the bank statement journal, the firm general ledger, and each client sub-ledger. If variance is non-zero, reconciliation locks pending partner review.",
+  },
+  {
+    q: "How are ethical walls and adverse conflicts enforced?",
+    a: "Before staffing an attorney or paralegal onto a matter, stored database procedures cross-check prior adverse representation and corporate affiliates, denying conflicting assignments automatically.",
+  },
+  {
+    q: "Which user roles are separated across workspaces?",
+    a: "Permissions scale cleanly across Managing Partner, Partner, Senior Associate, Associate, Paralegal, Finance Admin, IT Admin, and Intern. Associates see only staffed matters; IT Admins inspect systems telemetry without browsing client privilege ledgers.",
+  },
+  {
+    q: "What database and runtime power the platform?",
+    a: "Pearson Specter Litt runs an ACID-compliant MySQL 8.3 schema with stored procedures and cryptographic hash chains alongside a Java 21 LTS and Python FastAPI service tier.",
+  },
 ];
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-    window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
+  const [activeModule, setActiveModule] = useState(MODULES[0].id);
+  const currentModule = MODULES.find((m) => m.id === activeModule) ?? MODULES[0];
 
   return (
-    <div className="min-h-screen bg-[#020810] relative overflow-hidden">
-      {/* Aurora orbs */}
-      <div className="hero-orb hero-orb-1" />
-      <div className="hero-orb hero-orb-2" />
-      <div className="hero-orb hero-orb-3" />
-      <div className="hero-orb hero-orb-4" />
-
-      {/* Interactive cursor glow */}
-      <div
-        className="fixed pointer-events-none z-0 w-[700px] h-[700px] rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 65%)",
-          left: `${mousePos.x}%`,
-          top: `${mousePos.y}%`,
-          transform: "translate(-50%,-50%)",
-          transition: "left 0.6s ease, top 0.6s ease",
-        }}
-      />
-
-      {/* Grid overlay */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(37,99,235,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.8) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-          opacity: 0.025,
-        }}
-      />
-
-      {/* ── Navbar ── */}
-      <nav className="relative z-10 flex items-center justify-between px-6 lg:px-12 py-5 border-b"
-        style={{ borderColor: "rgba(56,189,248,0.07)" }}>
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg,#1d4ed8,#0ea5e9)",
-              boxShadow: "0 0 22px rgba(37,99,235,0.40)",
-            }}
-          >
-            <BriefcaseBusiness size={18} className="text-white" />
-          </div>
-          <div>
-            <span className="font-bold text-white tracking-tight text-sm" style={{ fontFamily: "Outfit,sans-serif" }}>
-              PEARSON SPECTER LITT
-            </span>
-            <span
-              className="ml-2 text-[9px] font-bold uppercase tracking-[0.18em] px-1.5 py-0.5 rounded"
-              style={{
-                background: "rgba(37,99,235,0.14)",
-                color: "#7dd3fc",
-                border: "1px solid rgba(37,99,235,0.25)",
-              }}
-            >
-              ENTERPRISE
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => navigate("/login")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200"
-          style={{
-            background: "linear-gradient(135deg,#1d4ed8,#0ea5e9)",
-            boxShadow: "0 0 20px rgba(37,99,235,0.32), 0 4px 12px rgba(0,0,0,0.3)",
-            border: "1px solid rgba(56,189,248,0.25)",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 30px rgba(37,99,235,0.48), 0 6px 18px rgba(0,0,0,0.4)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(37,99,235,0.32), 0 4px 12px rgba(0,0,0,0.3)";
-          }}
-        >
-          Sign In
-          <ArrowRight size={15} />
-        </button>
-      </nav>
-
-      {/* ── Hero ── */}
-      <section className="relative z-10 text-center px-6 pt-24 pb-20">
-        {/* Eyebrow badge */}
-        <div className="animate-slide-up inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold uppercase tracking-[0.14em]"
-          style={{
-            background: "rgba(37,99,235,0.08)",
-            border: "1px solid rgba(56,189,248,0.18)",
-            color: "#7dd3fc",
-          }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 inline-block" style={{ boxShadow: "0 0 6px #38bdf8" }} />
-          Enterprise Legal Cloud — Production v2.4
-        </div>
-
-        {/* Headline */}
-        <h1
-          className="animate-slide-up-d1 text-5xl sm:text-6xl lg:text-7xl font-black text-white mb-6 leading-[1.06]"
-          style={{ fontFamily: "Outfit, Inter, sans-serif", letterSpacing: "-0.03em" }}
-        >
-          The Future of{" "}
-          <span
-            style={{
-              background: "linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Legal Operations
-          </span>
-          <br />is Already Here.
-        </h1>
-
-        {/* Sub */}
-        <p className="animate-slide-up-d2 text-lg text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-          Pearson Specter Litt's enterprise-grade legal management platform — built on Java 21, MySQL 8.3,
-          and a security-first architecture trusted by the world's most demanding firms.
-        </p>
-
-        {/* CTA */}
-        <div className="animate-slide-up-d3 flex flex-wrap items-center justify-center gap-4">
+    <div className="min-h-screen bg-paper text-ink relative">
+      {/* ── Top Bar ── */}
+      <header className="sticky top-0 z-50 border-b border-rule bg-paper">
+        <div className="container flex h-16 items-center justify-between gap-4">
           <button
-            onClick={() => navigate("/login")}
-            className="group flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-bold text-white"
-            style={{
-              background: "linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #0ea5e9 100%)",
-              boxShadow: "0 0 35px rgba(37,99,235,0.42), 0 8px 24px rgba(0,0,0,0.4)",
-              border: "1px solid rgba(56,189,248,0.30)",
-              transition: "all 220ms ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 52px rgba(37,99,235,0.55), 0 12px 32px rgba(0,0,0,0.5)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 35px rgba(37,99,235,0.42), 0 8px 24px rgba(0,0,0,0.4)";
-            }}
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-3 text-left transition-opacity duration-150 hover:opacity-85"
+            aria-label="Pearson Specter Litt home"
           >
-            Access Platform
-            <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+            <span className="icon-accent flex h-9 w-9 items-center justify-center">
+              <BriefcaseBusiness size={18} aria-hidden="true" />
+            </span>
+            <span className="font-heading text-base font-medium tracking-tight text-ink">
+              Pearson Specter Litt
+            </span>
+          </button>
+
+          <nav className="hidden md:flex items-center gap-6 text-sm text-ink-2" aria-label="Primary">
+            <a href="#modules" className="hover:text-ink transition-colors duration-150">
+              Modules
+            </a>
+            <a href="#compliance" className="hover:text-ink transition-colors duration-150">
+              Compliance
+            </a>
+            <a href="#questions" className="hover:text-ink transition-colors duration-150">
+              Questions
+            </a>
+          </nav>
+
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="btn-dusk min-h-[40px] px-5 text-sm"
+          >
+            Sign In
           </button>
         </div>
+      </header>
 
-        {/* Stats */}
-        <div className="animate-slide-up-d4 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mt-20">
-          {STATS.map((s) => (
-            <div key={s.label} className="login-card p-5 text-center group cursor-default"
-              style={{ borderColor: "rgba(56,189,248,0.10)" }}>
-              <s.icon size={18} className="mx-auto mb-2.5 transition-transform group-hover:scale-110" style={{ color: s.color }} />
-              <div
-                className="text-2xl font-black mb-1"
-                style={{
-                  fontFamily: "Outfit,sans-serif",
-                  background: `linear-gradient(135deg, ${s.color}, white)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                {s.value}
-              </div>
-              <div className="text-xs text-slate-400 font-medium">{s.label}</div>
-            </div>
-          ))}
+      {/* ── Hero (Dusk Stage) ── */}
+      <section className="relative flex min-h-[min(88dvh,820px)] items-center overflow-hidden">
+        {/* Library Dusk Landscape Background */}
+        <div
+          className="absolute inset-0 z-0"
+          data-slot="hero"
+          data-alt="River in morning fog with reeds and trees along the bank"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Desna_river_Vinn_meadow_2016_G9.jpg/1920px-Desna_river_Vinn_meadow_2016_G9.jpg"
+            srcSet="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Desna_river_Vinn_meadow_2016_G9.jpg/960px-Desna_river_Vinn_meadow_2016_G9.jpg 960w, https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Desna_river_Vinn_meadow_2016_G9.jpg/1280px-Desna_river_Vinn_meadow_2016_G9.jpg 1280w, https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Desna_river_Vinn_meadow_2016_G9.jpg/1920px-Desna_river_Vinn_meadow_2016_G9.jpg 1920w"
+            sizes="100vw"
+            width={6000}
+            height={3850}
+            alt="River in morning fog with reeds and trees along the bank"
+            className="hero__photo"
+            fetchPriority="high"
+            style={{ objectPosition: "50% 45%" }}
+          />
+          <div className="hero__scrim" aria-hidden="true" />
         </div>
-      </section>
 
-      {/* ── Features ── */}
-      <section className="relative z-10 px-6 lg:px-12 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="eyebrow mb-4">Core Modules</p>
-            <h2
-              className="text-4xl font-black text-white"
-              style={{ fontFamily: "Outfit,sans-serif", letterSpacing: "-0.025em" }}
-            >
-              Everything your firm{" "}
-              <span style={{
-                background: "linear-gradient(135deg,#3b82f6,#22d3ee)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
-                needs to win
-              </span>
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-5">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="card-premium p-7 group cursor-pointer"
-                style={{ borderColor: `rgba(${f.accentRgb},0.15)` }}
+        <div className="container relative z-10 py-14 lg:py-20">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            {/* Hero Headline + Subhead + Primary Action (Left 5 Columns on Pale Fog) */}
+            <div className="lg:col-span-5 space-y-6">
+              <h1
+                className="font-heading text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.04]"
+                style={{ color: "var(--color-day-ink)" }}
               >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:scale-110"
+                Legal operations, composed before court.
+              </h1>
+
+              <p
+                className="text-base sm:text-lg leading-relaxed max-w-md"
+                style={{ color: "var(--color-day-muted)" }}
+              >
+                Manage legal matters, three-way IOLTA ledgers, and compliance together.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="btn-dusk"
+                >
+                  <span>Access Platform</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+                <a
+                  href="#modules"
+                  className="inline-flex min-h-[48px] items-center px-3 text-sm font-semibold underline-offset-4 hover:underline"
+                  style={{ color: "var(--color-day-ink)" }}
+                >
+                  Explore modules
+                </a>
+              </div>
+            </div>
+
+            {/* Signature Product Run in Smoked Glass (Right 7 Columns) */}
+            <div className="lg:col-span-7 min-w-0">
+              <div
+                className="dusk-glass p-6 sm:p-8"
+                data-slot="hero-ledger"
+                data-kind="product"
+                data-alt="Smoked glass view of live firm matter and trust ledger reconciliation"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule/70 pb-4">
+                  <div>
+                    <h2 className="font-heading text-lg font-medium text-ink">
+                      Fiduciary ledger run
+                    </h2>
+                    <p className="text-sm text-ink-muted">
+                      Three-way trust verification across active client matters
+                    </p>
+                  </div>
+                  <span
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium"
                     style={{
-                      background: `linear-gradient(135deg, rgba(${f.accentRgb},0.20), rgba(${f.accentRgb},0.08))`,
-                      border: `1px solid rgba(${f.accentRgb},0.28)`,
-                      boxShadow: `0 0 16px rgba(${f.accentRgb},0.10)`,
+                      backgroundColor: "color-mix(in oklab, var(--color-accent) 16%, transparent)",
+                      color: "var(--color-accent-hi)",
                     }}
                   >
-                    <f.icon size={19} style={{ color: f.accent }} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <h3 className="text-base font-bold text-white group-hover:text-sky-300 transition-colors">
-                        {f.title}
-                      </h3>
+                    <CheckCircle2 size={13} aria-hidden="true" />
+                    Zero variance
+                  </span>
+                </div>
+
+                <div className="divide-y divide-rule/60">
+                  {HERO_LEDGER.map((row) => (
+                    <div
+                      key={row.matter}
+                      className="flex items-center justify-between gap-4 py-3.5 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-medium text-ink truncate">{row.matter}</div>
+                        <div className="text-xs text-ink-muted num">{row.detail}</div>
+                      </div>
+                      <div className="flex items-center gap-5 shrink-0">
+                        <span
+                          className="text-xs font-medium"
+                          style={{
+                            color: row.open ? "var(--color-accent-2)" : "var(--color-accent)",
+                          }}
+                        >
+                          {row.status}
+                        </span>
+                        <span className="font-medium text-ink num w-28 text-right">
+                          {row.amount}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-inner)] px-4 py-3 text-xs"
+                  style={{
+                    backgroundColor: "color-mix(in oklab, var(--color-accent-2) 12%, transparent)",
+                    color: "var(--color-accent-2)",
+                  }}
+                >
+                  <span>Monarch Aviation labor escrow requires Senior Partner sign-off.</span>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="font-semibold underline-offset-4 hover:underline shrink-0"
+                  >
+                    Review in workspace
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Firm Infrastructure Figures (Ruled Strip, Zero Icon Tiles) ── */}
+      <section className="border-y border-rule py-14">
+        <div className="container">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-rule">
+            {STATS.map((stat, idx) => (
+              <div
+                key={stat.label}
+                className={`py-4 md:py-2 ${idx > 0 ? "md:pl-8" : ""} pr-6`}
+              >
+                <div className="font-heading text-3xl sm:text-4xl font-medium text-ink num">
+                  {stat.value}
+                </div>
+                <div className="mt-1.5 text-sm text-ink-muted">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Core Modules Tour (Interactive List + Smoked-Glass Pane) ── */}
+      <section id="modules" className="py-24 lg:py-32">
+        <div className="container">
+          <div className="max-w-2xl mb-12">
+            <h2 className="font-heading text-3xl sm:text-5xl font-medium text-ink">
+              Four practice systems on one transactional core.
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-ink-2">
+              Select a workspace module to inspect its operational guarantees before signing in.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            {/* Left Ruled Module List */}
+            <div className="lg:col-span-5 divide-y divide-rule border-t border-b border-rule">
+              {MODULES.map((mod) => {
+                const selected = mod.id === currentModule.id;
+                return (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    onClick={() => setActiveModule(mod.id)}
+                    className="w-full py-5 text-left transition-colors duration-150 hover:bg-paper-2/50 px-3"
+                  >
+                    <div className="flex items-center justify-between gap-4">
                       <span
-                        className="text-[9px] font-bold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded"
+                        className="font-heading text-xl font-medium"
                         style={{
-                          background: `rgba(${f.accentRgb},0.12)`,
-                          color: f.accent,
-                          border: `1px solid rgba(${f.accentRgb},0.22)`,
+                          color: selected ? "var(--color-accent)" : "var(--color-ink)",
                         }}
                       >
-                        {f.tag}
+                        {mod.title}
                       </span>
+                      <span className="text-xs text-ink-muted">{mod.tag}</span>
                     </div>
-                    <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+                    {selected && (
+                      <p className="mt-2 text-sm text-ink-2 leading-relaxed">
+                        {mod.desc}
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Smoked-Glass Pane */}
+            <div className="lg:col-span-7 min-w-0">
+              <div className="dusk-glass p-7 sm:p-9">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-5">
+                  <div>
+                    <h3 className="font-heading text-2xl font-medium text-ink">
+                      {currentModule.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-ink-muted">{currentModule.desc}</p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-sky-400">
-                  Explore module
-                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+
+                <dl className="divide-y divide-rule/70 mt-4">
+                  {currentModule.rows.map((item) => (
+                    <div
+                      key={item.label}
+                      className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-6 py-4"
+                    >
+                      <dt className="sm:col-span-5 text-sm font-medium text-ink">
+                        {item.label}
+                      </dt>
+                      <dd className="sm:col-span-7 text-sm text-ink-2">
+                        {item.detail}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="mt-6 pt-4 border-t border-rule/60 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="btn-dusk-quiet"
+                  >
+                    <span>Explore module</span>
+                    <ChevronRight size={15} aria-hidden="true" />
+                  </button>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Trust strip ── */}
-      <section className="relative z-10 px-6 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div
-            className="login-card px-8 py-6 flex flex-wrap items-center justify-center gap-6"
-            style={{ borderColor: "rgba(56,189,248,0.12)" }}
-          >
-            {TRUST_ITEMS.map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm text-slate-300">
-                <CheckCircle2 size={14} style={{ color: "#22d3ee" }} />
-                {item}
+      {/* ── Compliance Dossier (Dusk Bone Well Surface) ── */}
+      <section id="compliance" className="py-16 lg:py-24">
+        <div className="container">
+          <div className="dusk-well">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-5">
+                <h2
+                  className="font-heading text-3xl sm:text-4xl font-medium"
+                  style={{ color: "var(--color-well-ink)" }}
+                >
+                  Built for fiduciary scrutiny.
+                </h2>
+                <p
+                  className="mt-3 text-base leading-relaxed"
+                  style={{ color: "var(--color-well-muted)" }}
+                >
+                  Compliance checks execute in database triggers and immutable logs rather than advisory interface banners.
+                </p>
               </div>
-            ))}
+
+              <div className="lg:col-span-7">
+                <div className="dusk-well-card divide-y divide-well-rule">
+                  {TRUST_ITEMS.map((item) => (
+                    <div key={item.title} className="p-5 sm:p-6">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2
+                          size={18}
+                          className="shrink-0 mt-0.5"
+                          style={{ color: "var(--color-accent-deep)" }}
+                          aria-hidden="true"
+                        />
+                        <div>
+                          <div
+                            className="font-medium text-base"
+                            style={{ color: "var(--color-well-ink)" }}
+                          >
+                            {item.title}
+                          </div>
+                          <p
+                            className="mt-1 text-sm"
+                            style={{ color: "var(--color-well-muted)" }}
+                          >
+                            {item.note}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="relative z-10 px-6 py-20 text-center">
-        <div className="max-w-2xl mx-auto login-card p-12" style={{ borderColor: "rgba(37,99,235,0.18)" }}>
-          <p className="eyebrow mb-4">Ready to Transform?</p>
-          <h2
-            className="text-4xl font-black text-white mb-4"
-            style={{ fontFamily: "Outfit,sans-serif", letterSpacing: "-0.025em" }}
-          >
-            Sign in to your{" "}
-            <span style={{
-              background: "linear-gradient(135deg,#60a5fa,#22d3ee)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}>
-              workspace
-            </span>
-          </h2>
-          <p className="text-slate-400 mb-8 text-base">
-            Access your matters, clients, and firm-wide analytics in seconds.
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="btn-primary-hero max-w-xs mx-auto flex items-center justify-center gap-2"
-          >
-            Sign In Now
-            <ArrowRight size={18} />
-          </button>
+      {/* ── Conversational FAQ ── */}
+      <section id="questions" className="py-20 lg:py-28">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-4">
+              <h2 className="font-heading text-3xl sm:text-4xl font-medium text-ink">
+                Questions from managing partners.
+              </h2>
+              <p className="mt-3 text-sm text-ink-muted">
+                Direct answers on IOLTA verification, access segregation, and underlying runtime infrastructure.
+              </p>
+            </div>
+
+            <div className="lg:col-span-8 border-t border-rule">
+              {FAQS.map((faq) => (
+                <details key={faq.q} className="dusk-faq-item group">
+                  <summary className="text-lg font-medium text-ink hover:text-accent transition-colors duration-150">
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      size={18}
+                      className="shrink-0 text-ink-muted transition-transform duration-200 group-open:rotate-180"
+                      aria-hidden="true"
+                    />
+                  </summary>
+                  <div className="pb-6 pr-6 text-base text-ink-2 leading-relaxed">
+                    <p>{faq.a}</p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer
-        className="relative z-10 border-t px-6 py-8 text-center"
-        style={{ borderColor: "rgba(56,189,248,0.07)" }}
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto gap-4 text-xs text-slate-600">
-          <span className="font-semibold text-slate-400">PEARSON SPECTER LITT — Enterprise Legal Cloud</span>
-          <span className="font-mono">Java 21 LTS · MySQL 8.3 · JavaFX · Production v2.4</span>
+      {/* ── Close Band ── */}
+      <section className="border-t border-rule py-20 lg:py-24 bg-paper-2/40">
+        <div className="container">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div>
+              <h2 className="font-heading text-3xl sm:text-4xl font-medium text-ink">
+                Sign in to your workspace.
+              </h2>
+              <p className="mt-2 text-base text-ink-2">
+                Access your assigned matters, client trust sub-ledgers, and firm-wide analytics.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="btn-dusk shrink-0 self-start md:self-auto"
+            >
+              <span>Sign In Now</span>
+              <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Letter Close Footer ── */}
+      <footer className="border-t border-rule py-10">
+        <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-ink-muted">
+          <div className="font-medium text-ink">Pearson Specter Litt</div>
+          <div className="flex flex-wrap items-center gap-6">
+            <span>Java 21 LTS</span>
+            <span>MySQL 8.3</span>
+            <span>JavaFX</span>
+            <span>Production v2.4</span>
+          </div>
+        </div>
+        <div className="container mt-4 text-xs text-ink-muted" data-credits="true">
+          Photographs: <a href="https://commons.wikimedia.org/wiki/File:Desna_river_Vinn_meadow_2016_G9.jpg" target="_blank" rel="noreferrer" className="underline hover:text-ink">George Chernilevsky</a> (Public domain, Wikimedia Commons).
         </div>
       </footer>
     </div>

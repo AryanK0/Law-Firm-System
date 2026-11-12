@@ -50,18 +50,18 @@ function EmptyState({ message }: { message: string }) {
 
 function getStatusTone(status: string | null) {
   switch (status) {
-    case "Open":
-      return "bg-primary/10 text-primary";
-    case "Drafting":
-      return "bg-amber-500/10 text-amber-300";
-    case "Hearing Scheduled":
-      return "bg-blue-500/10 text-blue-300";
-    case "Negotiation":
-      return "bg-cyan-500/10 text-cyan-300";
-    case "Closed":
-      return "bg-white/10 text-slate-300";
+ case "Open":
+ return "bg-primary/10 text-primary";
+ case "Drafting":
+ return "bg-amber-500/10 text-amber-300";
+ case "Hearing Scheduled":
+ return "bg-blue-500/10 text-blue-300";
+ case "Negotiation":
+ return "bg-cyan-500/10 text-cyan-300";
+ case "Closed":
+ return "bg-white/10 text-slate-300";
     default:
-      return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
   }
 }
 
@@ -74,7 +74,7 @@ function SummaryCard({
 }) {
   return (
     <div className="rounded-2xl bg-white/[0.03] p-4">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{label}</p>
+      <p className="text-[11px] tracking-normal text-slate-400">{label}</p>
       <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
     </div>
   );
@@ -115,7 +115,7 @@ export default function CaseDetailPage() {
 
   useEffect(() => {
     if (!Number.isFinite(parsedCaseId)) {
-      setError("Invalid case id.");
+ setError("Invalid case id.");
       setLoading(false);
       return;
     }
@@ -161,7 +161,7 @@ export default function CaseDetailPage() {
 
   const handleCloseCase = async () => {
     if (!detail || closing) return;
-    if (!window.confirm("Are you sure you want to close this matter? This will set the end date to today and prevent further edits.")) return;
+ if (!window.confirm("Are you sure you want to close this matter? This will set the end date to today and prevent further edits.")) return;
 
     setClosing(true);
     try {
@@ -170,7 +170,7 @@ export default function CaseDetailPage() {
       const historyData = await getCaseStatusHistory(detail.case_id, user.id);
       setHistory(historyData);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Could not close case.");
+ alert(err instanceof Error ? err.message : "Could not close case.");
     } finally {
       setClosing(false);
     }
@@ -184,7 +184,7 @@ export default function CaseDetailPage() {
       const data = await getLedesInvoice(billId);
       setLedesData(data);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to load LEDES 1998B invoice");
+ alert(err instanceof Error ? err.message : "Failed to load LEDES 1998B invoice");
       setShowLedesModal(false);
     } finally {
       setLoadingLedes(false);
@@ -213,14 +213,14 @@ export default function CaseDetailPage() {
         party_type: newPartyType,
         corporate_affiliate: newAffiliate.trim() || undefined,
       });
-      setPartySuccess(`Registered adverse entity: ${newPartyName.trim()}`);
+ setPartySuccess(`Registered adverse entity: ${newPartyName.trim()}`);
       setShowAddPartyModal(false);
-      setNewPartyName("");
-      setNewAffiliate("");
+ setNewPartyName("");
+ setNewAffiliate("");
       const updated = await getCaseAdverseParties(detail.case_id);
       setAdverseParties(updated);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to register adverse party");
+ alert(err instanceof Error ? err.message : "Failed to register adverse party");
     } finally {
       setSubmittingParty(false);
     }
@@ -265,10 +265,10 @@ export default function CaseDetailPage() {
         </Link>
         <div className="card-premium p-6">
           <h1 className="text-xl font-semibold text-foreground">
-            {accessDenied ? "Access denied" : "Case unavailable"}
+ {accessDenied ? "Access denied" : "Case unavailable"}
           </h1>
           <p className="mt-3 text-sm text-slate-300">
-            {error || "Case not found."}
+ {error || "Case not found."}
           </p>
         </div>
       </div>
@@ -288,32 +288,32 @@ export default function CaseDetailPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-semibold text-primary">
-                {formatCaseCode(detail.case_code, `Matter #${detail.case_id}`)}
+ {formatCaseCode(detail.case_code, `Matter #${detail.case_id}`)}
               </span>
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusTone(
                   detail.status,
-                )}`}
+ )}`}
               >
-                {detail.status || "Unknown"}
+ {detail.status || "Unknown"}
               </span>
               <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                {detail.case_type || "General matter"}
+ {detail.case_type || "General matter"}
               </span>
               <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-                {detail.client.display_name || "Unknown client"}
+ {detail.client.display_name || "Unknown client"}
               </span>
             </div>
 
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
-              {detail.title || "Untitled matter"}
+ {detail.title || "Untitled matter"}
             </h1>
 
             <div className="mt-5 flex flex-wrap gap-4 text-sm text-slate-400">
               <span>Opened {formatDate(detail.start_date)}</span>
-              <span>Target {formatDate(detail.end_date, "Open ended")}</span>
-              <span>Lead {detail.lead_partner.name || "Unassigned"}</span>
-              <span>Senior {detail.lead_senior.name || "Not assigned"}</span>
+ <span>Target {formatDate(detail.end_date, "Open ended")}</span>
+ <span>Lead {detail.lead_partner.name || "Unassigned"}</span>
+ <span>Senior {detail.lead_senior.name || "Not assigned"}</span>
             </div>
           </div>
 
@@ -332,7 +332,7 @@ export default function CaseDetailPage() {
               disabled={closing}
               className="page-button-primary bg-red-500/80 hover:bg-red-500 text-white border-red-500/50"
             >
-              {closing ? "Closing..." : "Close Matter"}
+ {closing ? "Closing..." : "Close Matter"}
             </button>
           </div>
         )}
@@ -340,10 +340,10 @@ export default function CaseDetailPage() {
 
       {/* Description */}
       <section className="card-premium p-6">
-        <p className="eyebrow">Description</p>
+        <h3 className="text-lg font-medium text-ink">Description</h3>
         <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <p className="whitespace-pre-line text-sm leading-7 text-slate-300">
-            {detail.description || "No description available."}
+ {detail.description || "No description available."}
           </p>
         </div>
       </section>
@@ -364,10 +364,10 @@ export default function CaseDetailPage() {
                 >
                   <p className="font-semibold text-foreground">{member.name}</p>
                   <p className="mt-1 text-sm text-slate-300">
-                    {member.role_in_case || member.role_name || "Assigned team member"}
+ {member.role_in_case || member.role_name || "Assigned team member"}
                   </p>
                   <p className="mt-2 text-xs text-slate-400">
-                    {member.department_name || member.role_name || "Firm staff"}
+ {member.department_name || member.role_name || "Firm staff"}
                   </p>
                 </div>
               ))
@@ -392,11 +392,11 @@ export default function CaseDetailPage() {
                       <span className="text-slate-400">{item.old_status || "New matter"}</span>
                       <span className="text-primary">to</span>
                       <span className="font-semibold text-foreground">
-                        {item.new_status || "Updated"}
+ {item.new_status || "Updated"}
                       </span>
                     </div>
                     <p className="mt-2 text-xs text-slate-400">
-                      {item.changed_by_name || "Unknown"} | {formatDateTime(item.timestamp)}
+ {item.changed_by_name || "Unknown"} | {formatDateTime(item.timestamp)}
                     </p>
                   </div>
                 </div>
@@ -425,10 +425,10 @@ export default function CaseDetailPage() {
                 >
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-foreground">
-                      {document.file_name || "Document"}
+ {document.file_name || "Document"}
                     </p>
                     <p className="mt-1 text-sm text-slate-300">
-                      {document.confidentiality_level || "Internal"}
+ {document.confidentiality_level || "Internal"}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
                       Uploaded {formatDateTime(document.created_at)}
@@ -559,7 +559,7 @@ export default function CaseDetailPage() {
               <tbody>
                 {adverseParties.map((p) => (
                   <tr key={p.party_id} className="border-t border-white/5 hover:bg-white/[0.02]">
-                    <td className="px-4 py-2.5 text-slate-400 font-mono">#{p.party_id}</td>
+                    <td className="px-4 py-2.5 text-slate-400 num">#{p.party_id}</td>
                     <td className="px-4 py-2.5 font-bold text-foreground">{p.party_name}</td>
                     <td className="px-4 py-2.5">
                       <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold text-rose-300">
@@ -573,7 +573,7 @@ export default function CaseDetailPage() {
                           {p.corporate_affiliate}
                         </span>
                       ) : (
-                        "—"
+ "—"
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-slate-400">{formatDateTime(p.added_at)}</td>
@@ -605,10 +605,10 @@ export default function CaseDetailPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-foreground">
-                        {hearing.court_name || "Court to be confirmed"}
+ {hearing.court_name || "Court to be confirmed"}
                       </p>
                       <p className="mt-1 text-sm text-slate-300">
-                        {formatDate(hearing.date)} | {hearing.location || "Location pending"}
+ {formatDate(hearing.date)} | {hearing.location || "Location pending"}
                       </p>
                     </div>
                     <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
@@ -616,7 +616,7 @@ export default function CaseDetailPage() {
                     </span>
                   </div>
                   <p className="mt-3 text-sm text-slate-400">
-                    {hearing.notes || "No hearing notes recorded."}
+ {hearing.notes || "No hearing notes recorded."}
                   </p>
                 </div>
               </div>
@@ -647,7 +647,7 @@ export default function CaseDetailPage() {
 
             <form onSubmit={handleAddPartySubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                   Adverse Party / Entity Name
                 </label>
                 <input
@@ -662,7 +662,7 @@ export default function CaseDetailPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                     Party Type / Role
                   </label>
                   <select
@@ -679,7 +679,7 @@ export default function CaseDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                     Corporate Affiliate (Optional)
                   </label>
                   <input
@@ -705,7 +705,7 @@ export default function CaseDetailPage() {
                   disabled={submittingParty}
                   className="page-button-primary text-xs"
                 >
-                  {submittingParty ? "Saving..." : "Register Adverse Party"}
+ {submittingParty ? "Saving..." : "Register Adverse Party"}
                 </button>
               </div>
             </form>
@@ -745,25 +745,25 @@ export default function CaseDetailPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-white/[0.02] border border-white/10 rounded-xl p-3 text-xs">
                   <div>
                     <span className="text-slate-400">Invoice Number: </span>
-                    <span className="font-mono font-bold text-foreground">{ledesData.invoice_number}</span>
+                    <span className="num font-bold text-foreground">{ledesData.invoice_number}</span>
                   </div>
                   <div>
                     <span className="text-slate-400">Total Billed: </span>
-                    <span className="font-mono font-bold text-emerald-400">
+                    <span className="num font-bold text-emerald-400">
                       {formatCurrency(ledesData.total_amount)}
                     </span>
                   </div>
                   <div>
                     <span className="text-slate-400">Field Specification: </span>
-                    <span className="font-mono font-bold text-cyan-400">24 Canonical Fields</span>
+                    <span className="num font-bold text-cyan-400">24 Canonical Fields</span>
                   </div>
                   <div>
                     <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                       ledesData.is_valid
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-red-500/20 text-red-300 border border-red-500/30"
-                    }`}>
-                      {ledesData.is_valid ? "VALID LEDES 1998B" : "VALIDATION ISSUES"}
+ ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+ : "bg-red-500/20 text-red-300 border border-red-500/30"
+ }`}>
+ {ledesData.is_valid ? "VALID LEDES 1998B" : "VALIDATION ISSUES"}
                     </span>
                   </div>
                   {selectedLedesBillId && (
@@ -780,21 +780,21 @@ export default function CaseDetailPage() {
 
                 {/* Raw Flat File View */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <p className="text-xs font-semibold tracking-normal text-slate-400 mb-2">
                     Canonical Flat File Raw Output ([] Delimited)
                   </p>
-                  <pre className="rounded-xl border border-white/10 bg-slate-950 p-4 font-mono text-[11px] text-cyan-300 overflow-x-auto whitespace-pre-wrap leading-relaxed select-all max-h-64">
+                  <pre className="rounded-xl border border-white/10 bg-slate-950 p-4 num text-[11px] text-cyan-300 overflow-x-auto whitespace-pre-wrap leading-relaxed select-all max-h-64">
                     {ledesData.file_content}
                   </pre>
                 </div>
 
                 {/* Parsed Flat File Lines */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  <p className="text-xs font-semibold tracking-normal text-slate-400 mb-2">
                     Flat File Line Entries ({ledesData.line_item_count} items)
                   </p>
                   <div className="overflow-x-auto rounded-xl border border-white/10">
-                    <table className="min-w-full text-left text-xs font-mono">
+                    <table className="min-w-full text-left text-xs num">
                       <thead className="bg-white/5 text-slate-400">
                         <tr>
                           <th className="px-3 py-2 font-medium">#</th>
@@ -809,7 +809,7 @@ export default function CaseDetailPage() {
                       <tbody>
                         {ledesData.file_content
                           .trim()
-                          .split("\n")
+ .split("\n")
                           .slice(1)
                           .map((rawLine, idx) => {
                             const cols = rawLine.split("[]");
@@ -822,7 +822,7 @@ export default function CaseDetailPage() {
                                 <td className="px-3 py-2 text-right text-slate-300">{cols[14] || "—"}</td>
                                 <td className="px-3 py-2 text-right text-slate-300">{cols[13] ? `$${cols[13]}` : "—"}</td>
                                 <td className="px-3 py-2 text-right font-bold text-foreground">
-                                  {cols[16] ? `$${cols[16]}` : "—"}
+ {cols[16] ? `$${cols[16]}` : "—"}
                                 </td>
                               </tr>
                             );
@@ -859,38 +859,38 @@ export default function CaseDetailPage() {
 
             <div className="space-y-4 text-xs">
               <div>
-                <h4 className="font-bold text-cyan-400 uppercase tracking-wider mb-2">Activity Codes (A101 - A112)</h4>
+                <h4 className="font-bold text-cyan-400 tracking-normal mb-2">Activity Codes (A101 - A112)</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A101</b>: Plan and prepare for</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A102</b>: Research</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A103</b>: Draft / revise</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A104</b>: Review / analyze</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A105</b>: Communicate (in firm)</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A106</b>: Communicate (with client)</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A107</b>: Communicate (other outside)</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">A108</b>: Appear / attend</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A101</b>: Plan and prepare for</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A102</b>: Research</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A103</b>: Draft / revise</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A104</b>: Review / analyze</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A105</b>: Communicate (in firm)</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A106</b>: Communicate (with client)</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A107</b>: Communicate (other outside)</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">A108</b>: Appear / attend</div>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-bold text-cyan-400 uppercase tracking-wider mb-2">Litigation Task Codes (L110 - L530)</h4>
+                <h4 className="font-bold text-cyan-400 tracking-normal mb-2">Litigation Task Codes (L110 - L530)</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L110</b>: Case Assessment & Development</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L120</b>: Analysis / Strategy</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L210</b>: Fact Investigation</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L310</b>: Written Discovery</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L330</b>: Depositions</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">L410</b>: Fact Witness Prep</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L110</b>: Case Assessment & Development</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L120</b>: Analysis / Strategy</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L210</b>: Fact Investigation</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L310</b>: Written Discovery</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L330</b>: Depositions</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">L410</b>: Fact Witness Prep</div>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-bold text-cyan-400 uppercase tracking-wider mb-2">Expense Codes (E101 - E124)</h4>
+                <h4 className="font-bold text-cyan-400 tracking-normal mb-2">Expense Codes (E101 - E124)</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">E101</b>: Copying</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">E105</b>: Telephone charges</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">E108</b>: Postage / Courier</div>
-                  <div className="rounded-lg bg-white/5 p-2 font-mono"><b className="text-foreground">E112</b>: Court fees / Filings</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">E101</b>: Copying</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">E105</b>: Telephone charges</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">E108</b>: Postage / Courier</div>
+                  <div className="rounded-lg bg-white/5 p-2 num"><b className="text-foreground">E112</b>: Court fees / Filings</div>
                 </div>
               </div>
             </div>

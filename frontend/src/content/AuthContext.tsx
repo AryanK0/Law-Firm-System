@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(() => {
     const savedId =
       typeof window !== "undefined"
-        ? Number(localStorage.getItem("lfms_employee_id"))
+ ? Number(localStorage.getItem("lfms_employee_id"))
         : null;
     const found = demoUsers.find((candidate) => candidate.id === savedId);
     return found || demoUsers[1]; // Defaults to Harvey Specter
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((err) => {
-        console.warn("Persona switch sync error:", err);
+ console.warn("Persona switch sync error:", err);
       })
       .finally(() => {
         if (active) setIsLoading(false);
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (nextUser) {
       setUser(nextUser);
       if (typeof window !== "undefined") {
-        localStorage.setItem("lfms_employee_id", String(nextUser.id));
+ localStorage.setItem("lfms_employee_id", String(nextUser.id));
       }
     }
   };
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (nextUser) {
       setUser(nextUser);
       if (typeof window !== "undefined") {
-        localStorage.setItem("lfms_employee_id", String(nextUser.id));
+ localStorage.setItem("lfms_employee_id", String(nextUser.id));
       }
     }
   };
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used inside an AuthProvider.");
+ throw new Error("useAuth must be used inside an AuthProvider.");
   }
   return context;
 }

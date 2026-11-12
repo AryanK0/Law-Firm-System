@@ -42,24 +42,24 @@ const emptyTransactions: DbmsTransactionsResponse = {
 function StatusPill({ value }: { value: string | null | undefined }) {
   const tone = useMemo(() => {
     switch (value) {
-      case "Failed":
-      case "Overdue":
-        return "bg-red-500/10 text-red-300";
-      case "Recovered":
-      case "Released":
-      case "Success":
-        return "bg-emerald-500/10 text-emerald-300";
-      case "Active":
-      case "Due Soon":
-        return "bg-amber-500/10 text-amber-300";
+ case "Failed":
+ case "Overdue":
+ return "bg-red-500/10 text-red-300";
+ case "Recovered":
+ case "Released":
+ case "Success":
+ return "bg-emerald-500/10 text-emerald-300";
+ case "Active":
+ case "Due Soon":
+ return "bg-amber-500/10 text-amber-300";
       default:
-        return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
     }
   }, [value]);
 
   return (
     <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>
-      {value || "Unknown"}
+ {value || "Unknown"}
     </span>
   );
 }
@@ -93,13 +93,13 @@ function EmptyState({ message }: { message: string }) {
 }
 
 function operationsText(value: string | null | undefined) {
-  return (value || "")
-    .replace(/DBMS console/gi, "systems view")
-    .replace(/DBMS/gi, "systems")
-    .replace(/checkpoint/gi, "snapshot")
-    .replace(/active_locks/gi, "protected_records")
-    .replace(/transaction/gi, "activity")
-    .replace(/recovery/gi, "resolution");
+ return (value || "")
+ .replace(/DBMS console/gi, "systems view")
+ .replace(/DBMS/gi, "systems")
+ .replace(/checkpoint/gi, "snapshot")
+ .replace(/active_locks/gi, "protected_records")
+ .replace(/transaction/gi, "activity")
+ .replace(/recovery/gi, "resolution");
 }
 
 export default function DBMSConsole() {
@@ -178,9 +178,9 @@ export default function DBMSConsole() {
     try {
       await loadConsole();
       setError(null);
-      setMessage("Systems view refreshed.");
+ setMessage("Systems view refreshed.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Refresh failed.");
+ setError(err instanceof Error ? err.message : "Refresh failed.");
     } finally {
       setBusy(false);
     }
@@ -190,31 +190,31 @@ export default function DBMSConsole() {
     setBusy(true);
     try {
       await clearSystemCache();
-      setMessage("System cache cleared across Redis and in-memory tiers.");
+ setMessage("System cache cleared across Redis and in-memory tiers.");
       const updated = await getSystemTelemetry();
       setTelemetry(updated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cache flush failed.");
+ setError(err instanceof Error ? err.message : "Cache flush failed.");
     } finally {
       setBusy(false);
     }
   };
 
   const stats = [
-    { label: "Protected records", value: locks.length },
-    { label: "Interrupted activity", value: transactions.failures.length },
-    { label: "Continuity snapshots", value: checkpoints.length },
-    { label: "Matter reports", value: caseReports.length },
+ { label: "Protected records", value: locks.length },
+ { label: "Interrupted activity", value: transactions.failures.length },
+ { label: "Continuity snapshots", value: checkpoints.length },
+ { label: "Matter reports", value: caseReports.length },
   ];
 
   return (
     <div>
       <section className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-            <Database size={14} />
-            Systems Oversight
-          </span>
+          <div className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted">
+            <Database size={15} aria-hidden="true" />
+            <span>Systems oversight</span>
+          </div>
           <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
             Operations, History and Reports
           </h1>
@@ -244,7 +244,7 @@ export default function DBMSConsole() {
         <div className="card-premium p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <p className="eyebrow">Caching Layer</p>
+              
               <h2 className="mt-1 text-xl font-semibold text-foreground">Redis & Resilience Tier</h2>
             </div>
             <span className="icon-accent rounded-xl p-2 text-cyan-400">
@@ -257,29 +257,29 @@ export default function DBMSConsole() {
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 telemetry?.cache.redis_connected
-                  ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
-                  : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
-              }`}
+ ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
+ : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
+ }`}
             >
-              {telemetry?.cache.redis_connected ? "Redis Distributed" : "In-Memory Fallback Active"}
+ {telemetry?.cache.redis_connected ? "Redis Distributed" : "In-Memory Fallback Active"}
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Hit Ratio</p>
+              <p className="text-[10px] tracking-normal text-slate-400">Hit Ratio</p>
               <p className="mt-1 text-lg font-bold text-emerald-400">
                 {telemetry?.cache.hit_ratio_percent ?? 0}%
               </p>
             </div>
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Cache Hits</p>
+              <p className="text-[10px] tracking-normal text-slate-400">Cache Hits</p>
               <p className="mt-1 text-lg font-bold text-foreground">
                 {telemetry?.cache.hits ?? 0}
               </p>
             </div>
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Cache Misses</p>
+              <p className="text-[10px] tracking-normal text-slate-400">Cache Misses</p>
               <p className="mt-1 text-lg font-bold text-slate-400">
                 {telemetry?.cache.misses ?? 0}
               </p>
@@ -306,7 +306,7 @@ export default function DBMSConsole() {
         <div className="card-premium p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <p className="eyebrow">Distributed Tracing</p>
+              
               <h2 className="mt-1 text-xl font-semibold text-foreground">Latency & Observability</h2>
             </div>
             <span className="icon-accent rounded-xl p-2 text-primary">
@@ -316,26 +316,26 @@ export default function DBMSConsole() {
 
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <span className="text-xs text-slate-400">System Uptime:</span>
-            <span className="font-mono text-xs font-semibold text-slate-200">
+            <span className="num text-xs font-semibold text-slate-200">
               {Math.floor((telemetry?.metrics.uptime_seconds ?? 0) / 60)}m {(telemetry?.metrics.uptime_seconds ?? 0) % 60}s
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Avg Latency</p>
+              <p className="text-[10px] tracking-normal text-slate-400">Avg Latency</p>
               <p className="mt-1 text-lg font-bold text-cyan-300">
                 {telemetry?.metrics.avg_latency_ms ?? 0}ms
               </p>
             </div>
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">P95 Latency</p>
+              <p className="text-[10px] tracking-normal text-slate-400">P95 Latency</p>
               <p className="mt-1 text-lg font-bold text-primary">
                 {telemetry?.metrics.p95_latency_ms ?? 0}ms
               </p>
             </div>
             <div className="rounded-xl bg-white/[0.02] p-3 border border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Requests</p>
+              <p className="text-[10px] tracking-normal text-slate-400">Requests</p>
               <p className="mt-1 text-lg font-bold text-foreground">
                 {telemetry?.metrics.total_requests ?? 0}
               </p>
@@ -344,7 +344,7 @@ export default function DBMSConsole() {
 
           <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
             <span>
-              HTTP 2xx: <b className="text-emerald-400">{telemetry?.metrics.status_2xx ?? 0}</b> • 4xx: <b className="text-amber-400">{telemetry?.metrics.status_4xx ?? 0}</b> • 5xx: <b className="text-rose-400">{telemetry?.metrics.status_5xx ?? 0}</b>
+              HTTP 2xx: <b className="text-emerald-400 mr-2">{telemetry?.metrics.status_2xx ?? 0}</b> 4xx: <b className="text-amber-400 mr-2">{telemetry?.metrics.status_4xx ?? 0}</b> 5xx: <b className="text-rose-400">{telemetry?.metrics.status_5xx ?? 0}</b>
             </span>
             <span className="text-[11px] text-slate-400">
               Slow (&gt;1s): <b className={(telemetry?.metrics.slow_requests_gt_1s ?? 0) > 0 ? "text-amber-400" : "text-slate-400"}>{telemetry?.metrics.slow_requests_gt_1s ?? 0}</b>
@@ -356,9 +356,9 @@ export default function DBMSConsole() {
       <section className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((item) => (
           <div key={item.label} className="card-premium p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+            <p className="text-xs tracking-normal text-slate-400">{item.label}</p>
             <p className="mt-2 text-2xl font-semibold text-foreground">
-              {loading ? "..." : item.value}
+ {loading ? "..." : item.value}
             </p>
           </div>
         ))}
@@ -376,7 +376,7 @@ export default function DBMSConsole() {
           ) : (
             <div className="mt-5 overflow-x-auto">
               <table className="w-full min-w-[620px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                <thead className="text-xs tracking-normal text-slate-400">
                   <tr>
                     <th className="px-3 py-3">Table</th>
                     <th className="px-3 py-3">Record</th>
@@ -391,7 +391,7 @@ export default function DBMSConsole() {
                       <td className="px-3 py-3 text-foreground">{lock.table_name}</td>
                       <td className="px-3 py-3 text-slate-300">#{lock.record_id}</td>
                       <td className="px-3 py-3 text-slate-300">
-                        {lock.locked_by_name || "System"}
+ {lock.locked_by_name || "System"}
                       </td>
                       <td className="px-3 py-3">
                         <StatusPill value={lock.status} />
@@ -428,13 +428,13 @@ export default function DBMSConsole() {
                         #{txn.txn_id} {txn.txn_type}
                       </p>
                       <p className="mt-1 text-sm text-slate-400">
-                        {txn.table_name} #{txn.record_id ?? "n/a"} | {txn.action}
+ {txn.table_name} #{txn.record_id ?? "n/a"} | {txn.action}
                       </p>
                     </div>
                     <StatusPill value={txn.status} />
                   </div>
                   <p className="mt-3 text-sm text-red-300">
-                    {truncate(txn.error_message, 140) || "No error message captured."}
+ {truncate(txn.error_message, 140) || "No error message captured."}
                   </p>
                 </div>
               ))}
@@ -557,7 +557,7 @@ export default function DBMSConsole() {
                   </div>
                   <p className="mt-2 text-sm text-slate-400">{truncate(report.summary, 105)}</p>
                   <p className="mt-3 text-xs text-slate-300">
-                    Owner {report.assigned_to_name || "unassigned"}
+ Owner {report.assigned_to_name || "unassigned"}
                   </p>
                 </div>
               ))}

@@ -22,16 +22,16 @@ const ConflictCheck   = lazy(() => import("./pages/ConflictCheck"));
 const AISearch     = lazy(() => import("./pages/AISearch"));
 
 function getActivePage(pathname: string): AppPage {
-  if (pathname.startsWith("/cases"))          return "cases";
-  if (pathname.startsWith("/clients"))        return "clients";
-  if (pathname.startsWith("/trust"))          return "trust";
-  if (pathname.startsWith("/conflicts"))      return "conflicts";
-  if (pathname.startsWith("/documents"))      return "documents";
-  if (pathname.startsWith("/tickets"))        return "tickets";
-  if (pathname.startsWith("/dbms"))           return "dbms";
-  if (pathname.startsWith("/access-control")) return "access";
-  if (pathname.startsWith("/ai-search"))      return "ai-search";
-  return "dashboard";
+ if (pathname.startsWith("/cases")) return "cases";
+ if (pathname.startsWith("/clients")) return "clients";
+ if (pathname.startsWith("/trust")) return "trust";
+ if (pathname.startsWith("/conflicts")) return "conflicts";
+ if (pathname.startsWith("/documents")) return "documents";
+ if (pathname.startsWith("/tickets")) return "tickets";
+ if (pathname.startsWith("/dbms")) return "dbms";
+ if (pathname.startsWith("/access-control")) return "access";
+ if (pathname.startsWith("/ai-search")) return "ai-search";
+ return "dashboard";
 }
 
 function canViewSystemsOversight(user: { id: number; name: string; role: string }) {
@@ -55,7 +55,7 @@ function PageLoader() {
         >
           <div className="w-4 h-4 rounded-full" style={{ background: "rgba(14,165,233,0.7)" }} />
         </div>
-        <p className="text-sm text-slate-500 font-mono">Loading workspace…</p>
+        <p className="text-sm text-ink-muted">Loading workspace…</p>
       </div>
     </div>
   );
@@ -80,7 +80,7 @@ export default function App() {
         setCmdOpen((prev) => !prev);
       }
     };
-    window.addEventListener("keydown", handler);
+ window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
@@ -90,7 +90,7 @@ export default function App() {
       const target = users.find((u) => u.id === userId);
       selectUser(userId);
       if (target) {
-        info(`Switched to ${target.name}`, target.role);
+ info(`Switched to ${target.name}`, target.role);
       }
     }
   }, [selectUser, users, info]);
@@ -136,21 +136,17 @@ export default function App() {
               </Routes>
             </main>
             <footer
-              className="relative z-10 mt-8 border-t py-5 px-6 text-xs text-slate-600"
-              style={{ borderColor: "rgba(255,255,255,0.04)" }}
+              className="relative z-10 mt-8 border-t border-rule py-5 px-6 text-xs text-ink-muted"
             >
               <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-2 sm:flex-row">
-                <span className="font-semibold text-slate-500">PEARSON SPECTER LITT — Enterprise Legal Cloud</span>
-                <div className="flex items-center gap-3 font-mono text-[10px] text-slate-700">
+                <span className="font-semibold text-ink-2">Pearson Specter Litt Legal Operations</span>
+                <div className="flex items-center gap-4 text-xs text-ink-muted">
                   <span>v2.5</span>
-                  <span>•</span>
                   <span>Java 21 LTS</span>
-                  <span>•</span>
                   <span>MySQL 8.3</span>
-                  <span>•</span>
                   <button
                     type="button"
-                    className="hover:text-slate-500 transition-colors"
+                    className="hover:text-ink transition-colors duration-150"
                     onClick={() => setCmdOpen(true)}
                   >
                     ⌘K

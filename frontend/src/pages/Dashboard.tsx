@@ -44,10 +44,10 @@ import {
 const COLORS = ["#22D3EE", "#3B82F6", "#06B6D4", "#38BDF8", "#0EA5E9", "#0284C7"];
 
 const TOOLTIP_STYLE = {
-  backgroundColor: "rgba(11, 17, 32, 0.96)",
-  border: "1px solid rgba(255, 255, 255, 0.08)",
-  borderRadius: "1rem",
-  boxShadow: "0 18px 40px rgba(2, 6, 23, 0.28)",
+ backgroundColor: "rgba(11, 17, 32, 0.96)",
+ border: "1px solid rgba(255, 255, 255, 0.08)",
+ borderRadius: "1rem",
+ boxShadow: "0 18px 40px rgba(2, 6, 23, 0.28)",
 };
 
 const emptyAnalytics: AnalyticsResponse = {
@@ -66,8 +66,8 @@ const emptyAnalytics: AnalyticsResponse = {
 
 const emptyOverview: OverviewResponse = {
   firm: {
-    name: "PSL Law",
-    tagline: "Premium operations workspace for matters, access, hearings, and support.",
+ name: "PSL Law",
+ tagline: "Premium operations workspace for matters, access, hearings, and support.",
   },
   summary: {
     active_people: 0,
@@ -93,92 +93,92 @@ const emptyOverview: OverviewResponse = {
 
 function getVisibleFileName(path: string | null | undefined) {
   const fileName = path?.split("/").pop() ?? "Unknown file";
-  return fileName.replace(/^[a-f0-9]{32}_/i, "");
+ return fileName.replace(/^[a-f0-9]{32}_/i, "");
 }
 
 function getInitials(name: string | null | undefined) {
   if (!name) {
-    return "NA";
+ return "NA";
   }
 
   return name
-    .split(" ")
+ .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
+ .join("");
 }
 
 function getMatterTone(status: string | null | undefined) {
   switch (status) {
-    case "Open":
-      return "bg-primary/10 text-primary";
-    case "Hearing Scheduled":
-      return "bg-blue-500/10 text-blue-300";
-    case "Drafting":
-      return "bg-amber-500/10 text-amber-300";
-    case "Negotiation":
-      return "bg-cyan-500/10 text-cyan-300";
-    case "Closed":
-      return "bg-white/10 text-slate-300";
+ case "Open":
+ return "bg-primary/10 text-primary";
+ case "Hearing Scheduled":
+ return "bg-blue-500/10 text-blue-300";
+ case "Drafting":
+ return "bg-amber-500/10 text-amber-300";
+ case "Negotiation":
+ return "bg-cyan-500/10 text-cyan-300";
+ case "Closed":
+ return "bg-white/10 text-slate-300";
     default:
-      return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
   }
 }
 
 function getTicketTone(priority: string | null | undefined, breached?: boolean | null) {
   if (breached) {
-    return "bg-red-500/10 text-red-300";
+ return "bg-red-500/10 text-red-300";
   }
 
   switch (priority) {
-    case "High":
-      return "bg-amber-500/10 text-amber-300";
-    case "Medium":
-      return "bg-blue-500/10 text-blue-300";
-    case "Low":
-      return "bg-emerald-500/10 text-emerald-300";
+ case "High":
+ return "bg-amber-500/10 text-amber-300";
+ case "Medium":
+ return "bg-blue-500/10 text-blue-300";
+ case "Low":
+ return "bg-emerald-500/10 text-emerald-300";
     default:
-      return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
   }
 }
 
 function getAccessTone(level: string | null | undefined) {
   switch (level) {
-    case "Executive":
-      return "border-primary/30 bg-primary/10 text-primary";
-    case "Leadership":
-      return "border-blue-400/25 bg-blue-500/10 text-blue-200";
-    case "Senior Matter Access":
-      return "border-cyan-400/25 bg-cyan-500/10 text-cyan-200";
-    case "Matter Access":
-      return "border-emerald-400/20 bg-emerald-500/10 text-emerald-200";
+ case "Executive":
+ return "border-primary/30 bg-primary/10 text-primary";
+ case "Leadership":
+ return "border-blue-400/25 bg-blue-500/10 text-blue-200";
+ case "Senior Matter Access":
+ return "border-cyan-400/25 bg-cyan-500/10 text-cyan-200";
+ case "Matter Access":
+ return "border-emerald-400/20 bg-emerald-500/10 text-emerald-200";
     default:
-      return "border-white/10 bg-white/5 text-slate-300";
+ return "border-white/10 bg-white/5 text-slate-300";
   }
 }
 
 function getConfidentialityTone(level: string | null | undefined) {
   switch (level) {
-    case "Highly Confidential":
-      return "bg-red-500/10 text-red-300";
-    case "Confidential":
-      return "bg-amber-500/10 text-amber-300";
-    case "Internal":
-      return "bg-cyan-500/10 text-cyan-300";
+ case "Highly Confidential":
+ return "bg-red-500/10 text-red-300";
+ case "Confidential":
+ return "bg-amber-500/10 text-amber-300";
+ case "Internal":
+ return "bg-cyan-500/10 text-cyan-300";
     default:
-      return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
   }
 }
 
 function getBillingTone(status: string | null | undefined) {
   switch (status) {
-    case "Pending":
-      return "bg-amber-500/10 text-amber-300";
-    case "Approved":
-      return "bg-emerald-500/10 text-emerald-300";
+ case "Pending":
+ return "bg-amber-500/10 text-amber-300";
+ case "Approved":
+ return "bg-emerald-500/10 text-emerald-300";
     default:
-      return "bg-white/10 text-slate-300";
+ return "bg-white/10 text-slate-300";
   }
 }
 
@@ -279,10 +279,10 @@ export default function Dashboard() {
     <div>
       <section className="mb-20 grid grid-cols-1 gap-8 xl:grid-cols-[1.2fr_0.92fr]">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-            <Sparkles size={14} />
-            Premium Operations View
-          </span>
+          <div className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted">
+            <Sparkles size={15} aria-hidden="true" />
+            <span>Firm command view</span>
+          </div>
 
           <h1 className="mt-6 max-w-3xl pb-2">
             <span className="mb-2 block text-5xl font-semibold tracking-tight leading-[1.02] text-foreground md:text-6xl">
@@ -290,9 +290,9 @@ export default function Dashboard() {
             </span>
             <span
               className="block pb-1 text-5xl font-semibold tracking-tight leading-[1.02] text-transparent md:text-6xl"
-              style={{ textShadow: "0 0 20px rgba(34, 211, 238, 0.25)" }}
+              
             >
-              <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text pb-1 text-transparent">
+              <span className="inline-block text-accent pb-1">
                 Management
               </span>
             </span>
@@ -301,28 +301,28 @@ export default function Dashboard() {
           <div className="mt-6 flex items-center gap-4">
             <div
               className="h-0.5 w-32 rounded-full opacity-80"
-              style={{ background: "linear-gradient(90deg, #22D3EE, #3B82F6)" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             />
           </div>
 
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Streamline your practice with a premium legal operations workspace that
+            Coordinate your practice in one legal operations workspace that
             keeps matters, hearings, billing, documents, and support activity in one
             refined command view.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <span className="nav-pill px-4 py-2 text-sm text-slate-200">
-              {loading ? "..." : `${overview.summary.active_people} active people`}
+ {loading ? "..." : `${overview.summary.active_people} active people`}
             </span>
             <span className="nav-pill px-4 py-2 text-sm text-slate-200">
-              {loading ? "..." : `${overview.summary.open_matters} live matters`}
+ {loading ? "..." : `${overview.summary.open_matters} live matters`}
             </span>
             <span className="nav-pill px-4 py-2 text-sm text-slate-200">
-              {loading ? "..." : `${overview.summary.upcoming_hearings} hearings ahead`}
+ {loading ? "..." : `${overview.summary.upcoming_hearings} hearings ahead`}
             </span>
             <span className="nav-pill px-4 py-2 text-sm text-slate-200">
-              {loading ? "..." : `${overview.summary.open_tickets} support items`}
+ {loading ? "..." : `${overview.summary.open_tickets} support items`}
             </span>
           </div>
         </div>
@@ -331,46 +331,46 @@ export default function Dashboard() {
           className="card-premium relative overflow-hidden p-8"
           style={{
             background:
-              "radial-gradient(circle at top right, rgba(34, 211, 238, 0.16), transparent 28%), rgba(255, 255, 255, 0.03)",
+ "radial-gradient(circle at top right, rgba(34, 211, 238, 0.16), transparent 28%), rgba(255, 255, 255, 0.03)",
           }}
         >
           <div className="relative">
-            <p className="eyebrow">Operations Pulse</p>
+            
             <h2 className="mt-2 text-2xl font-semibold text-foreground">
               Live portfolio and revenue watch
             </h2>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div className="card-soft p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-xs tracking-normal text-slate-400">
                   Tracked revenue
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {loading ? "..." : formatCurrency(overview.summary.tracked_revenue)}
+ {loading ? "..." : formatCurrency(overview.summary.tracked_revenue)}
                 </p>
               </div>
               <div className="card-soft p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-xs tracking-normal text-slate-400">
                   Pending bills
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {loading ? "..." : overview.summary.pending_bills}
+ {loading ? "..." : overview.summary.pending_bills}
                 </p>
               </div>
               <div className="card-soft p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-xs tracking-normal text-slate-400">
                   Active clients
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {loading ? "..." : overview.summary.active_clients}
+ {loading ? "..." : overview.summary.active_clients}
                 </p>
               </div>
               <div className="card-soft p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-xs tracking-normal text-slate-400">
                   SLA watch
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {loading ? "..." : overview.summary.sla_risk}
+ {loading ? "..." : overview.summary.sla_risk}
                 </p>
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <span className="shrink-0 whitespace-nowrap rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                  {loading ? "..." : `${billingWatch.length} visible`}
+ {loading ? "..." : `${billingWatch.length} visible`}
                 </span>
               </div>
 
@@ -399,10 +399,10 @@ export default function Dashboard() {
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-foreground">
-                          {formatCaseCode(bill.case_code, `Matter #${bill.bill_id}`)}
+ {formatCaseCode(bill.case_code, `Matter #${bill.bill_id}`)}
                         </p>
                         <p className="mt-1 truncate text-xs text-slate-400">
-                          {bill.client_name || bill.title || "Client detail pending"}
+ {bill.client_name || bill.title || "Client detail pending"}
                         </p>
                       </div>
                       <div className="text-right">
@@ -412,9 +412,9 @@ export default function Dashboard() {
                         <span
                           className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${getBillingTone(
                             bill.status,
-                          )}`}
+ )}`}
                         >
-                          {bill.status || "Queued"}
+ {bill.status || "Queued"}
                         </span>
                       </div>
                     </div>
@@ -461,13 +461,13 @@ export default function Dashboard() {
         <div className="card-premium p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="eyebrow">Matter Mix</p>
+              
               <h2 className="mt-2 text-2xl font-semibold text-foreground">
                 Case status overview
               </h2>
             </div>
             <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {loading ? "..." : `${analytics.summary.total_cases} total`}
+ {loading ? "..." : `${analytics.summary.total_cases} total`}
             </span>
           </div>
 
@@ -536,13 +536,13 @@ export default function Dashboard() {
         <div className="card-premium p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="eyebrow">Revenue Pulse</p>
+              
               <h2 className="mt-2 text-2xl font-semibold text-foreground">
                 Billing overview
               </h2>
             </div>
             <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {loading ? "..." : formatCurrency(overview.summary.tracked_revenue)}
+ {loading ? "..." : formatCurrency(overview.summary.tracked_revenue)}
             </span>
           </div>
 
@@ -583,7 +583,7 @@ export default function Dashboard() {
                       contentStyle={TOOLTIP_STYLE}
                       formatter={(value, _name, item) => [
                         formatCurrency(Number(value)),
-                        formatCaseCode(String(item.payload?.name ?? "Matter")),
+ formatCaseCode(String(item.payload?.name ?? "Matter")),
                       ]}
                     />
                     <Bar dataKey="amount" fill="#22D3EE" radius={[10, 10, 0, 0]} barSize={30} />
@@ -593,7 +593,7 @@ export default function Dashboard() {
 
               <div className="mt-6 grid grid-cols-3 gap-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs tracking-normal text-slate-400">
                     Visible matters
                   </p>
                   <p className="mt-2 text-xl font-semibold text-foreground">
@@ -601,7 +601,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs tracking-normal text-slate-400">
                     Pending bills
                   </p>
                   <p className="mt-2 text-xl font-semibold text-foreground">
@@ -609,7 +609,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs tracking-normal text-slate-400">
                     Documents
                   </p>
                   <p className="mt-2 text-xl font-semibold text-foreground">
@@ -624,7 +624,7 @@ export default function Dashboard() {
 
       <section className="mb-16 grid grid-cols-1 gap-8 xl:grid-cols-3">
         <div className="card-premium p-8">
-          <p className="eyebrow">Matter Board</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">Priority matters</h2>
 
           <div className="mt-8 space-y-4">
@@ -639,38 +639,38 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold text-primary">
-                        {formatCaseCode(matter.case_code, `Matter #${matter.case_id}`)}
+ {formatCaseCode(matter.case_code, `Matter #${matter.case_id}`)}
                       </p>
                       <h3 className="mt-1 text-base font-semibold text-foreground">
-                        {matter.title || "Untitled matter"}
+ {matter.title || "Untitled matter"}
                       </h3>
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${getMatterTone(
                         matter.status,
-                      )}`}
+ )}`}
                     >
-                      {matter.status || "Unknown"}
+ {matter.status || "Unknown"}
                     </span>
                   </div>
 
                   <p className="mt-4 text-sm text-slate-300">
-                    {matter.client_name || "Client pending"} | {matter.case_type || "General"}
+ {matter.client_name || "Client pending"} | {matter.case_type || "General"}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2 text-xs">
                     <span
                       className={`rounded-full px-3 py-1 ${getConfidentialityTone(
                         matter.confidentiality_level,
-                      )}`}
+ )}`}
                     >
-                      {matter.confidentiality_level || "Internal"}
+ {matter.confidentiality_level || "Internal"}
                     </span>
                     <span className="rounded-full bg-white/5 px-3 py-1 text-slate-300">
-                      Lead {matter.lead_partner_name || "unassigned"}
+ Lead {matter.lead_partner_name || "unassigned"}
                     </span>
                   </div>
                   <p className="mt-4 text-xs text-slate-400">
-                    Target date {formatDate(matter.end_date, "Open ended")}
+ Target date {formatDate(matter.end_date, "Open ended")}
                   </p>
                 </div>
               ))
@@ -681,7 +681,7 @@ export default function Dashboard() {
         <div className="card-premium p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="eyebrow">Support Desk</p>
+              
               <h2 className="mt-2 text-2xl font-semibold text-foreground">
                 Open ticket watch
               </h2>
@@ -709,17 +709,17 @@ export default function Dashboard() {
                       className={`rounded-full px-3 py-1 text-xs font-medium ${getTicketTone(
                         ticket.priority,
                         ticket.breach_flag,
-                      )}`}
+ )}`}
                     >
-                      {ticket.breach_flag ? "Breach risk" : ticket.priority || "Open"}
+ {ticket.breach_flag ? "Breach risk" : ticket.priority || "Open"}
                     </span>
                   </div>
                   <p className="mt-4 text-xs text-slate-400">
-                    Owner {ticket.assigned_to_name || "unassigned"} | raised by{" "}
-                    {ticket.raised_by_name || "unknown"}
+ Owner {ticket.assigned_to_name || "unassigned"} | raised by{" "}
+ {ticket.raised_by_name || "unknown"}
                   </p>
                   <p className="mt-2 text-xs text-slate-400">
-                    Deadline {formatDateTime(ticket.resolution_deadline, "Not set")}
+ Deadline {formatDateTime(ticket.resolution_deadline, "Not set")}
                   </p>
                 </div>
               ))
@@ -728,7 +728,7 @@ export default function Dashboard() {
         </div>
 
         <div className="card-premium p-8">
-          <p className="eyebrow">Client Pulse</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">
             Relationship activity
           </h2>
@@ -748,11 +748,11 @@ export default function Dashboard() {
                         {interaction.client_name}
                       </p>
                       <h3 className="mt-1 text-base font-semibold text-foreground">
-                        {interaction.interaction_type || "Client update"}
+ {interaction.interaction_type || "Client update"}
                       </h3>
                     </div>
                     <span className="shrink-0 whitespace-nowrap rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                      {formatCompactDateTime(interaction.datetime, "Not set")}
+ {formatCompactDateTime(interaction.datetime, "Not set")}
                     </span>
                   </div>
 
@@ -760,7 +760,7 @@ export default function Dashboard() {
                     {truncate(interaction.notes, 120)}
                   </p>
                   <p className="mt-4 text-xs text-slate-400">
-                    Led by {interaction.employee_name || "team member not listed"}
+ Led by {interaction.employee_name || "team member not listed"}
                   </p>
                 </div>
               ))
@@ -771,7 +771,7 @@ export default function Dashboard() {
 
       <section className="mb-16 grid grid-cols-1 gap-8 xl:grid-cols-3">
         <div className="card-premium p-8">
-          <p className="eyebrow">Calendar</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">Upcoming hearings</h2>
 
           <div className="mt-8 space-y-4">
@@ -790,13 +790,13 @@ export default function Dashboard() {
                     <span className="absolute left-0 top-1.5 h-6 w-6 rounded-full border border-primary/30 bg-primary/10" />
                     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 smooth-transition group-hover:-translate-y-0.5 group-hover:bg-white/[0.05]">
                       <p className="text-sm font-semibold text-primary">
-                        {formatCaseCode(hearing.case_code, `Matter #${hearing.case_id}`)}
+ {formatCaseCode(hearing.case_code, `Matter #${hearing.case_id}`)}
                       </p>
                     <h3 className="mt-1 text-base font-semibold text-foreground">
-                      {hearing.court_name || "Court to be confirmed"}
+ {hearing.court_name || "Court to be confirmed"}
                     </h3>
                     <p className="mt-2 text-sm text-slate-300">
-                      {formatDate(hearing.date)} | {hearing.location || "Location pending"}
+ {formatDate(hearing.date)} | {hearing.location || "Location pending"}
                     </p>
                       <p className="mt-3 text-sm text-slate-400">
                         {truncate(hearing.notes, 96)}
@@ -809,7 +809,7 @@ export default function Dashboard() {
         </div>
 
         <div className="card-premium p-8">
-          <p className="eyebrow">Document Feed</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">Recent filings</h2>
 
           <div className="mt-8 space-y-4">
@@ -825,7 +825,7 @@ export default function Dashboard() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-primary">
-                        {formatCaseCode(document.case_code, `Matter #${document.document_id}`)}
+ {formatCaseCode(document.case_code, `Matter #${document.document_id}`)}
                       </p>
                       <h3 className="mt-1 break-words text-base font-semibold text-foreground">
                         {getVisibleFileName(document.file_path)}
@@ -834,17 +834,17 @@ export default function Dashboard() {
                     <span
                       className={`shrink-0 self-start rounded-full px-3 py-1 text-xs font-medium ${getConfidentialityTone(
                         document.confidentiality_level,
-                      )}`}
+ )}`}
                     >
-                      {document.confidentiality_level || "Internal"}
+ {document.confidentiality_level || "Internal"}
                     </span>
                   </div>
 
                   <p className="mt-4 text-sm text-slate-300">
-                    {document.title || "Matter title unavailable"}
+ {document.title || "Matter title unavailable"}
                   </p>
                     <p className="mt-4 text-xs text-slate-400">
-                      Uploaded by {document.uploaded_by_name || "Unknown"} |{" "}
+ Uploaded by {document.uploaded_by_name || "Unknown"} |{" "}
                       {formatDateTime(document.created_at)}
                     </p>
                   </Link>
@@ -854,7 +854,7 @@ export default function Dashboard() {
         </div>
 
         <div className="card-premium p-8">
-          <p className="eyebrow">Portfolio Leaders</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">Client portfolio</h2>
 
           <div className="mt-8 space-y-4">
@@ -873,7 +873,7 @@ export default function Dashboard() {
                         {client.client_name}
                       </h3>
                       <p className="mt-1 text-xs text-slate-400">
-                        Last contact {formatDateTime(client.last_contact, "Not recorded")}
+ Last contact {formatDateTime(client.last_contact, "Not recorded")}
                       </p>
                     </div>
                     <ArrowUpRight size={16} className="mt-1 text-primary" />
@@ -881,7 +881,7 @@ export default function Dashboard() {
 
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                      <p className="text-xs tracking-normal text-slate-400">
                         Matters
                       </p>
                       <p className="mt-1 text-lg font-semibold text-foreground">
@@ -889,7 +889,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="rounded-2xl bg-white/[0.03] px-4 py-3">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                      <p className="text-xs tracking-normal text-slate-400">
                         Billed
                       </p>
                       <p className="mt-1 text-lg font-semibold text-foreground">
@@ -906,7 +906,7 @@ export default function Dashboard() {
 
       <section className="grid grid-cols-1 gap-8 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="card-premium p-8">
-          <p className="eyebrow">Team Spotlight</p>
+          
           <h2 className="mt-2 text-2xl font-semibold text-foreground">People in motion</h2>
 
           <div className="mt-8 space-y-4">
@@ -927,18 +927,18 @@ export default function Dashboard() {
                       <span
                         className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getAccessTone(
                           person.access_level,
-                        )}`}
+ )}`}
                       >
-                        {person.access_level || "Support Access"}
+ {person.access_level || "Support Access"}
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-300">
-                      {person.role_name || "Role pending"} |{" "}
-                      {person.department_name || "Department pending"}
+ {person.role_name || "Role pending"} |{" "}
+ {person.department_name || "Department pending"}
                     </p>
                     <p className="mt-2 text-xs text-slate-400">
-                      Reports to {person.supervisor_name || "executive leadership"} |{" "}
-                      {person.employment_type || "Full-Time"}
+ Reports to {person.supervisor_name || "executive leadership"} |{" "}
+ {person.employment_type || "Full-Time"}
                     </p>
                   </div>
                 </div>
@@ -950,7 +950,7 @@ export default function Dashboard() {
         <div className="card-premium p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="eyebrow">Access and Coverage</p>
+              
               <h2 className="mt-2 text-2xl font-semibold text-foreground">
                 Role map and staffing
               </h2>
@@ -977,7 +977,7 @@ export default function Dashboard() {
                     <span
                       className={`rounded-full border px-3 py-1 text-xs font-medium ${getAccessTone(
                         role.access_level,
-                      )}`}
+ )}`}
                     >
                       {role.access_level}
                     </span>
@@ -1010,8 +1010,8 @@ export default function Dashboard() {
                         <div
                           className="h-2 rounded-full"
                           style={{
-                            width: `${width}%`,
-                            background: `linear-gradient(90deg, ${COLORS[index % COLORS.length]}, #60A5FA)`,
+ width: `${width}%`,
+ backgroundColor: COLORS[index % COLORS.length],
                           }}
                         />
                       </div>

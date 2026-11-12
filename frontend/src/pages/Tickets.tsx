@@ -40,10 +40,10 @@ export default function TicketsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    description: "",
-    priority: "Medium",
-    assigned_to: "",
-    resolution_deadline: "",
+ description: "",
+ priority: "Medium",
+ assigned_to: "",
+ resolution_deadline: "",
   });
 
   const loadData = () => {
@@ -58,7 +58,7 @@ export default function TicketsPage() {
             current.assigned_to ||
             String(
               employeeData.find((employee) => employee.role_name === "IT Admin")
-                ?.employee_id ?? "",
+ ?.employee_id ?? "",
             ),
         }));
         setError(null);
@@ -97,11 +97,11 @@ export default function TicketsPage() {
         ticket.description,
         ticket.priority,
         ticket.status,
-        `TCK-${String(ticket.ticket_id).padStart(3, "0")}`,
-        `#${ticket.ticket_id}`,
+ `TCK-${String(ticket.ticket_id).padStart(3, "0")}`,
+ `#${ticket.ticket_id}`,
       ]
         .filter(Boolean)
-        .join(" ")
+ .join(" ")
         .toLowerCase();
 
       return searchable.includes(searchQuery.toLowerCase().trim());
@@ -118,30 +118,30 @@ export default function TicketsPage() {
 
   const getPriorityBadge = (priority: string | null) => {
     switch (priority) {
-      case "Critical":
+ case "Critical":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-red-300 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/15 px-2.5 py-0.5 text-[11px] font-bold tracking-normal text-red-300 ">
             <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
             Critical
           </span>
         );
-      case "High":
+ case "High":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-bold tracking-normal text-amber-300">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
             High
           </span>
         );
-      case "Medium":
+ case "Medium":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-sky-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/15 px-2.5 py-0.5 text-[11px] font-bold tracking-normal text-sky-300">
             <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
             Medium
           </span>
         );
-      case "Low":
+ case "Low":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-500/30 bg-slate-500/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-500/30 bg-slate-500/15 px-2.5 py-0.5 text-[11px] font-bold tracking-normal text-slate-300">
             <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
             Low
           </span>
@@ -149,7 +149,7 @@ export default function TicketsPage() {
       default:
         return (
           <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-slate-300">
-            {priority || "Standard"}
+ {priority || "Standard"}
           </span>
         );
     }
@@ -157,21 +157,21 @@ export default function TicketsPage() {
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case "Open":
+ case "Open":
         return (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-300">
             <AlertCircle size={13} className="text-red-400" />
             Open
           </span>
         );
-      case "In Progress":
+ case "In Progress":
         return (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-300">
             <Clock size={13} className="text-sky-400" />
             In Progress
           </span>
         );
-      case "Resolved":
+ case "Resolved":
         return (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300">
             <CheckCircle2 size={13} className="text-emerald-400" />
@@ -181,7 +181,7 @@ export default function TicketsPage() {
       default:
         return (
           <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300">
-            {status || "Unknown"}
+ {status || "Unknown"}
           </span>
         );
     }
@@ -193,7 +193,7 @@ export default function TicketsPage() {
     setMessage(null);
 
     if (!form.description.trim()) {
-      setError("Please add a detailed description of the issue.");
+ setError("Please add a detailed description of the issue.");
       return;
     }
 
@@ -204,22 +204,22 @@ export default function TicketsPage() {
         raised_by: user.id,
         description: form.description.trim(),
         priority: form.priority,
-        status: "Open",
+ status: "Open",
         assigned_to: form.assigned_to ? Number(form.assigned_to) : undefined,
         resolution_deadline: form.resolution_deadline || undefined,
       });
 
       setTickets((current) => [created, ...current]);
-      setMessage(`Support ticket #${created.ticket_id} escalated successfully.`);
+ setMessage(`Support ticket #${created.ticket_id} escalated successfully.`);
       setShowCreateModal(false);
       setForm((current) => ({
         ...current,
-        description: "",
-        priority: "Medium",
-        resolution_deadline: "",
+ description: "",
+ priority: "Medium",
+ resolution_deadline: "",
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not raise ticket.");
+ setError(err instanceof Error ? err.message : "Could not raise ticket.");
     } finally {
       setSubmitting(false);
     }
@@ -235,9 +235,9 @@ export default function TicketsPage() {
       setTickets((current) =>
         current.map((ticket) => (ticket.ticket_id === ticketId ? resolved : ticket)),
       );
-      setMessage(`Ticket #${ticketId} marked as Resolved.`);
+ setMessage(`Ticket #${ticketId} marked as Resolved.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resolve ticket.");
+ setError(err instanceof Error ? err.message : "Could not resolve ticket.");
     } finally {
       setResolvingTicketId(null);
     }
@@ -249,7 +249,7 @@ export default function TicketsPage() {
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-sky-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-semibold tracking-normal text-sky-400">
               <LifeBuoy size={13} />
               Internal Operations & Desk
             </span>
@@ -276,7 +276,7 @@ export default function TicketsPage() {
       {/* KPI Stats Ribbon */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="stat-card">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Tickets</p>
+          <p className="text-[11px] font-bold tracking-normal text-slate-400">Total Tickets</p>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-black font-heading text-white">{tickets.length}</span>
             <LifeBuoy size={18} className="text-sky-400/60" />
@@ -285,7 +285,7 @@ export default function TicketsPage() {
         </div>
 
         <div className="stat-card">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Open Escalations</p>
+          <p className="text-[11px] font-bold tracking-normal text-slate-400">Open Escalations</p>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-black font-heading text-red-400">{openCount}</span>
             <AlertCircle size={18} className="text-red-400/60" />
@@ -294,7 +294,7 @@ export default function TicketsPage() {
         </div>
 
         <div className="stat-card">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">In Progress</p>
+          <p className="text-[11px] font-bold tracking-normal text-slate-400">In Progress</p>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-black font-heading text-sky-300">{inProgressCount}</span>
             <Clock size={18} className="text-sky-400/60" />
@@ -303,7 +303,7 @@ export default function TicketsPage() {
         </div>
 
         <div className="stat-card">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Resolved</p>
+          <p className="text-[11px] font-bold tracking-normal text-slate-400">Resolved</p>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-black font-heading text-emerald-300">{resolvedCount}</span>
             <CheckCircle2 size={18} className="text-emerald-400/60" />
@@ -352,7 +352,7 @@ export default function TicketsPage() {
             placeholder="Search by ticket summary, priority, status, or TCK ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-slate-900/60 py-2.5 pl-10 pr-9 text-sm text-foreground placeholder-slate-500 backdrop-blur-md transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full rounded-xl border border-white/10 bg-slate-900/60 py-2.5 pl-10 pr-9 text-sm text-foreground placeholder-slate-500 backdrop-blur-md transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
           {searchQuery && (
             <button
@@ -370,44 +370,44 @@ export default function TicketsPage() {
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               statusFilter === "ALL"
-                ? "bg-cyan-500/20 text-cyan-300 shadow-sm border border-cyan-500/30"
-                : "text-slate-400 hover:text-white"
-            }`}
+ ? "bg-cyan-500/20 text-cyan-300 shadow-sm border border-cyan-500/30"
+ : "text-slate-400 hover:text-white"
+ }`}
           >
             All ({tickets.length})
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter("Open")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               statusFilter === "Open"
-                ? "bg-red-500/20 text-red-300 shadow-sm border border-red-500/30"
-                : "text-slate-400 hover:text-white"
-            }`}
+ ? "bg-red-500/20 text-red-300 shadow-sm border border-red-500/30"
+ : "text-slate-400 hover:text-white"
+ }`}
           >
             Open ({openCount})
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter("In Progress")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               statusFilter === "In Progress"
-                ? "bg-sky-500/20 text-sky-300 shadow-sm border border-sky-500/30"
-                : "text-slate-400 hover:text-white"
-            }`}
+ ? "bg-sky-500/20 text-sky-300 shadow-sm border border-sky-500/30"
+ : "text-slate-400 hover:text-white"
+ }`}
           >
             In Progress ({inProgressCount})
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter("Resolved")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               statusFilter === "Resolved"
-                ? "bg-emerald-500/20 text-emerald-300 shadow-sm border border-emerald-500/30"
-                : "text-slate-400 hover:text-white"
-            }`}
+ ? "bg-emerald-500/20 text-emerald-300 shadow-sm border border-emerald-500/30"
+ : "text-slate-400 hover:text-white"
+ }`}
           >
             Resolved ({resolvedCount})
           </button>
@@ -440,14 +440,14 @@ export default function TicketsPage() {
             return (
               <div
                 key={ticket.ticket_id}
-                className="card-premium group relative p-6 transition-all duration-300 hover:border-cyan-500/40 hover:shadow-[0_4px_24px_rgba(6,182,212,0.08)]"
+                className="card-premium group relative p-6 transition-colors duration-300 hover:border-cyan-500/40 "
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3 flex-1">
                     {/* Top Row: ID, Priority, Status */}
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-mono text-xs font-bold text-cyan-400">
-                        TCK-{String(ticket.ticket_id).padStart(3, "0")}
+                      <span className="num text-xs font-bold text-cyan-400">
+ TCK-{String(ticket.ticket_id).padStart(3, "0")}
                       </span>
                       {getPriorityBadge(ticket.priority)}
                       {getStatusBadge(ticket.status)}
@@ -467,7 +467,7 @@ export default function TicketsPage() {
                         <UserCheck size={14} className="text-slate-500" />
                         <span>Assigned to:</span>
                         <span className="font-semibold text-slate-200">
-                          {assignedEmployee?.name || "Unassigned"}
+ {assignedEmployee?.name || "Unassigned"}
                         </span>
                         {assignedEmployee?.role_name && (
                           <span className="text-[11px] text-slate-500">
@@ -501,7 +501,7 @@ export default function TicketsPage() {
                       type="button"
                       disabled={resolvingTicketId === ticket.ticket_id}
                       onClick={() => handleResolveTicket(ticket.ticket_id)}
-                      className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-300 transition-all hover:bg-emerald-500/20 disabled:opacity-50"
+                      className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
                     >
                       <CheckCircle2 size={15} />
                       {resolvingTicketId === ticket.ticket_id ? "Resolving..." : "Mark as Resolved"}
@@ -519,8 +519,8 @@ export default function TicketsPage() {
             <h3 className="mt-4 text-base font-bold text-white">No tickets found</h3>
             <p className="mt-1 text-sm text-slate-400">
               {searchQuery
-                ? `No support tickets matching "${searchQuery}".`
-                : "No tickets recorded under this filter status."}
+ ? `No support tickets matching "${searchQuery}".`
+ : "No tickets recorded under this filter status."}
             </p>
             {searchQuery && (
               <button
@@ -560,7 +560,7 @@ export default function TicketsPage() {
 
             <form onSubmit={handleCreateTicket} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1.5">
                   Issue Description
                 </label>
                 <textarea
@@ -574,7 +574,7 @@ export default function TicketsPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1.5">
                     Priority Tier
                   </label>
                   <select
@@ -590,7 +590,7 @@ export default function TicketsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1.5">
                     Assigned Member
                   </label>
                   <select
@@ -609,7 +609,7 @@ export default function TicketsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1.5">
                   Resolution Target Deadline
                 </label>
                 <input
@@ -633,7 +633,7 @@ export default function TicketsPage() {
                   disabled={submitting}
                   className="btn-luminous px-5 py-2 text-sm font-semibold disabled:opacity-50"
                 >
-                  {submitting ? "Submitting..." : "Submit Ticket"}
+ {submitting ? "Submitting..." : "Submit Ticket"}
                 </button>
               </div>
             </form>

@@ -21,10 +21,10 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const TOAST_CONFIG: Record<ToastType, { icon: React.ElementType; color: string; bg: string; border: string }> = {
-  success: { icon: CheckCircle2, color: "#10b981", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)" },
-  error:   { icon: XCircle,      color: "#f43f5e", bg: "rgba(244,63,94,0.08)",  border: "rgba(244,63,94,0.25)"  },
-  warning: { icon: AlertTriangle, color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)" },
-  info:    { icon: Info,          color: "#38bdf8", bg: "rgba(56,189,248,0.08)", border: "rgba(56,189,248,0.25)" },
+ success: { icon: CheckCircle2, color: "#10b981", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)" },
+ error: { icon: XCircle, color: "#f43f5e", bg: "rgba(244,63,94,0.08)", border: "rgba(244,63,94,0.25)"  },
+ warning: { icon: AlertTriangle, color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)" },
+ info: { icon: Info, color: "#38bdf8", bg: "rgba(56,189,248,0.08)", border: "rgba(56,189,248,0.25)" },
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -63,11 +63,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               key={t.id}
               className="flex items-start gap-3 rounded-xl px-4 py-3.5 min-w-[280px] max-w-[360px]"
               style={{
-                background: "rgba(2,8,16,0.96)",
-                border: `1px solid ${cfg.border}`,
-                backdropFilter: "blur(24px)",
-                boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${cfg.border}`,
-                animation: "toastIn 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards",
+ background: "rgba(2,8,16,0.96)",
+ border: `1px solid ${cfg.border}`,
+ backdropFilter: "blur(24px)",
+ boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${cfg.border}`,
+ animation: "toastIn 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards",
               }}
             >
               <div className="flex-shrink-0 mt-0.5">
@@ -96,6 +96,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast must be used within <ToastProvider>");
+ if (!ctx) throw new Error("useToast must be used within <ToastProvider>");
   return ctx;
 }

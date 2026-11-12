@@ -1,0 +1,20 @@
+{
+  "scanned": "2026-11-12",
+  "findings": {
+    "fonts": "Outfit (heading), Inter (sans), JetBrains Mono (mono) via Google Fonts (frontend/src/index.css:1, frontend/tailwind.config.js:32-36)",
+    "palette": "CSS custom properties on :root with deep slate-navy bases (--bg-base #020810) and blue/sky/cyan accents (frontend/src/index.css:8-69, frontend/tailwind.config.js:6-30)",
+    "motion": "CSS keyframes and transitions, no JS motion library (frontend/src/index.css:105, frontend/tailwind.config.js:37-48)",
+    "spacing": "Tailwind CSS default spacing utilities with custom utility classes (frontend/package.json:26, frontend/src/index.css)",
+    "framework": "React 19 + Vite 8 + TypeScript 6 + React Router DOM 7 + Recharts 3 + Lucide React (frontend/package.json:11-29)"
+  },
+  "preserve": [
+    "All React Router routes, API wiring (api.ts / mockData.ts), AuthContext persona switching, Recharts charts, and interactive forms",
+    "PSL Law / Pearson Specter Litt firm identity and existing factual case/trust/compliance copy"
+  ],
+  "introduce": [
+    "design.md locked multi-page token & system spec (for >1 route)",
+    "Hallmark tokens.css and base.css with Floor compliance (focus rings, prefers-reduced-motion, overflow-x: clip, no literal hex/purple gradient)",
+    "Sentence-case labels without tracked uppercase eyebrows, explicit transition properties, and recomposed layout/app-screen density"
+  ]
+}
+

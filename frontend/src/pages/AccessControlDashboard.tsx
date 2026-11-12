@@ -35,12 +35,12 @@ const emptyDashboard: AccessDashboardResponse = {
 };
 
 type GrantKey =
-  | "can_view"
-  | "can_edit"
-  | "can_upload_docs"
-  | "can_approve_docs"
-  | "can_close_case"
-  | "can_assign_members";
+ | "can_view"
+ | "can_edit"
+ | "can_upload_docs"
+ | "can_approve_docs"
+ | "can_close_case"
+ | "can_assign_members";
 
 type AccessFormState = {
   employeeId: string;
@@ -49,9 +49,9 @@ type AccessFormState = {
 } & Record<GrantKey, boolean>;
 
 const defaultAccessForm: AccessFormState = {
-  employeeId: "",
-  caseId: "",
-  caseRole: "Managed access",
+ employeeId: "",
+ caseId: "",
+ caseRole: "Managed access",
   can_view: true,
   can_edit: false,
   can_upload_docs: false,
@@ -61,63 +61,63 @@ const defaultAccessForm: AccessFormState = {
 };
 
 const accessToggles: Array<{ key: GrantKey; label: string }> = [
-  { key: "can_view", label: "View matter" },
-  { key: "can_edit", label: "Edit matter" },
-  { key: "can_upload_docs", label: "Upload documents" },
-  { key: "can_approve_docs", label: "Approve documents" },
-  { key: "can_assign_members", label: "Assign members" },
-  { key: "can_close_case", label: "Close matter" },
+ { key: "can_view", label: "View matter" },
+ { key: "can_edit", label: "Edit matter" },
+ { key: "can_upload_docs", label: "Upload documents" },
+ { key: "can_approve_docs", label: "Approve documents" },
+ { key: "can_assign_members", label: "Assign members" },
+ { key: "can_close_case", label: "Close matter" },
 ];
 
 const columnLabels: Record<string, string> = {
-  rank_no: "rank",
-  can_assign_case: "can assign matters",
-  can_approve_billing: "can approve billing",
-  can_override_access: "can override access",
-  can_run_recovery: "can resolve activity",
-  can_upload_docs: "can upload documents",
-  can_approve_docs: "can approve documents",
-  can_assign_members: "can assign members",
-  case_code: "matter code",
-  employee_name: "assigned personnel",
-  case_role: "matter assignment",
-  requester_name: "requester",
-  resource_type: "resource",
-  resource_id: "record id",
-  requested_permission: "requested permission",
-  approved_by_name: "approver",
-  from_employee_name: "delegator",
-  to_employee_name: "delegatee",
-  valid_from: "effective from",
-  valid_to: "expires at",
-  violation_id: "violation ref",
-  attempted_resource_type: "target resource",
-  attempted_resource_id: "resource ref",
-  attempted_action: "attempted operation",
-  severity: "severity tier",
-  reason: "violation reason",
+ rank_no: "rank",
+ can_assign_case: "can assign matters",
+ can_approve_billing: "can approve billing",
+ can_override_access: "can override access",
+ can_run_recovery: "can resolve activity",
+ can_upload_docs: "can upload documents",
+ can_approve_docs: "can approve documents",
+ can_assign_members: "can assign members",
+ case_code: "matter code",
+ employee_name: "assigned personnel",
+ case_role: "matter assignment",
+ requester_name: "requester",
+ resource_type: "resource",
+ resource_id: "record id",
+ requested_permission: "requested permission",
+ approved_by_name: "approver",
+ from_employee_name: "delegator",
+ to_employee_name: "delegatee",
+ valid_from: "effective from",
+ valid_to: "expires at",
+ violation_id: "violation ref",
+ attempted_resource_type: "target resource",
+ attempted_resource_id: "resource ref",
+ attempted_action: "attempted operation",
+ severity: "severity tier",
+ reason: "violation reason",
 };
 
 const permissionLabels: Record<string, string> = {
-  VIEW_CASE: "View matters",
-  EDIT_CASE: "Edit matters",
-  ASSIGN_CASE: "Assign matters",
-  VIEW_TEAM: "View teams",
-  MODIFY_TEAM: "Modify teams",
-  VIEW_DOCUMENT: "View documents",
-  UPLOAD_DOCUMENT: "Upload documents",
-  DELETE_DOCUMENT: "Delete documents",
-  VIEW_BILLING: "View billing",
-  APPROVE_BILLING: "Approve billing",
-  VIEW_REPORTS: "View reports",
-  VIEW_LOCKS: "View protected records",
-  CREATE_CHECKPOINT: "Create continuity snapshots",
-  RUN_RECOVERY: "Resolve interrupted activity",
-  ACCESS_AUDIT_LOG: "View access audit",
-  UPDATE_STATUS: "Update matter status",
-  ASSIGN_HEARING: "Assign hearing dates",
-  CLOSE_CASE: "Close matters",
-  OVERRIDE_ACCESS: "Override access",
+ VIEW_CASE: "View matters",
+ EDIT_CASE: "Edit matters",
+ ASSIGN_CASE: "Assign matters",
+ VIEW_TEAM: "View teams",
+ MODIFY_TEAM: "Modify teams",
+ VIEW_DOCUMENT: "View documents",
+ UPLOAD_DOCUMENT: "Upload documents",
+ DELETE_DOCUMENT: "Delete documents",
+ VIEW_BILLING: "View billing",
+ APPROVE_BILLING: "Approve billing",
+ VIEW_REPORTS: "View reports",
+ VIEW_LOCKS: "View protected records",
+ CREATE_CHECKPOINT: "Create continuity snapshots",
+ RUN_RECOVERY: "Resolve interrupted activity",
+ ACCESS_AUDIT_LOG: "View access audit",
+ UPDATE_STATUS: "Update matter status",
+ ASSIGN_HEARING: "Assign hearing dates",
+ CLOSE_CASE: "Close matters",
+ OVERRIDE_ACCESS: "Override access",
 };
 
 function isBooleanColumn(column: string) {
@@ -146,7 +146,7 @@ function renderCell(value: unknown, column: string) {
   if (isBooleanColumn(column) || typeof value === "boolean") {
     const isGranted = coerceBoolean(value);
     return isGranted ? (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold tracking-normal text-emerald-300 border border-emerald-500/30">
         <Check size={11} className="stroke-[3]" />
         Granted
       </span>
@@ -165,11 +165,11 @@ function renderCell(value: unknown, column: string) {
       <span
         className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold border ${
           isCritical
-            ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+ ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
             : isHigh
-            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-            : "bg-sky-500/15 text-sky-300 border-sky-500/30"
-        }`}
+ ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+ : "bg-sky-500/15 text-sky-300 border-sky-500/30"
+ }`}
       >
         <AlertTriangle size={11} />
         {sev}
@@ -183,13 +183,13 @@ function renderCell(value: unknown, column: string) {
     const isPending = st === "Pending";
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-normal border ${
           isGood
-            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+ ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
             : isPending
-            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-            : "bg-rose-500/15 text-rose-300 border-rose-500/30"
-        }`}
+ ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+ : "bg-rose-500/15 text-rose-300 border-rose-500/30"
+ }`}
       >
         {isGood ? <Check size={11} className="stroke-[3]" /> : null}
         {st}
@@ -210,7 +210,7 @@ function renderCell(value: unknown, column: string) {
 }
 
 function columnText(column: string) {
-  return columnLabels[column] ?? column.replace(/_/g, " ");
+ return columnLabels[column] ?? column.replace(/_/g, " ");
 }
 
 function DataTable({
@@ -232,7 +232,7 @@ function DataTable({
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-2">
+          <thead className="text-[11px] font-bold tracking-normal text-slate-400 border-b border-white/10 pb-2">
             <tr>
               {columns.map((column) => (
                 <th key={column} className="px-3.5 py-3">
@@ -295,7 +295,7 @@ export default function AccessControlDashboard() {
     if (!isManagingPartner) {
       setEmployees([]);
       setCases([]);
-      setSelectedGrantId("");
+ setSelectedGrantId("");
       setAccessForm(defaultAccessForm);
       return;
     }
@@ -314,8 +314,8 @@ export default function AccessControlDashboard() {
         setCases(caseData);
         setAccessForm((current) => ({
           ...current,
-          employeeId: current.employeeId || String(activeEmployees[0]?.employee_id ?? ""),
-          caseId: current.caseId || String(caseData[0]?.case_id ?? ""),
+ employeeId: current.employeeId || String(activeEmployees[0]?.employee_id ?? ""),
+ caseId: current.caseId || String(caseData[0]?.case_id ?? ""),
         }));
       })
       .catch((err: Error) => setEditorMessage(err.message))
@@ -336,10 +336,10 @@ export default function AccessControlDashboard() {
   );
 
   const stats = [
-    { label: "Hierarchy levels", value: dashboard.hierarchy.length, icon: <Workflow size={18} /> },
-    { label: "Allowed permissions", value: allowedCount, icon: <KeyRound size={18} /> },
-    { label: "Case grants", value: dashboard.case_access.length, icon: <UserCheck size={18} /> },
-    { label: "Violations", value: dashboard.violations.length, icon: <ShieldCheck size={18} /> },
+ { label: "Hierarchy levels", value: dashboard.hierarchy.length, icon: <Workflow size={18} /> },
+ { label: "Allowed permissions", value: allowedCount, icon: <KeyRound size={18} /> },
+ { label: "Case grants", value: dashboard.case_access.length, icon: <UserCheck size={18} /> },
+ { label: "Violations", value: dashboard.violations.length, icon: <ShieldCheck size={18} /> },
   ];
 
   const handleGrantSelection = (grantId: string) => {
@@ -358,9 +358,9 @@ export default function AccessControlDashboard() {
     }
 
     setAccessForm({
-      employeeId: String(grant.employee_id ?? ""),
-      caseId: String(grant.case_id ?? ""),
-      caseRole: String(grant.case_role ?? "Managed access"),
+ employeeId: String(grant.employee_id ?? ""),
+ caseId: String(grant.case_id ?? ""),
+ caseRole: String(grant.case_role ?? "Managed access"),
       can_view: coerceBoolean(grant.can_view),
       can_edit: coerceBoolean(grant.can_edit),
       can_upload_docs: coerceBoolean(grant.can_upload_docs),
@@ -374,7 +374,7 @@ export default function AccessControlDashboard() {
     event.preventDefault();
 
     if (!isManagingPartner) {
-      setEditorMessage("Only the Managing Partner can change access grants.");
+ setEditorMessage("Only the Managing Partner can change access grants.");
       return;
     }
 
@@ -382,7 +382,7 @@ export default function AccessControlDashboard() {
     const caseId = Number(accessForm.caseId);
 
     if (!Number.isInteger(employeeId) || !Number.isInteger(caseId)) {
-      setEditorMessage("Choose an employee and matter before saving.");
+ setEditorMessage("Choose an employee and matter before saving.");
       return;
     }
 
@@ -394,7 +394,7 @@ export default function AccessControlDashboard() {
         approver_id: user.id,
         employee_id: employeeId,
         case_id: caseId,
-        case_role: accessForm.caseRole.trim() || "Managed access",
+ case_role: accessForm.caseRole.trim() || "Managed access",
         can_view: accessForm.can_view,
         can_edit: accessForm.can_edit,
         can_upload_docs: accessForm.can_upload_docs,
@@ -403,10 +403,10 @@ export default function AccessControlDashboard() {
         can_assign_members: accessForm.can_assign_members,
       });
       await loadDashboard();
-      setSelectedGrantId("");
-      setEditorMessage("Case access updated.");
+ setSelectedGrantId("");
+ setEditorMessage("Case access updated.");
     } catch (err) {
-      setEditorMessage(err instanceof Error ? err.message : "Access update failed.");
+ setEditorMessage(err instanceof Error ? err.message : "Access update failed.");
     } finally {
       setSaving(false);
     }
@@ -415,10 +415,10 @@ export default function AccessControlDashboard() {
   return (
     <div>
       <section className="mb-10">
-        <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-          <ShieldCheck size={14} />
-          Enterprise Access
-        </span>
+        <div className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted">
+          <ShieldCheck size={15} aria-hidden="true" />
+          <span>Access governance</span>
+        </div>
         <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
           Hierarchy, clearance, delegation, and violation controls
         </h1>
@@ -430,9 +430,9 @@ export default function AccessControlDashboard() {
         {stats.map((item) => (
           <div key={item.label} className="card-premium p-5">
             <span className="icon-accent inline-flex rounded-xl p-2">{item.icon}</span>
-            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+            <p className="mt-4 text-xs tracking-normal text-slate-400">{item.label}</p>
             <p className="mt-2 text-2xl font-semibold text-foreground">
-              {loading ? "..." : item.value}
+ {loading ? "..." : item.value}
             </p>
           </div>
         ))}
@@ -442,7 +442,7 @@ export default function AccessControlDashboard() {
         <section className="mb-8 card-premium p-6">
           <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="eyebrow">Managing Partner Tools</p>
+              
               <h2 className="mt-2 text-xl font-semibold text-foreground">
                 Change Case Access
               </h2>
@@ -456,7 +456,7 @@ export default function AccessControlDashboard() {
 
           <form onSubmit={handleAccessSubmit} className="grid grid-cols-1 gap-4 xl:grid-cols-12">
             <label className="xl:col-span-4">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <span className="mb-2 block text-xs font-semibold tracking-normal text-slate-400">
                 Existing grant
               </span>
               <select
@@ -467,15 +467,15 @@ export default function AccessControlDashboard() {
                 <option value="">Create or select an existing grant</option>
                 {dashboard.case_access.map((grant) => (
                   <option key={String(grant.case_access_id)} value={String(grant.case_access_id)}>
-                    {String(grant.case_code ?? `Matter ${grant.case_id}`)} |{" "}
-                    {String(grant.employee_name ?? `Employee ${grant.employee_id}`)}
+ {String(grant.case_code ?? `Matter ${grant.case_id}`)} |{" "}
+ {String(grant.employee_name ?? `Employee ${grant.employee_id}`)}
                   </option>
                 ))}
               </select>
             </label>
 
             <label className="xl:col-span-4">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <span className="mb-2 block text-xs font-semibold tracking-normal text-slate-400">
                 Employee
               </span>
               <select
@@ -495,7 +495,7 @@ export default function AccessControlDashboard() {
             </label>
 
             <label className="xl:col-span-4">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <span className="mb-2 block text-xs font-semibold tracking-normal text-slate-400">
                 Matter
               </span>
               <select
@@ -508,14 +508,14 @@ export default function AccessControlDashboard() {
               >
                 {cases.map((caseItem) => (
                   <option key={caseItem.case_id} value={caseItem.case_id}>
-                    {caseItem.case_code ?? `Matter ${caseItem.case_id}`} | {caseItem.title}
+ {caseItem.case_code ?? `Matter ${caseItem.case_id}`} | {caseItem.title}
                   </option>
                 ))}
               </select>
             </label>
 
             <label className="xl:col-span-4">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <span className="mb-2 block text-xs font-semibold tracking-normal text-slate-400">
                 Access label
               </span>
               <input
@@ -557,7 +557,7 @@ export default function AccessControlDashboard() {
                 disabled={saving || loadingOptions || !accessForm.employeeId || !accessForm.caseId}
               >
                 <Save size={16} />
-                {saving ? "Saving..." : "Save Access"}
+ {saving ? "Saving..." : "Save Access"}
               </button>
             </div>
           </form>

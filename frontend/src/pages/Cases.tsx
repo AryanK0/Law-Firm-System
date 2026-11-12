@@ -33,12 +33,12 @@ import {
 } from "../services/api";
 
 const caseStatuses = [
-  "All",
-  "Open",
-  "Drafting",
-  "Hearing Scheduled",
-  "Negotiation",
-  "Closed",
+ "All",
+ "Open",
+ "Drafting",
+ "Hearing Scheduled",
+ "Negotiation",
+ "Closed",
 ];
 
 function mapDetailToRecord(detail: CaseDetailRecord): CaseRecord {
@@ -81,16 +81,16 @@ export default function CasesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    case_code: "",
-    title: "",
-    description: "",
-    client_id: "",
-    case_type: "",
-    lead_partner_id: "",
-    lead_senior_id: "",
-    status: "Open",
-    confidentiality_level: "Internal",
-    start_date: "",
+ case_code: "",
+ title: "",
+ description: "",
+ client_id: "",
+ case_type: "",
+ lead_partner_id: "",
+ lead_senior_id: "",
+ status: "Open",
+ confidentiality_level: "Internal",
+ start_date: "",
   });
 
   const loadData = useCallback(() => {
@@ -104,22 +104,22 @@ export default function CasesPage() {
         setEmployees(employeeData);
         setForm((current) => ({
           ...current,
-          client_id: current.client_id || String(clientData[0]?.client_id ?? ""),
+ client_id: current.client_id || String(clientData[0]?.client_id ?? ""),
           lead_partner_id:
             current.lead_partner_id ||
             String(
               employeeData.find((employee) =>
-                ["Managing Partner", "Partner"].includes(employee.role_name ?? ""),
-              )?.employee_id ?? "",
+ ["Managing Partner", "Partner"].includes(employee.role_name ?? ""),
+ )?.employee_id ?? "",
             ),
           lead_senior_id:
             current.lead_senior_id ||
             String(
               employeeData.find((employee) =>
-                ["Senior Associate", "Associate"].includes(
-                  employee.role_name ?? "",
+ ["Senior Associate", "Associate"].includes(
+ employee.role_name ?? "",
                 ),
-              )?.employee_id ?? "",
+ )?.employee_id ?? "",
             ),
         }));
       })
@@ -136,11 +136,11 @@ export default function CasesPage() {
   }, [loadData]);
 
   const leadPartners = employees.filter((employee) =>
-    ["Managing Partner", "Partner"].includes(employee.role_name ?? ""),
+ ["Managing Partner", "Partner"].includes(employee.role_name ?? ""),
   );
   const leadSeniors = employees.filter((employee) =>
-    ["Senior Associate", "Associate", "Special Counsel"].includes(
-      employee.role_name ?? "",
+ ["Senior Associate", "Associate", "Special Counsel"].includes(
+ employee.role_name ?? "",
     ),
   );
 
@@ -156,7 +156,7 @@ export default function CasesPage() {
         caseItem.lead_partner_name,
       ]
         .filter(Boolean)
-        .join(" ")
+ .join(" ")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
@@ -180,32 +180,32 @@ export default function CasesPage() {
 
   const getStatusBadge = (statusValue: string | null) => {
     switch (statusValue) {
-      case "Hearing Scheduled":
+ case "Hearing Scheduled":
         return {
-          pill: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-          dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]",
+ pill: "border-amber-400/30 bg-amber-500/10 text-amber-300",
+ dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]",
         };
-      case "Open":
-      case "Active":
+ case "Open":
+ case "Active":
         return {
-          pill: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-          dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]",
+ pill: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
+ dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]",
         };
-      case "Drafting":
-      case "Negotiation":
+ case "Drafting":
+ case "Negotiation":
         return {
-          pill: "border-sky-400/30 bg-sky-500/10 text-sky-300",
-          dot: "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]",
+ pill: "border-sky-400/30 bg-sky-500/10 text-sky-300",
+ dot: "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]",
         };
-      case "Closed":
+ case "Closed":
         return {
-          pill: "border-slate-500/30 bg-slate-500/10 text-slate-400",
-          dot: "bg-slate-400",
+ pill: "border-slate-500/30 bg-slate-500/10 text-slate-400",
+ dot: "bg-slate-400",
         };
       default:
         return {
-          pill: "border-white/10 bg-white/5 text-slate-300",
-          dot: "bg-slate-300",
+ pill: "border-white/10 bg-white/5 text-slate-300",
+ dot: "bg-slate-300",
         };
     }
   };
@@ -217,7 +217,7 @@ export default function CasesPage() {
   const handleCreateCase = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!form.title.trim()) {
-      setError("Matter title is required.");
+ setError("Matter title is required.");
       return;
     }
 
@@ -230,7 +230,7 @@ export default function CasesPage() {
         case_code: form.case_code || undefined,
         title: form.title,
         description: form.description || undefined,
-        case_type: form.case_type || "General Practice",
+ case_type: form.case_type || "General Practice",
         client_id: Number(form.client_id) || clients[0]?.client_id || 1,
         lead_partner_id: form.lead_partner_id
           ? Number(form.lead_partner_id)
@@ -245,20 +245,20 @@ export default function CasesPage() {
       });
 
       setCases((current) => [mapDetailToRecord(created), ...current]);
-      setMessage(`Successfully opened ${created.title || "new matter"}.`);
+ setMessage(`Successfully opened ${created.title || "new matter"}.`);
       setShowCreateForm(false);
       setForm((current) => ({
         ...current,
-        case_code: "",
-        title: "",
-        description: "",
-        case_type: "",
-        status: "Open",
-        confidentiality_level: "Internal",
-        start_date: "",
+ case_code: "",
+ title: "",
+ description: "",
+ case_type: "",
+ status: "Open",
+ confidentiality_level: "Internal",
+ start_date: "",
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create case.");
+ setError(err instanceof Error ? err.message : "Could not create case.");
     } finally {
       setSubmitting(false);
     }
@@ -269,9 +269,9 @@ export default function CasesPage() {
       {/* Header Banner */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
-            <Scale size={14} />
-            <span>Practice Management & Litigation</span>
+          <div className="flex items-center gap-2 text-sm font-medium text-ink-muted">
+            <Scale size={15} aria-hidden="true" />
+            <span>Practice management and litigation</span>
           </div>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight font-heading premium-gradient-text md:text-5xl">
             Active Matters
@@ -307,16 +307,16 @@ export default function CasesPage() {
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {user.id === 1
-                ? "Executive Privilege: Complete firm-wide access to all corporate and litigation matters."
+ ? "Executive Privilege: Complete firm-wide access to all corporate and litigation matters."
                 : user.id === 2
-                ? "Partner Authority: Filtered to high-stakes litigation matters where assigned as Lead Partner."
+ ? "Partner Authority: Filtered to high-stakes litigation matters where assigned as Lead Partner."
                 : user.id === 5
-                ? "Senior Counsel: Filtered to active dispute arbitration and defense matters with lead drafting clearance."
+ ? "Senior Counsel: Filtered to active dispute arbitration and defense matters with lead drafting clearance."
                 : user.id === 6
-                ? "Associate Access: Filtered to staffed discovery research and chancery motions under partner supervision."
+ ? "Associate Access: Filtered to staffed discovery research and chancery motions under partner supervision."
                 : user.id === 7
-                ? "Support Access: Partitioned to assigned deposition and filing coordination matters (ABA Model Rule 1.6)."
-                : "Systems Administration: Technical oversight, audit logging, and DBMS infrastructure access."}
+ ? "Support Access: Partitioned to assigned deposition and filing coordination matters (ABA Model Rule 1.6)."
+ : "Systems Administration: Technical oversight, audit logging, and DBMS infrastructure access."}
             </p>
           </div>
         </div>
@@ -332,7 +332,7 @@ export default function CasesPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="card-premium p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold tracking-normal text-slate-400">
               Total Matters
             </span>
             <div className="icon-accent p-2 rounded-xl">
@@ -341,7 +341,7 @@ export default function CasesPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-extrabold font-heading text-white">
-              {loading ? "..." : kpiStats.totalMatters}
+ {loading ? "..." : kpiStats.totalMatters}
             </span>
             <span className="text-xs text-sky-400 font-medium">In Workspace</span>
           </div>
@@ -349,7 +349,7 @@ export default function CasesPage() {
 
         <div className="card-premium p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold tracking-normal text-slate-400">
               Active Hearings
             </span>
             <div className="p-2 rounded-xl border border-amber-400/20 bg-amber-500/10 text-amber-400">
@@ -358,7 +358,7 @@ export default function CasesPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-extrabold font-heading text-white">
-              {loading ? "..." : kpiStats.activeHearings}
+ {loading ? "..." : kpiStats.activeHearings}
             </span>
             <span className="text-xs text-amber-400 font-medium">Scheduled</span>
           </div>
@@ -366,7 +366,7 @@ export default function CasesPage() {
 
         <div className="card-premium p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold tracking-normal text-slate-400">
               Billed Ledger
             </span>
             <div className="p-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 text-emerald-400">
@@ -375,7 +375,7 @@ export default function CasesPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-extrabold font-heading text-white">
-              {loading ? "..." : formatCurrency(kpiStats.totalBilled)}
+ {loading ? "..." : formatCurrency(kpiStats.totalBilled)}
             </span>
             <span className="text-xs text-emerald-400 font-medium">Tracked</span>
           </div>
@@ -383,7 +383,7 @@ export default function CasesPage() {
 
         <div className="card-premium p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold tracking-normal text-slate-400">
               Billable Hours
             </span>
             <div className="p-2 rounded-xl border border-indigo-400/20 bg-indigo-500/10 text-indigo-400">
@@ -392,7 +392,7 @@ export default function CasesPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-extrabold font-heading text-white">
-              {loading ? "..." : `${kpiStats.totalHours.toLocaleString()}h`}
+ {loading ? "..." : `${kpiStats.totalHours.toLocaleString()}h`}
             </span>
             <span className="text-xs text-indigo-400 font-medium">Recorded</span>
           </div>
@@ -422,7 +422,7 @@ export default function CasesPage() {
 
         {/* Filter Chips */}
         <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <span className="mr-1 text-xs font-semibold tracking-normal text-slate-400">
             Filter:
           </span>
           {caseStatuses.map((statusName) => {
@@ -433,9 +433,9 @@ export default function CasesPage() {
                 onClick={() => setStatusFilter(statusName)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
                   isActive
-                    ? "bg-sky-400 text-slate-950 font-semibold shadow-sm shadow-sky-400/30"
-                    : "border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:text-white"
-                }`}
+ ? "bg-sky-400 text-slate-950 font-semibold shadow-sm shadow-sky-400/30"
+ : "border border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:text-white"
+ }`}
               >
                 {statusName}
               </button>
@@ -524,7 +524,7 @@ export default function CasesPage() {
                 <option value="">Select corporate client</option>
                 {clients.map((client) => (
                   <option key={client.client_id} value={client.client_id}>
-                    {client.organization || client.name || `Client #${client.client_id}`}
+ {client.organization || client.name || `Client #${client.client_id}`}
                   </option>
                 ))}
               </select>
@@ -620,7 +620,7 @@ export default function CasesPage() {
               disabled={submitting}
               className="page-button-primary disabled:opacity-60"
             >
-              {submitting ? "Opening Matter..." : "Confirm & Open Matter"}
+ {submitting ? "Opening Matter..." : "Confirm & Open Matter"}
             </button>
           </div>
         </form>
@@ -647,31 +647,31 @@ export default function CasesPage() {
                   <div className="flex-1 space-y-3">
                     {/* Top tags row */}
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="font-mono text-xs font-semibold tracking-wider px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-400/20">
-                        {formatCaseCode(caseItem.case_code, `MATTER-${caseItem.case_id}`)}
+                      <span className="text-xs font-semibold tracking-normal px-2.5 py-1 rounded-md bg-paper-3 text-accent border border-rule">
+ {formatCaseCode(caseItem.case_code, `MATTER-${caseItem.case_id}`)}
                       </span>
 
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-medium border ${badge.pill}`}
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${badge.dot}`} />
-                        <span>{caseItem.status || "Open"}</span>
+ <span>{caseItem.status || "Open"}</span>
                       </span>
 
                       <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-white/5 text-slate-300 border border-white/10">
                         <Shield size={11} className="text-slate-400" />
-                        <span>{caseItem.confidentiality_level || "Internal"}</span>
+ <span>{caseItem.confidentiality_level || "Internal"}</span>
                       </span>
                     </div>
 
                     {/* Title */}
                     <h3 className="text-xl font-bold font-heading text-white group-hover:text-sky-300 transition-colors">
-                      {caseItem.title || "Untitled Matter"}
+ {caseItem.title || "Untitled Matter"}
                     </h3>
 
                     {/* Description */}
                     <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">
-                      {caseItem.description || "No formal brief documented."}
+ {caseItem.description || "No formal brief documented."}
                     </p>
 
                     {/* Metadata chips */}
@@ -679,12 +679,12 @@ export default function CasesPage() {
                       <div className="flex items-center gap-1.5">
                         <Building2 size={14} className="text-sky-400" />
                         <span className="text-slate-300 font-medium">
-                          {caseItem.client_name || "General Client"}
+ {caseItem.client_name || "General Client"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Scale size={14} className="text-indigo-400" />
-                        <span>{caseItem.case_type || "General Practice"}</span>
+ <span>{caseItem.case_type || "General Practice"}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Calendar size={14} className="text-slate-500" />
@@ -693,7 +693,7 @@ export default function CasesPage() {
                       <div className="flex items-center gap-1.5">
                         <span className="text-slate-500">Lead:</span>
                         <span className="text-slate-300 font-medium">
-                          {caseItem.lead_partner_name || "Unassigned"}
+ {caseItem.lead_partner_name || "Unassigned"}
                         </span>
                       </div>
                     </div>
@@ -702,7 +702,7 @@ export default function CasesPage() {
                   {/* Financial & Team metrics panel */}
                   <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2 lg:w-64 shrink-0">
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 text-[11px] uppercase tracking-wider text-slate-400">
+                      <div className="flex items-center justify-center gap-1 text-[11px] tracking-normal text-slate-400">
                         <Users size={12} />
                         <span>Counsel</span>
                       </div>
@@ -712,7 +712,7 @@ export default function CasesPage() {
                     </div>
 
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 text-[11px] uppercase tracking-wider text-slate-400">
+                      <div className="flex items-center justify-center gap-1 text-[11px] tracking-normal text-slate-400">
                         <FileText size={12} />
                         <span>Documents</span>
                       </div>
@@ -722,7 +722,7 @@ export default function CasesPage() {
                     </div>
 
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
-                      <span className="text-[11px] uppercase tracking-wider text-slate-400">
+                      <span className="text-[11px] tracking-normal text-slate-400">
                         Billed
                       </span>
                       <p className="mt-1 text-base font-bold font-heading text-emerald-400">
@@ -731,7 +731,7 @@ export default function CasesPage() {
                     </div>
 
                     <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-center">
-                      <span className="text-[11px] uppercase tracking-wider text-slate-400">
+                      <span className="text-[11px] tracking-normal text-slate-400">
                         Hours
                       </span>
                       <p className="mt-1 text-base font-bold font-heading text-sky-400">
@@ -764,8 +764,8 @@ export default function CasesPage() {
             {searchTerm || statusFilter !== "All" ? (
               <button
                 onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("All");
+ setSearchTerm("");
+ setStatusFilter("All");
                 }}
                 className="page-button-secondary text-xs mt-4 px-4 py-2"
               >

@@ -21,7 +21,7 @@ import { useAuth } from "./AuthContext";
 
 function getVisibleFileName(document: DocumentRecord) {
   const fileName = document.file_name ?? document.file_path?.split("/").pop() ?? "Unknown file";
-  return fileName.replace(/^[a-f0-9]{32}_/i, "");
+ return fileName.replace(/^[a-f0-9]{32}_/i, "");
 }
 
 export default function DocumentsPage() {
@@ -142,12 +142,12 @@ export default function DocumentsPage() {
   // Direct S3 Upload via Pre-Signed URL pipeline
   const handleUpload = async () => {
     if (!queuedFiles.length) {
-      setError("Choose at least one file before uploading.");
+ setError("Choose at least one file before uploading.");
       return;
     }
 
     if (!caseId) {
-      setError("Select a matter before uploading documents.");
+ setError("Select a matter before uploading documents.");
       return;
     }
 
@@ -163,13 +163,13 @@ export default function DocumentsPage() {
       const refreshedDocuments = await getDocuments(user.id);
       setDocuments(refreshedDocuments);
       setMessage(
-        `Successfully uploaded ${queuedFiles.length} file${
-          queuedFiles.length > 1 ? "s" : ""
-        } via direct S3 pre-signed channel with AES-256 envelope encryption. OCR and search indexing queued.`,
+ `Successfully uploaded ${queuedFiles.length} file${
+ queuedFiles.length > 1 ? "s" : ""
+ } via direct S3 pre-signed channel with AES-256 envelope encryption. OCR and search indexing queued.`,
       );
       setQueuedFiles([]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed.");
+ setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
     }
@@ -180,7 +180,7 @@ export default function DocumentsPage() {
     if (!caseId) return;
 
     if (targetHold && !holdReason.trim()) {
-      setError("A formal justification reason is required to enact a Legal Hold.");
+ setError("A formal justification reason is required to enact a Legal Hold.");
       return;
     }
 
@@ -192,17 +192,17 @@ export default function DocumentsPage() {
       const result = await setCaseLegalHold(
         Number(caseId),
         targetHold,
-        targetHold ? holdReason.trim() : "Hold released by authorized partner",
+ targetHold ? holdReason.trim() : "Hold released by authorized partner",
       );
       setLegalHold(result);
-      setHoldReason("");
+ setHoldReason("");
       setMessage(
         targetHold
-          ? `WORM Compliance Enforced: Matter #${caseId} placed on Legal Hold. All document mutations locked.`
-          : `Matter #${caseId} Legal Hold lifted. Document operations restored to normal policy.`,
+ ? `WORM Compliance Enforced: Matter #${caseId} placed on Legal Hold. All document mutations locked.`
+ : `Matter #${caseId} Legal Hold lifted. Document operations restored to normal policy.`,
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update Legal Hold status.");
+ setError(err instanceof Error ? err.message : "Failed to update Legal Hold status.");
     } finally {
       setTogglingHold(false);
     }
@@ -226,26 +226,26 @@ export default function DocumentsPage() {
       );
       setSearchResults(results.hits);
       if (results.hits.length === 0) {
-        setMessage(`No documents found matching "${searchQuery.trim()}".`);
+ setMessage(`No documents found matching "${searchQuery.trim()}".`);
       } else {
         setMessage(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Search query failed.");
+ setError(err instanceof Error ? err.message : "Search query failed.");
     } finally {
       setSearching(false);
     }
   };
 
   const handleClearSearch = () => {
-    setSearchQuery("");
+ setSearchQuery("");
     setSearchResults(null);
   };
 
   // Document Deletion with WORM Compliance Enforcement
   const handleDeleteDocument = async (doc: DocumentRecord) => {
     const fileName = getVisibleFileName(doc);
-    if (!window.confirm(`Are you sure you want to delete "${fileName}"?`)) {
+ if (!window.confirm(`Are you sure you want to delete "${fileName}"?`)) {
       return;
     }
 
@@ -255,14 +255,14 @@ export default function DocumentsPage() {
 
     try {
       await deleteDocument(doc.document_id);
-      setMessage(`Document "${fileName}" deleted successfully.`);
+ setMessage(`Document "${fileName}" deleted successfully.`);
       const refreshedDocuments = await getDocuments(user.id);
       setDocuments(refreshedDocuments);
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : "Failed to delete document.";
-      if (errMsg.includes("423") || errMsg.toLowerCase().includes("legal hold") || errMsg.includes("WORM")) {
+ if (errMsg.includes("423") || errMsg.toLowerCase().includes("legal hold") || errMsg.includes("WORM")) {
         setError(
-          `🚨 WORM COMPLIANCE BLOCKED: Document is under active Legal Hold for this matter. Deletion prohibited (HTTP 423 Locked). SOC-2 compliance violation recorded.`,
+ `🚨 WORM COMPLIANCE BLOCKED: Document is under active Legal Hold for this matter. Deletion prohibited (HTTP 423 Locked). SOC-2 compliance violation recorded.`,
         );
       } else {
         setError(errMsg);
@@ -299,7 +299,7 @@ export default function DocumentsPage() {
       {/* Case Selector and Confidentiality Selection */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label className="mb-1 block text-xs font-medium tracking-normal text-muted-foreground">
             Target Matter
           </label>
           <select
@@ -310,15 +310,15 @@ export default function DocumentsPage() {
             <option value="">All Matters</option>
             {cases.map((caseItem) => (
               <option key={caseItem.case_id} value={caseItem.case_id}>
-                {formatCaseCode(caseItem.case_code, `Matter #${caseItem.case_id}`)} -{" "}
-                {caseItem.title || "Untitled matter"}
+ {formatCaseCode(caseItem.case_code, `Matter #${caseItem.case_id}`)} -{" "}
+ {caseItem.title || "Untitled matter"}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label className="mb-1 block text-xs font-medium tracking-normal text-muted-foreground">
             Confidentiality Level
           </label>
           <select
@@ -338,18 +338,18 @@ export default function DocumentsPage() {
         <div
           className={`card-premium p-6 smooth-transition ${
             legalHold?.legal_hold
-              ? "border-amber-500/30 bg-amber-500/5 shadow-[0_0_25px_rgba(245,158,11,0.12)]"
-              : "border-white/5"
-          }`}
+ ? "border-amber-500/30 bg-amber-500/5 "
+ : "border-white/5"
+ }`}
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
               <div
                 className={`rounded-xl p-3 ${
                   legalHold?.legal_hold
-                    ? "bg-amber-500/20 text-amber-400"
-                    : "bg-white/5 text-muted-foreground"
-                }`}
+ ? "bg-amber-500/20 text-amber-400"
+ : "bg-white/5 text-muted-foreground"
+ }`}
               >
                 {legalHold?.legal_hold ? <ShieldAlert size={26} /> : <Lock size={26} />}
               </div>
@@ -357,28 +357,28 @@ export default function DocumentsPage() {
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-bold text-foreground">
                     {legalHold?.legal_hold
-                      ? "WORM COMPLIANCE ACTIVE: Legal Hold Enforced"
-                      : "Legal Hold Status: Inactive"}
+ ? "WORM COMPLIANCE ACTIVE: Legal Hold Enforced"
+ : "Legal Hold Status: Inactive"}
                   </h3>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold tracking-normal ${
                       legalHold?.legal_hold
-                        ? "bg-amber-500/20 text-amber-300"
-                        : "bg-white/10 text-muted-foreground"
-                    }`}
+ ? "bg-amber-500/20 text-amber-300"
+ : "bg-white/10 text-muted-foreground"
+ }`}
                   >
-                    {legalHold?.legal_hold ? "WORM Locked" : "Standard Policy"}
+ {legalHold?.legal_hold ? "WORM Locked" : "Standard Policy"}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {legalHold?.legal_hold
-                    ? `Reason: "${legalHold.legal_hold_reason || "Litigation hold active"}". All files for this matter are Write-Once-Read-Many (WORM) immutable. File deletion or modification is strictly prohibited.`
-                    : "Standard document lifecycle. File deletion allowed subject to access permissions."}
+ ? `Reason: "${legalHold.legal_hold_reason || "Litigation hold active"}". All files for this matter are Write-Once-Read-Many (WORM) immutable. File deletion or modification is strictly prohibited.`
+ : "Standard document lifecycle. File deletion allowed subject to access permissions."}
                 </p>
                 {legalHold?.legal_hold && legalHold.legal_hold_at && (
                   <p className="mt-1 text-xs text-amber-400/80">
                     Enacted: {formatDateTime(legalHold.legal_hold_at)}
-                    {legalHold.legal_hold_by ? ` (Officer #${legalHold.legal_hold_by})` : ""}
+ {legalHold.legal_hold_by ? ` (Officer #${legalHold.legal_hold_by})` : ""}
                   </p>
                 )}
               </div>
@@ -394,7 +394,7 @@ export default function DocumentsPage() {
                     disabled={togglingHold}
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/20 smooth-transition disabled:opacity-50"
                   >
-                    {togglingHold ? "Releasing..." : "Release Legal Hold"}
+ {togglingHold ? "Releasing..." : "Release Legal Hold"}
                   </button>
                 ) : (
                   <div className="flex w-full items-center gap-2 sm:w-auto">
@@ -411,7 +411,7 @@ export default function DocumentsPage() {
                       disabled={togglingHold || !holdReason.trim()}
                       className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/15 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-500/25 smooth-transition disabled:opacity-50"
                     >
-                      {togglingHold ? "Applying..." : "Apply Legal Hold"}
+ {togglingHold ? "Applying..." : "Apply Legal Hold"}
                     </button>
                   </div>
                 )}
@@ -460,14 +460,14 @@ export default function DocumentsPage() {
             disabled={searching || !searchQuery.trim()}
             className="page-button-primary shrink-0 disabled:opacity-50"
           >
-            {searching ? "Searching..." : "e-Discovery"}
+ {searching ? "Searching..." : "e-Discovery"}
           </button>
         </form>
 
         {/* Search Results Display */}
         {searchResults && (
           <div className="mt-6 space-y-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="text-xs font-semibold tracking-normal text-muted-foreground">
               Matches Found: {searchResults.length}
             </div>
             {searchResults.length === 0 ? (
@@ -492,7 +492,7 @@ export default function DocumentsPage() {
                             {formatCaseCode(hit.case_code)}
                           </span>
                         )}
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-mono font-medium text-primary">
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] num font-medium text-primary">
                           Score: {hit.score}
                         </span>
                       </div>
@@ -523,9 +523,9 @@ export default function DocumentsPage() {
         onDrop={handleDrop}
         className={`card-premium border-2 border-dashed p-10 text-center smooth-transition ${
           dragActive
-            ? "border-primary bg-primary/5 shadow-[0_0_25px_rgba(34,211,238,0.15)]"
-            : "border-white/10 hover:border-white/20"
-        }`}
+ ? "border-primary bg-primary/5 "
+ : "border-white/10 hover:border-white/20"
+ }`}
       >
         <div className="mx-auto max-w-md">
           <div className="mb-4 flex justify-center">
@@ -550,9 +550,9 @@ export default function DocumentsPage() {
             <span className="page-button-primary cursor-pointer">Browse Files</span>
           </label>
           <div className="mt-4 flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
-            <span>• Pre-Signed PUT URLs</span>
-            <span>• Envelope AES-256</span>
-            <span>• Background OCR</span>
+            <span>Pre-Signed PUT URLs</span>
+            <span>Envelope AES-256</span>
+            <span>Background OCR</span>
           </div>
           {selectedCase && (
             <p className="mt-2 text-xs font-medium text-primary">
@@ -588,7 +588,7 @@ export default function DocumentsPage() {
               disabled={uploading}
               className="page-button-primary disabled:opacity-60"
             >
-              {uploading ? "Encrypting & Uploading..." : "Process Direct S3 Upload"}
+ {uploading ? "Encrypting & Uploading..." : "Process Direct S3 Upload"}
             </button>
           </div>
 
@@ -603,7 +603,7 @@ export default function DocumentsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type || "binary"}
+ {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type || "binary"}
                       </p>
                     </div>
                   </div>
@@ -630,7 +630,7 @@ export default function DocumentsPage() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-bold text-foreground">
-              {selectedCase ? `Repository for ${selectedCase.title}` : "All Enterprise Documents"}
+ {selectedCase ? `Repository for ${selectedCase.title}` : "All Enterprise Documents"}
             </h2>
             <p className="text-sm text-muted-foreground">
               {visibleDocuments.length} document{visibleDocuments.length === 1 ? "" : "s"} indexed in
@@ -649,19 +649,19 @@ export default function DocumentsPage() {
             <table className="w-full">
               <thead className="border-b border-white/5 bg-white/[0.02]">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Document
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Matter
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Security & Compliance
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Uploaded
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-6 py-4 text-right text-xs font-semibold tracking-normal text-muted-foreground">
                     Actions
                   </th>
                 </tr>
@@ -701,7 +701,7 @@ export default function DocumentsPage() {
                       <td className="px-6 py-4 text-sm font-medium text-muted-foreground">
                         {document.case_code
                           ? formatCaseCode(document.case_code)
-                          : document.case_title || "Unlinked"}
+ : document.case_title || "Unlinked"}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -717,7 +717,7 @@ export default function DocumentsPage() {
                             </span>
                           )}
                           <span className="rounded bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-                            {document.confidentiality_level || "Internal"}
+ {document.confidentiality_level || "Internal"}
                           </span>
                         </div>
                       </td>

@@ -27,7 +27,7 @@ import { formatDateTime } from "../lib/format";
 const QUICK_QUERIES = [
   'Titan Industries',
   'Acme AND Patent',
-  '"Global Logistics" OR Apex',
+ '"Global Logistics" OR Apex',
   'Nova NOT Construction',
 ];
 
@@ -78,21 +78,21 @@ export default function ConflictCheck() {
   const handleRunSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!query && !proposedClient && !proposedAdverse) {
-      setError("Please specify a search query or a proposed client / adverse party.");
+ setError("Please specify a search query or a proposed client / adverse party.");
       return;
     }
     try {
       setLoading(true);
       setError(null);
       const res = await checkConflict({
-        query: query.trim() || proposedClient.trim() || "Conflict Query",
+ query: query.trim() || proposedClient.trim() || "Conflict Query",
         target_matter_type: matterType,
         proposed_client_name: proposedClient.trim() || undefined,
         proposed_adverse_party: proposedAdverse.trim() || undefined,
       });
       setConflictResult(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Conflict check failed");
+ setError(err instanceof Error ? err.message : "Conflict check failed");
     } finally {
       setLoading(false);
     }
@@ -109,15 +109,15 @@ export default function ConflictCheck() {
         party_type: newPartyType,
         corporate_affiliate: newAffiliate.trim() || undefined,
       });
-      setPartySuccess(`Registered adverse party: ${newPartyName.trim()}`);
+ setPartySuccess(`Registered adverse party: ${newPartyName.trim()}`);
       setShowAddPartyModal(false);
-      setNewPartyName("");
-      setNewAffiliate("");
+ setNewPartyName("");
+ setNewAffiliate("");
       // Refresh adverse parties
       const updated = await getCaseAdverseParties(selectedCaseId);
       setAdverseParties(updated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to register adverse party");
+ setError(err instanceof Error ? err.message : "Failed to register adverse party");
     } finally {
       setSubmittingParty(false);
     }
@@ -125,33 +125,33 @@ export default function ConflictCheck() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "CLEARED":
-        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
-      case "CONFLICT_DETECTED":
-        return "bg-red-500/20 text-red-300 border-red-500/30";
-      case "REQUIRES_ETHICAL_WALL":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/30";
-      case "REVIEW_RECOMMENDED":
-        return "bg-sky-500/20 text-sky-300 border-sky-500/30";
+ case "CLEARED":
+ return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+ case "CONFLICT_DETECTED":
+ return "bg-red-500/20 text-red-300 border-red-500/30";
+ case "REQUIRES_ETHICAL_WALL":
+ return "bg-amber-500/20 text-amber-300 border-amber-500/30";
+ case "REVIEW_RECOMMENDED":
+ return "bg-sky-500/20 text-sky-300 border-sky-500/30";
       default:
-        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+ return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
   };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
-      case "CRITICAL":
-        return "bg-red-500/20 text-red-400 border border-red-500/30";
-      case "HIGH":
-        return "bg-rose-500/20 text-rose-300 border border-rose-500/30";
-      case "MEDIUM":
-        return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-      case "ETHICAL_WALL_REQUIRED":
-        return "bg-orange-500/20 text-orange-300 border border-orange-500/30";
-      case "LOW":
-        return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
+ case "CRITICAL":
+ return "bg-red-500/20 text-red-400 border border-red-500/30";
+ case "HIGH":
+ return "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+ case "MEDIUM":
+ return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+ case "ETHICAL_WALL_REQUIRED":
+ return "bg-orange-500/20 text-orange-300 border border-orange-500/30";
+ case "LOW":
+ return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
       default:
-        return "bg-slate-500/20 text-slate-300 border border-slate-500/30";
+ return "bg-slate-500/20 text-slate-300 border border-slate-500/30";
     }
   };
 
@@ -202,7 +202,7 @@ export default function ConflictCheck() {
       <section className="card-premium p-6 space-y-5">
         <form onSubmit={handleRunSearch} className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="block text-xs font-semibold tracking-normal text-slate-400">
               Boolean Query Search Bar
             </label>
             <div className="relative">
@@ -212,7 +212,7 @@ export default function ConflictCheck() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder='e.g. "Apex Corp" AND Patents OR "Titan Industries"'
-                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-primary placeholder:text-slate-500 font-mono"
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-foreground focus:outline-none focus:border-primary placeholder:text-slate-500 num"
               />
               <Search
                 size={18}
@@ -230,7 +230,7 @@ export default function ConflictCheck() {
                   onClick={() => {
                     setQuery(q);
                   }}
-                  className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-mono text-cyan-400 hover:border-primary/50 hover:bg-primary/10 transition"
+                  className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] num text-cyan-400 hover:border-primary/50 hover:bg-primary/10 transition"
                 >
                   {q}
                 </button>
@@ -241,7 +241,7 @@ export default function ConflictCheck() {
           {/* Direct Adversity Parameters */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 pt-2">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                 Proposed Client Name
               </label>
               <input
@@ -255,7 +255,7 @@ export default function ConflictCheck() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                 Proposed Adverse Party
               </label>
               <input
@@ -269,7 +269,7 @@ export default function ConflictCheck() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                 Target Matter Type
               </label>
               <select
@@ -294,7 +294,7 @@ export default function ConflictCheck() {
               className="page-button-primary flex items-center gap-2 text-sm"
             >
               <FileSearch size={16} className={loading ? "animate-spin" : ""} />
-              {loading ? "Scanning Inverted Index..." : "Run Comprehensive Conflict Search"}
+ {loading ? "Scanning Inverted Index..." : "Run Comprehensive Conflict Search"}
             </button>
           </div>
         </form>
@@ -307,16 +307,16 @@ export default function ConflictCheck() {
           <div className="card-premium p-6 border-white/10 space-y-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-white/10 pb-4">
               <div>
-                <span className="text-xs font-mono uppercase tracking-widest text-slate-400">
+                <span className="text-xs num tracking-normal text-slate-400">
                   Conflict Assessment Result
                 </span>
                 <div className="mt-1 flex items-center gap-3">
                   <span
-                    className={`rounded-full border px-4 py-1.5 text-sm font-bold uppercase tracking-wider ${getStatusColor(
+                    className={`rounded-full border px-4 py-1.5 text-sm font-bold tracking-normal ${getStatusColor(
                       conflictResult.status
-                    )}`}
+ )}`}
                   >
-                    {conflictResult.status.replace(/_/g, " ")}
+ {conflictResult.status.replace(/_/g, " ")}
                   </span>
                   <span className="text-xs text-slate-400">
                     Checked {formatDateTime(conflictResult.checked_at)}
@@ -327,32 +327,32 @@ export default function ConflictCheck() {
               {/* Risk Meter */}
               <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-2xl px-5 py-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-400">Ethical Risk Score</p>
+                  <p className="text-[10px] tracking-normal text-slate-400">Ethical Risk Score</p>
                   <p
                     className={`text-2xl font-black ${
                       conflictResult.risk_score >= 70
-                        ? "text-red-400"
+ ? "text-red-400"
                         : conflictResult.risk_score >= 40
-                        ? "text-amber-400"
+ ? "text-amber-400"
                         : conflictResult.risk_score > 0
-                        ? "text-sky-400"
-                        : "text-emerald-400"
-                    }`}
+ ? "text-sky-400"
+ : "text-emerald-400"
+ }`}
                   >
                     {conflictResult.risk_score} / 100
                   </p>
                 </div>
                 <div className="h-10 w-24 rounded-full bg-white/5 overflow-hidden flex items-end p-1">
                   <div
-                    className={`w-full rounded-full transition-all duration-700 ${
+                    className={`w-full rounded-full transition-colors duration-700 ${
                       conflictResult.risk_score >= 70
-                        ? "bg-red-500"
+ ? "bg-red-500"
                         : conflictResult.risk_score >= 40
-                        ? "bg-amber-500"
+ ? "bg-amber-500"
                         : conflictResult.risk_score > 0
-                        ? "bg-sky-500"
-                        : "bg-emerald-500"
-                    }`}
+ ? "bg-sky-500"
+ : "bg-emerald-500"
+ }`}
                     style={{ height: `${Math.max(10, conflictResult.risk_score)}%` }}
                   />
                 </div>
@@ -362,7 +362,7 @@ export default function ConflictCheck() {
             {/* Ethical Rules Citation & Screening */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-semibold tracking-normal text-slate-400">
                   Applicable ABA Model Rule
                 </p>
                 <p className="mt-1 text-sm font-bold text-foreground">
@@ -372,13 +372,13 @@ export default function ConflictCheck() {
 
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-xs font-semibold tracking-normal text-slate-400">
                     Ethical Wall Requirement
                   </p>
                   <p className="mt-1 text-sm font-semibold text-slate-200">
                     {conflictResult.ethical_wall_required
-                      ? "Mandatory Ethical Screen (Rule 1.10)"
-                      : "No Ethical Screen Required"}
+ ? "Mandatory Ethical Screen (Rule 1.10)"
+ : "No Ethical Screen Required"}
                   </p>
                 </div>
                 {conflictResult.ethical_wall_required ? (
@@ -395,7 +395,7 @@ export default function ConflictCheck() {
 
             {/* Official Recommendation Box */}
             <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              <p className="text-xs font-semibold tracking-normal text-cyan-400">
                 Ethical Advisory Recommendation
               </p>
               <p className="text-sm text-slate-200 leading-relaxed">
@@ -410,8 +410,8 @@ export default function ConflictCheck() {
               <h3 className="text-lg font-bold text-foreground">
                 Matched Conflict Entities ({conflictResult.match_count})
               </h3>
-              <span className="text-xs font-mono text-slate-400">
-                Parsed Tokens: {conflictResult.search_terms.join(", ") || "—"}
+              <span className="text-xs num text-slate-400">
+ Parsed Tokens: {conflictResult.search_terms.join(", ") || "—"}
               </span>
             </div>
 
@@ -438,8 +438,8 @@ export default function ConflictCheck() {
                         )}
                       </div>
                       {match.case_id && (
-                        <span className="text-xs font-mono text-primary">
-                          Case #{match.case_id} {match.case_title ? `• ${match.case_title}` : ""}
+                        <span className="text-xs num text-primary">
+ Case #{match.case_id} {match.case_title ? `• ${match.case_title}` : ""}
                         </span>
                       )}
                     </div>
@@ -488,7 +488,7 @@ export default function ConflictCheck() {
             >
               {cases.map((c) => (
                 <option key={c.case_id} value={c.case_id} className="bg-slate-900 text-white">
-                  {c.case_code || `#${c.case_id}`} - {c.title}
+ {c.case_code || `#${c.case_id}`} - {c.title}
                 </option>
               ))}
             </select>
@@ -522,7 +522,7 @@ export default function ConflictCheck() {
               <tbody>
                 {adverseParties.map((p) => (
                   <tr key={p.party_id} className="border-t border-white/5 hover:bg-white/[0.02]">
-                    <td className="px-4 py-2.5 text-slate-400 font-mono">#{p.party_id}</td>
+                    <td className="px-4 py-2.5 text-slate-400 num">#{p.party_id}</td>
                     <td className="px-4 py-2.5 font-bold text-foreground">{p.party_name}</td>
                     <td className="px-4 py-2.5">
                       <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold text-rose-300">
@@ -536,7 +536,7 @@ export default function ConflictCheck() {
                           {p.corporate_affiliate}
                         </span>
                       ) : (
-                        "—"
+ "—"
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-slate-400">{formatDateTime(p.added_at)}</td>
@@ -547,7 +547,7 @@ export default function ConflictCheck() {
           </div>
         ) : (
           <div className="rounded-xl border border-white/10 bg-white/[0.01] p-6 text-center text-xs text-slate-400">
-            No adverse parties registered for this matter yet. Click "Register Adverse Party" above to record one.
+ No adverse parties registered for this matter yet. Click "Register Adverse Party" above to record one.
           </div>
         )}
       </section>
@@ -572,7 +572,7 @@ export default function ConflictCheck() {
 
             <form onSubmit={handleAddPartySubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                   Adverse Party / Entity Name
                 </label>
                 <input
@@ -587,7 +587,7 @@ export default function ConflictCheck() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                     Party Type / Role
                   </label>
                   <select
@@ -604,7 +604,7 @@ export default function ConflictCheck() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold tracking-normal text-slate-400 mb-1">
                     Corporate Affiliate (Optional)
                   </label>
                   <input
@@ -630,7 +630,7 @@ export default function ConflictCheck() {
                   disabled={submittingParty}
                   className="page-button-primary text-xs"
                 >
-                  {submittingParty ? "Saving..." : "Register Adverse Party"}
+ {submittingParty ? "Saving..." : "Register Adverse Party"}
                 </button>
               </div>
             </form>

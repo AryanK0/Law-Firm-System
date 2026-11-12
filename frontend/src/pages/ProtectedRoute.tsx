@@ -25,11 +25,16 @@ export default function ProtectedRoute({
 
   if (blockedByLevel || blockedByRole) {
     return (
-      <div className="card-premium p-8 border" style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.05)" }}>
-        <p className="eyebrow mb-3" style={{ color: "#f87171" }}>Access Restricted</p>
-        <h2 className="text-2xl font-bold text-white mb-2">Permission Denied</h2>
-        <p className="text-sm text-slate-400 max-w-xl">
-          Your current role (<strong className="text-white">{user.role}</strong>) does not have permission to access this section.
+      <div
+        className="card-premium p-8 border"
+        style={{
+          borderColor: "color-mix(in oklab, var(--color-error) 28%, transparent)",
+          backgroundColor: "color-mix(in oklab, var(--color-error) 8%, var(--color-paper-2))",
+        }}
+      >
+        <h2 className="text-2xl font-medium text-ink mb-2">Permission Denied</h2>
+        <p className="text-sm text-ink-2 max-w-xl">
+          Your current role (<strong className="text-ink">{user.role}</strong>) does not have permission to access this section.
           Contact your system administrator if you believe this is an error.
         </p>
       </div>

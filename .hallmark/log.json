@@ -1,0 +1,32 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Conversational FAQ",
+  "theme": "Dusk",
+  "axes": "dark/grotesk-sans/cool",
+  "hero": "Stage",
+  "nav": "floating pill",
+  "footer": "letter close",
+  "imagery": "photographs, library 1, natural",
+  "photos": [
+   "Desna river Vinn meadow 2016 G9.jpg"
+  ],
+  "entry": "index.css",
+  "fingerprint": "Hanging|Two-column asymmetric|Hairline|Solid|Full-bleed|None",
+  "sections": [
+   "Hero (Stage)",
+   "Figures",
+   "Switcher",
+   "Band (Bone Well)",
+   "Conversational FAQ",
+   "Close Band",
+   "Footer"
+  ],
+  "signature": "Smoked-glass IOLTA fiduciary ledger run inside Dusk hero",
+  "waived": [],
+  "prompt": "Pearson Specter Litt Legal Operations Platform & IOLTA Trust Engine",
+  "date": "2026-11-12"
+ }
+]
