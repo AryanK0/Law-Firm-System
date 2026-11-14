@@ -26,7 +26,7 @@ public class EnterpriseSystemRunner {
     public static void main(String[] args) {
         System.out.println("===============================================================================");
         System.out.println("  PEARSON SPECTER LITT | ENTERPRISE SYSTEM DIAGNOSTICS SUITE");
-        System.out.println("  Production Verification & Health Check (Java 21 LTS + MySQL 8.3)");
+        System.out.println("  Production Verification & Health Check (Java 25 LTS + MySQL 8.3)");
         System.out.println("===============================================================================\n");
 
         LoggerUtil.initialize();

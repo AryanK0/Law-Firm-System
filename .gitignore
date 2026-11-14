@@ -7,15 +7,27 @@ __pycache__/
 .codex-temp/
 npm-debug.log*
 vite-start*.log
+# Local environment files and deployment secrets.
 .env
-.env.local
+.env.*
+!.env.example
 frontend/.env
-frontend/.env.local
+frontend/.env.*
+!frontend/.env.example
 backend/.env
+backend/.env.*
+!backend/.env.example
 uploads/
 *.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
 
-.vercel
+.vercel/
 storage/
+
+# Local tooling, test caches, and runtime output.
+.pytest_cache/
+.history/
+backend-java/logs/
+backend-java/target/
+backend-java/storage/

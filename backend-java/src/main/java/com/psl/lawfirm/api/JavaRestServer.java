@@ -91,7 +91,7 @@ public class JavaRestServer {
         public void handle(HttpExchange exchange) throws IOException {
             Map<String, Object> resp = new HashMap<>();
             resp.put("status", "ONLINE");
-            resp.put("engine", "Core Java 21 Enterprise Server");
+            resp.put("engine", "Core Java 25 Enterprise Server");
             resp.put("platform", "Pearson Specter Litt Legal Platform");
             resp.put("version", "2.4.0-PROD");
             resp.put("databaseConnected", DatabaseConfig.testConnection());

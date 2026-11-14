@@ -142,7 +142,7 @@ export default function App() {
                 <span className="font-semibold text-ink-2">Pearson Specter Litt Legal Operations</span>
                 <div className="flex items-center gap-4 text-xs text-ink-muted">
                   <span>v2.5</span>
-                  <span>Java 21 LTS</span>
+                  <span>Java 25 LTS</span>
                   <span>MySQL 8.3</span>
                   <button
                     type="button"

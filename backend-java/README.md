@@ -1,6 +1,6 @@
 # Pearson Specter Litt | Enterprise Legal Management System (Core Platform)
 
-A mission-critical enterprise legal practice management and governance platform engineered with **Java 21 LTS**, **MySQL 8.3 Enterprise**, **JDBC Data Access Object (DAO) Layer**, and **JavaFX 21 Desktop Console**.
+A mission-critical enterprise legal practice management and governance platform engineered with **Java 25 LTS**, **MySQL 8.3 Enterprise**, **JDBC Data Access Object (DAO) Layer**, and **JavaFX 25 Desktop Console**.
 
 ---
 
@@ -12,7 +12,7 @@ The system is architected as a modular, high-throughput legal practice managemen
 +-------------------------------------------------------------------------+
 |                  Enterprise Presentation Tier                           |
 |  - Web Console (React 19 + TypeScript + Vite)                           |
-|  - Desktop Console (JavaFX 21 OpenJFX with BorderPane, TableView)       |
+|  - Desktop Console (JavaFX 25 OpenJFX with BorderPane, TableView)       |
 +------------------------------------+------------------------------------+
                                      |
 +------------------------------------+------------------------------------+
@@ -53,7 +53,7 @@ The system is architected as a modular, high-throughput legal practice managemen
    - **Byte Streams**: Bit-for-bit secure file vaulting via `FileInputStream` and `FileOutputStream`.
    - **Object Serialization**: Complete binary cluster snapshots and state restoration via `ObjectOutputStream` and `ObjectInputStream`.
 
-4. **Institutional Desktop Operations Console (JavaFX 21)**
+4. **Institutional Desktop Operations Console (JavaFX 25)**
    - Real-time `TableView` with dynamic matter sorting and search filtering.
    - Matter initiation forms with live validation dialogs and alert notifications.
    - On-demand snapshot serialization and CSV auditing triggers.
@@ -61,6 +61,14 @@ The system is architected as a modular, high-throughput legal practice managemen
 ---
 
 ## 🚀 Execution & Verification
+
+**Prerequisites:** Install a Java 25 JDK and Maven, set `JAVA_HOME` to the JDK 25 installation, and make both `java`/`javac` and `mvn` available on `PATH`. The launch scripts resolve current dependencies from `pom.xml`.
+
+Compile production and test sources, then run the test suite:
+```cmd
+cd backend-java
+mvn clean test
+```
 
 ### 1. System Health & Diagnostics Runner
 Validates end-to-end database connectivity, transaction rollback isolation, collection pipelines, and streaming persistence:

@@ -1,10 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "JDK_BIN=C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin"
-if exist "%JDK_BIN%\java.exe" (
-    set "PATH=%JDK_BIN%;%PATH%"
-)
+if defined JAVA_HOME set "PATH=%JAVA_HOME%\bin;%PATH%"
 
 cd /d "%~dp0"
 
@@ -14,7 +11,7 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-set "CP=target\classes;lib\*"
+set "CP=target\classes;target\dependency\*"
 
 echo Starting Enterprise System Verification Runner...
 java -cp "%CP%" com.psl.lawfirm.EnterpriseSystemRunner

@@ -127,7 +127,7 @@ const FAQS = [
   },
   {
     q: "What database and runtime power the platform?",
-    a: "Pearson Specter Litt runs an ACID-compliant MySQL 8.3 schema with stored procedures and cryptographic hash chains alongside a Java 21 LTS and Python FastAPI service tier.",
+    a: "Pearson Specter Litt runs an ACID-compliant MySQL 8.3 schema with stored procedures and cryptographic hash chains alongside a Java 25 LTS and Python FastAPI service tier.",
   },
 ];
 
@@ -540,7 +540,7 @@ export default function LandingPage() {
         <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-ink-muted">
           <div className="font-medium text-ink">Pearson Specter Litt</div>
           <div className="flex flex-wrap items-center gap-6">
-            <span>Java 21 LTS</span>
+            <span>Java 25 LTS</span>
             <span>MySQL 8.3</span>
             <span>JavaFX</span>
             <span>Production v2.4</span>
