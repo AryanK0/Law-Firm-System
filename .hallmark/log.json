@@ -2,6 +2,39 @@
  {
   "mode": "redesign",
   "depth": "full",
+  "scope": "page",
+  "shape": "Conversational FAQ",
+  "theme": "Dusk",
+  "axes": "dark/grotesk-sans/cool",
+  "hero": "Stage",
+  "nav": "floating pill",
+  "footer": "letter close",
+  "imagery": "photographs, library 1, natural",
+  "photos": [
+   "Desna river Vinn meadow 2016 G9.jpg"
+  ],
+  "entry": "product-led legal-operations landing page",
+  "fingerprint": "smoked-glass matter register and fiduciary checkpoint",
+  "sections": [
+   "Mast",
+   "Stage",
+   "Figures",
+   "Modules",
+   "Compliance",
+   "Questions",
+   "Close",
+   "Footer"
+  ],
+  "signature": "active matter register in the hero",
+  "waived": [
+   "23: compact isolated primary actions"
+  ],
+  "prompt": "Hallmark redesign",
+  "date": "2026-11-14"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
   "scope": "site",
   "shape": "Conversational FAQ",
   "theme": "Dusk",

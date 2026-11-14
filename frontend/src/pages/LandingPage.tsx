@@ -137,32 +137,32 @@ export default function LandingPage() {
   const currentModule = MODULES.find((m) => m.id === activeModule) ?? MODULES[0];
 
   return (
-    <div className="min-h-screen bg-paper text-ink relative">
+    <div className="landing-page">
       {/* ── Top Bar ── */}
-      <header className="sticky top-0 z-50 border-b border-rule bg-paper">
-        <div className="container flex h-16 items-center justify-between gap-4">
+      <header className="landing-mast">
+        <div className="container landing-mast__inner">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex items-center gap-3 text-left transition-opacity duration-150 hover:opacity-85"
+            className="landing-wordmark"
             aria-label="Pearson Specter Litt home"
           >
-            <span className="icon-accent flex h-9 w-9 items-center justify-center">
+            <span className="landing-wordmark__mark">
               <BriefcaseBusiness size={18} aria-hidden="true" />
             </span>
-            <span className="font-heading text-base font-medium tracking-tight text-ink">
+            <span className="landing-wordmark__name">
               Pearson Specter Litt
             </span>
           </button>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm text-ink-2" aria-label="Primary">
-            <a href="#modules" className="hover:text-ink transition-colors duration-150">
+          <nav className="landing-nav" aria-label="Primary">
+            <a href="#modules">
               Modules
             </a>
-            <a href="#compliance" className="hover:text-ink transition-colors duration-150">
+            <a href="#compliance">
               Compliance
             </a>
-            <a href="#questions" className="hover:text-ink transition-colors duration-150">
+            <a href="#questions">
               Questions
             </a>
           </nav>
@@ -170,7 +170,7 @@ export default function LandingPage() {
           <button
             type="button"
             onClick={() => navigate("/login")}
-            className="btn-dusk min-h-[40px] px-5 text-sm"
+            className="btn-dusk landing-mast__action"
           >
             Sign In
           </button>
@@ -178,10 +178,10 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero (Dusk Stage) ── */}
-      <section className="relative flex min-h-[min(88dvh,820px)] items-center overflow-hidden">
+      <section className="landing-stage">
         {/* Library Dusk Landscape Background */}
         <div
-          className="absolute inset-0 z-0"
+          className="landing-stage__photo"
           data-slot="hero"
           data-alt="River in morning fog with reeds and trees along the bank"
         >
@@ -199,25 +199,25 @@ export default function LandingPage() {
           <div className="hero__scrim" aria-hidden="true" />
         </div>
 
-        <div className="container relative z-10 py-14 lg:py-20">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="container landing-stage__inner">
+          <div className="landing-stage__grid">
             {/* Hero Headline + Subhead + Primary Action (Left 5 Columns on Pale Fog) */}
-            <div className="lg:col-span-5 space-y-6">
+            <div className="landing-stage__copy">
               <h1
-                className="font-heading text-4xl sm:text-5xl lg:text-6xl font-medium leading-[1.04]"
+                className="landing-stage__title"
                 style={{ color: "var(--color-day-ink)" }}
               >
                 Legal operations, composed before court.
               </h1>
 
               <p
-                className="text-base sm:text-lg leading-relaxed max-w-md"
+                className="landing-stage__lead"
                 style={{ color: "var(--color-day-muted)" }}
               >
                 Manage legal matters, three-way IOLTA ledgers, and compliance together.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="landing-stage__actions">
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
@@ -228,7 +228,7 @@ export default function LandingPage() {
                 </button>
                 <a
                   href="#modules"
-                  className="inline-flex min-h-[48px] items-center px-3 text-sm font-semibold underline-offset-4 hover:underline"
+                  className="landing-link"
                   style={{ color: "var(--color-day-ink)" }}
                 >
                   Explore modules
@@ -237,54 +237,47 @@ export default function LandingPage() {
             </div>
 
             {/* Signature Product Run in Smoked Glass (Right 7 Columns) */}
-            <div className="lg:col-span-7 min-w-0">
+            <div className="landing-stage__product">
               <div
-                className="dusk-glass p-6 sm:p-8"
+                className="matter-register"
                 data-slot="hero-ledger"
                 data-kind="product"
                 data-alt="Smoked glass view of live firm matter and trust ledger reconciliation"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule/70 pb-4">
+                <div className="matter-register__head">
                   <div>
-                    <h2 className="font-heading text-lg font-medium text-ink">
+                    <h2>
                       Fiduciary ledger run
                     </h2>
-                    <p className="text-sm text-ink-muted">
+                    <p>
                       Three-way trust verification across active client matters
                     </p>
                   </div>
                   <span
-                    className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium"
-                    style={{
-                      backgroundColor: "color-mix(in oklab, var(--color-accent) 16%, transparent)",
-                      color: "var(--color-accent-hi)",
-                    }}
+                    className="matter-register__status"
                   >
                     <CheckCircle2 size={13} aria-hidden="true" />
                     Zero variance
                   </span>
                 </div>
 
-                <div className="divide-y divide-rule/60">
+                <div className="matter-register__rows">
                   {HERO_LEDGER.map((row) => (
                     <div
                       key={row.matter}
-                      className="flex items-center justify-between gap-4 py-3.5 text-sm"
+                      className="matter-register__row"
                     >
-                      <div className="min-w-0">
-                        <div className="font-medium text-ink truncate">{row.matter}</div>
-                        <div className="text-xs text-ink-muted num">{row.detail}</div>
+                      <div>
+                        <div>{row.matter}</div>
+                        <div className="num">{row.detail}</div>
                       </div>
-                      <div className="flex items-center gap-5 shrink-0">
+                      <div className="matter-register__row-end">
                         <span
-                          className="text-xs font-medium"
-                          style={{
-                            color: row.open ? "var(--color-accent-2)" : "var(--color-accent)",
-                          }}
+                          className={row.open ? "is-open" : "is-matched"}
                         >
                           {row.status}
                         </span>
-                        <span className="font-medium text-ink num w-28 text-right">
+                        <span className="num">
                           {row.amount}
                         </span>
                       </div>
@@ -292,18 +285,12 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <div
-                  className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-inner)] px-4 py-3 text-xs"
-                  style={{
-                    backgroundColor: "color-mix(in oklab, var(--color-accent-2) 12%, transparent)",
-                    color: "var(--color-accent-2)",
-                  }}
-                >
+                <div className="matter-register__notice">
                   <span>Monarch Aviation labor escrow requires Senior Partner sign-off.</span>
                   <button
                     type="button"
                     onClick={() => navigate("/login")}
-                    className="font-semibold underline-offset-4 hover:underline shrink-0"
+                    className="landing-link"
                   >
                     Review in workspace
                   </button>
@@ -315,13 +302,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── Firm Infrastructure Figures (Ruled Strip, Zero Icon Tiles) ── */}
-      <section className="border-y border-rule py-14">
+      <section className="landing-figures">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-rule">
+          <div className="landing-figures__grid">
             {STATS.map((stat, idx) => (
               <div
                 key={stat.label}
-                className={`py-4 md:py-2 ${idx > 0 ? "md:pl-8" : ""} pr-6`}
+                className={`landing-figures__item ${idx === 0 ? "is-first" : ""}`}
               >
                 <div className="font-heading text-3xl sm:text-4xl font-medium text-ink num">
                   {stat.value}
@@ -334,9 +321,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Core Modules Tour (Interactive List + Smoked-Glass Pane) ── */}
-      <section id="modules" className="py-24 lg:py-32">
+      <section id="modules" className="landing-modules">
         <div className="container">
-          <div className="max-w-2xl mb-12">
+          <div className="landing-section-head">
             <h2 className="font-heading text-3xl sm:text-5xl font-medium text-ink">
               Four practice systems on one transactional core.
             </h2>
@@ -345,9 +332,9 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="landing-modules__grid">
             {/* Left Ruled Module List */}
-            <div className="lg:col-span-5 divide-y divide-rule border-t border-b border-rule">
+            <div className="module-list">
               {MODULES.map((mod) => {
                 const selected = mod.id === currentModule.id;
                 return (
@@ -355,7 +342,8 @@ export default function LandingPage() {
                     key={mod.id}
                     type="button"
                     onClick={() => setActiveModule(mod.id)}
-                    className="w-full py-5 text-left transition-colors duration-150 hover:bg-paper-2/50 px-3"
+                    className="module-list__item"
+                    aria-pressed={selected}
                   >
                     <div className="flex items-center justify-between gap-4">
                       <span
@@ -379,8 +367,8 @@ export default function LandingPage() {
             </div>
 
             {/* Right Smoked-Glass Pane */}
-            <div className="lg:col-span-7 min-w-0">
-              <div className="dusk-glass p-7 sm:p-9">
+            <div className="module-dossier-wrap">
+              <div className="module-dossier">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-5">
                   <div>
                     <h3 className="font-heading text-2xl font-medium text-ink">
@@ -423,10 +411,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── Compliance Dossier (Dusk Bone Well Surface) ── */}
-      <section id="compliance" className="py-16 lg:py-24">
+      <section id="compliance" className="landing-compliance">
         <div className="container">
-          <div className="dusk-well">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="compliance-dossier">
+            <div className="compliance-dossier__grid">
               <div className="lg:col-span-5">
                 <h2
                   className="font-heading text-3xl sm:text-4xl font-medium"
@@ -478,9 +466,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Conversational FAQ ── */}
-      <section id="questions" className="py-20 lg:py-28">
+      <section id="questions" className="landing-questions">
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="landing-questions__grid">
             <div className="lg:col-span-4">
               <h2 className="font-heading text-3xl sm:text-4xl font-medium text-ink">
                 Questions from managing partners.
@@ -512,9 +500,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Close Band ── */}
-      <section className="border-t border-rule py-20 lg:py-24 bg-paper-2/40">
+      <section className="landing-close">
         <div className="container">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="landing-close__inner">
             <div>
               <h2 className="font-heading text-3xl sm:text-4xl font-medium text-ink">
                 Sign in to your workspace.
@@ -536,7 +524,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Letter Close Footer ── */}
-      <footer className="border-t border-rule py-10">
+      <footer className="landing-footer">
         <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-ink-muted">
           <div className="font-medium text-ink">Pearson Specter Litt</div>
           <div className="flex flex-wrap items-center gap-6">
