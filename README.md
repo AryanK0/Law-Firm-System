@@ -29,33 +29,33 @@
 ```mermaid
 flowchart TB
     subgraph ClientLayer["Presentation & Operations Tier"]
-        WebUI["Executive Web Console (React 19 + TypeScript + Tailwind 4)\nHallmark Modern Dusk Theme | Role-Based Persona Scoping"]
-        DesktopUI["Institutional Desktop Console (JavaFX 21 OpenJFX)\nHigh-Density TableViews | Real-Time Stream & Serialization Triggers"]
+        WebUI["Executive Web Console (React 19 + TypeScript + Tailwind 4)<br/>Hallmark Modern Dusk Theme • Role-Based Persona Scoping"]
+        DesktopUI["Institutional Desktop Console (JavaFX 21 OpenJFX)<br/>High-Density TableViews • Real-Time Stream & Serialization Triggers"]
     end
 
     subgraph ServiceTier["Java 21 LTS Enterprise Core Platform (backend/)"]
-        RestEngine["Embedded REST API Engine (HttpServer :8085)\nCORS Filter | JSON Serialization | Context Routing"]
+        RestEngine["Embedded REST API Engine (HttpServer :8085)<br/>CORS Filter • JSON Serialization • Context Routing"]
         
         subgraph Subsystems["Core Engineering Subsystems"]
-            Sub1["Subsystem 1: Domain Modeling & Object Abstractions\n(BaseEntity Inheritance | Static Metrics | Identity Encapsulation)"]
-            Sub2["Subsystem 2: Collections Engine & Business Logic\n(ArrayList Pipelines | HashSet Uniques | HashMap Partitioning | Custom Comparators)"]
-            Sub3["Subsystem 3: Multi-Stream Persistence & Serialization\n(Character Streams CSV | Byte Streams | ObjectOutputStream Snapshots)"]
-            Sub4["Subsystem 4: JDBC DAO Layer & Transaction Isolation\n(PreparedStatement Queries | Atomic Rollback | ABA Rule 1.15 IOLTA)"]
-            Sub5["Subsystem 5: Operations Console & Desktop Architecture\n(OpenJFX 21 Layouts | Event Listeners | Observable Lists)"]
+            Sub1["Subsystem 1: Domain Modeling & Object Abstractions<br/>BaseEntity Inheritance • Static Metrics • Identity Encapsulation"]
+            Sub2["Subsystem 2: Collections Engine & Business Logic<br/>ArrayList Pipelines • HashSet Uniques • HashMap Partitioning • Custom Comparators"]
+            Sub3["Subsystem 3: Multi-Stream Persistence & Serialization<br/>Character Streams CSV • Byte Streams • ObjectOutputStream Snapshots"]
+            Sub4["Subsystem 4: JDBC DAO Layer & Transaction Isolation<br/>PreparedStatement Queries • Atomic Rollback • ABA Rule 1.15 IOLTA"]
+            Sub5["Subsystem 5: Operations Console & Desktop Architecture<br/>OpenJFX 21 Layouts • Event Listeners • Observable Lists"]
         end
     end
 
     subgraph DataLayer["Enterprise Storage & Relational Persistence Tier"]
-        MySQL[("MySQL 8.3 Enterprise Relational Store\n39 Normalized Tables | ACID Engine | Stored Procedures | Triggers")]
-        Snapshots[("Cluster Storage & Vault Registry\nstorage/exports/*.csv | storage/snapshots/*.ser")]
+        MySQL[("MySQL 8.3 Enterprise Relational Store<br/>39 Normalized Tables • ACID Engine • Stored Procedures • Triggers")]
+        Snapshots[("Cluster Storage & Vault Registry<br/>storage/exports/*.csv • storage/snapshots/*.ser")]
     end
 
-    WebUI -->|HTTP / REST JSON| RestEngine
-    DesktopUI -->|Direct Java In-Memory Pipe| Subsystems
+    WebUI -->|"HTTP / REST JSON"| RestEngine
+    DesktopUI -->|"Direct Java In-Memory Pipe"| Subsystems
     RestEngine --> Subsystems
 
-    Sub4 -->|Native JDBC Connector/J 8.3 (Port 3306)| MySQL
-    Sub3 -->|Buffered Character & Object Streams| Snapshots
+    Sub4 -->|"Native JDBC Connector/J 8.3 (Port 3306)"| MySQL
+    Sub3 -->|"Buffered Character & Object Streams"| Snapshots
 ```
 
 ---
