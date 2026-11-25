@@ -41,23 +41,32 @@ public class AppProperties {
     }
 
     public static String get(String key) {
-        return properties.getProperty(key);
+        return getProperty(key, null);
     }
 
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+        return getProperty(key, null);
     }
 
     public static String getProperty(String key, String defaultValue) {
+        String sysProp = System.getProperty(key);
+        if (sysProp != null && !sysProp.trim().isEmpty()) {
+            return sysProp.trim();
+        }
+        String envKey = key.toUpperCase().replace('.', '_');
+        String envVal = System.getenv(envKey);
+        if (envVal != null && !envVal.trim().isEmpty()) {
+            return envVal.trim();
+        }
         return properties.getProperty(key, defaultValue);
     }
 
     public static String getOrDefault(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
+        return getProperty(key, defaultValue);
     }
 
     public static int getInt(String key, int defaultValue) {
-        String val = properties.getProperty(key);
+        String val = getProperty(key, null);
         if (val == null || val.trim().isEmpty()) {
             return defaultValue;
         }

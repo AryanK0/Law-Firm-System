@@ -26,7 +26,13 @@ public class DatabaseConfig {
 
     private static void loadConfiguration() {
         dbDriver = AppProperties.getProperty("db.driver", "com.mysql.cj.jdbc.Driver");
-        dbUrl = AppProperties.getProperty("db.url", "jdbc:mysql://localhost:3306/lawfirm?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+        
+        String host = AppProperties.getProperty("db.host", "localhost");
+        String port = AppProperties.getProperty("db.port", "3306");
+        String name = AppProperties.getProperty("db.name", "lawfirm");
+        String defaultUrl = "jdbc:mysql://" + host + ":" + port + "/" + name + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        
+        dbUrl = AppProperties.getProperty("db.url", defaultUrl);
         dbUser = AppProperties.getProperty("db.user", "root");
         dbPassword = AppProperties.getProperty("db.password", "Ar@230806.");
 

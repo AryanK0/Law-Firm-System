@@ -1,6 +1,6 @@
 # ==============================================================================
-# Tier-1 Enterprise CI/CD Pipeline - SOC-2 Compliant Automated Quality Gate
-# Validates: Multi-phase Pytest test suites, TypeScript compilation, Docker builds
+# Tier-1 Enterprise CI/CD Pipeline - SOC-2 Compliant Quality & Verification Gate
+# Validates: Java 21 LTS Enterprise Diagnostics Suite, React 19 Frontend Build, Docker Containers
 # ==============================================================================
 
 name: LFMS Enterprise CI/CD Pipeline
@@ -13,10 +13,10 @@ on:
 
 jobs:
   # ----------------------------------------------------------------------------
-  # Job 1: Backend Automated Test Matrix & Domain Verification
+  # Job 1: Java 21 LTS Enterprise Backend Diagnostics & Verification Suite
   # ----------------------------------------------------------------------------
   backend-test:
-    name: Backend Test Suite (Python 3.12 + MySQL 8.0 + Redis 7)
+    name: Java 21 Enterprise Core Verification (Adoptium Temurin + MySQL 8.0)
     runs-on: ubuntu-latest
 
     services:
@@ -33,40 +33,17 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
-      redis:
-        image: redis:7-alpine
-        command: redis-server --requirepass redispassword
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli -a redispassword ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12 Runtime
-        uses: actions/setup-python@v5
+      - name: Set up Java 21 LTS Runtime (Adoptium Temurin)
+        uses: actions/setup-java@v4
         with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Install Enterprise Backend Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          distribution: "temurin"
+          java-version: "21"
 
       - name: Initialize MySQL Database Schema & Seed Data
-        env:
-          DATABASE_URL: mysql+aiomysql://root:rootpassword@127.0.0.1:3306/lawfirm
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_NAME: lawfirm
-          DB_USER: root
-          DB_PASSWORD: rootpassword
         run: |
           echo "Waiting for MySQL service container to be fully accessible..."
           for i in $(seq 1 30); do
@@ -78,37 +55,38 @@ jobs:
             sleep 2
           done
           echo "Importing schema.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/schema.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/schema.sql
           echo "Importing access_control.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/access_control.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/access_control.sql
           echo "Importing dbms_features.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/dbms_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/dbms_features.sql
           echo "Importing advanced_features.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/advanced_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/advanced_features.sql
           echo "Importing sample_data.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/sample_data.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/sample_data.sql
           echo "Importing phase4_features.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/phase4_features.sql
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/phase4_features.sql
           echo "Importing case_sensitivity_compat.sql..."
-          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 < backend/sql/case_sensitivity_compat.sql
-          echo "Running Alembic migrations..."
-          python -m alembic upgrade head
-          echo "Verifying case-insensitive table queries..."
-          mysql -h 127.0.0.1 -u root -prootpassword -e "USE lawfirm; SELECT count(*) AS cases_count FROM cases; SELECT count(*) AS Cases_count FROM Cases; SELECT count(*) AS employee_count FROM employee; SELECT count(*) AS Employee_count FROM Employee; SELECT count(*) AS trust_count FROM trust_account;"
+          mysql -h 127.0.0.1 -u root -prootpassword --default-character-set=utf8mb4 lawfirm < backend/sql/case_sensitivity_compat.sql
 
-      - name: Run Full Multi-Phase Automated Test Suite (Phases 1-6)
+      - name: Compile Java Enterprise Core
+        working-directory: backend
+        run: |
+          mkdir -p target/classes storage/exports storage/snapshots storage/s3_vault logs
+          javac -cp "lib/*" -d target/classes $(find src/main/java -name "*.java")
+          if [ -d "src/main/resources" ]; then cp -r src/main/resources/* target/classes/ 2>/dev/null || true; fi
+          echo "Java 21 compilation succeeded."
+
+      - name: Run 5-Subsystem Enterprise Diagnostic Verification Suite
+        working-directory: backend
         env:
-          ENVIRONMENT: test
-          DATABASE_URL: mysql+aiomysql://root:rootpassword@127.0.0.1:3306/lawfirm
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
           DB_NAME: lawfirm
           DB_USER: root
           DB_PASSWORD: rootpassword
-          REDIS_URL: redis://:redispassword@127.0.0.1:6379/0
-          JWT_SECRET: test-suite-secret-key-32-chars-minimum-soc2
         run: |
-          python -m pytest backend/tests -v --durations=10
+          java -cp "target/classes:lib/*" com.psl.lawfirm.EnterpriseSystemRunner
 
   # ----------------------------------------------------------------------------
   # Job 2: Frontend TypeScript Verification & Production Bundle Compilation
@@ -153,7 +131,7 @@ jobs:
       - name: Validate Docker Compose Configuration
         run: docker compose config
 
-      - name: Build Multi-Stage Backend Docker Image
+      - name: Build Multi-Stage Backend Java 21 Docker Image
         run: docker build -t lfms-backend:latest ./backend
 
       - name: Build Multi-Stage Frontend Nginx Docker Image
