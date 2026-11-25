@@ -24,12 +24,12 @@ htmlcov/
 .codex-temp/
 
 # Java Build & Runtime Artifacts
-backend-java/target/
-backend-java/logs/
-backend-java/storage/
+backend/target/
+backend/logs/
+backend/storage/
 *.class
 *.jar
-!backend-java/lib/*.jar
+!backend/lib/*.jar
 
 # Storage, Snapshots & Uploads
 storage/snapshots/*.ser

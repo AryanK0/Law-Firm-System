@@ -1,56 +1,35 @@
 # ==============================================================================
-# Root Dockerfile: Points to Backend Production Multi-Stage Build
+# Pearson Specter Litt - Enterprise Java 21 LTS Platform
+# Multi-Stage Production Container Build
 # ==============================================================================
-FROM python:3.12-slim AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /build
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+COPY backend/pom.xml ./
+COPY backend/lib/ ./lib/
+COPY backend/src/ ./src/
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libffi-dev \
-    pkg-config \
-    default-libmysqlclient-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p target/classes && \
+    javac -cp "lib/*" -d target/classes $(find src/main/java -name "*.java") && \
+    if [ -d "src/main/resources" ]; then cp -r src/main/resources/* target/classes/ 2>/dev/null || true; fi
 
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-COPY backend/requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-FROM python:3.12-slim AS runner
+FROM eclipse-temurin:21-jre-jammy AS runner
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:$PATH" \
-    PORT=8000 \
-    ENVIRONMENT=production
+RUN groupadd -g 10002 appgroup && \
+    useradd -u 10002 -g appgroup -s /sbin/nologin -d /app appuser
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/target/classes /app/target/classes
+COPY --from=builder /build/lib /app/lib
 
-RUN groupadd -g 10001 appgroup && \
-    useradd -u 10001 -g appgroup -s /sbin/nologin -d /app appuser
-
-COPY --from=builder /opt/venv /opt/venv
-COPY backend /app/backend
-
-RUN chown -R appuser:appgroup /app
-
-EXPOSE 8000
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+RUN mkdir -p /app/storage/exports /app/storage/snapshots /app/storage/s3_vault /app/logs && \
+    chown -R appuser:appgroup /app
 
 USER appuser
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+ENV PORT=8085
+EXPOSE 8085
+
+CMD ["java", "-cp", "target/classes:lib/*", "com.psl.lawfirm.api.JavaRestServer"]
