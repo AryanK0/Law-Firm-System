@@ -3,7 +3,7 @@
 > **Enterprise-Grade Legal Practice Management Platform, Java 21 LTS Fiduciary Accounting Core, ABA Model Rule 1.15 IOLTA Trust Engine, and Institutional Operations Architecture**
 
 [![CI/CD Pipeline](https://github.com/AryanK0/Law-Firm-System/actions/workflows/ci.yml/badge.svg)](https://github.com/AryanK0/Law-Firm-System/actions)
-[![Live Demo: Vercel](https://img.shields.io/badge/Live%20Demo-Vercel%20Production-000000.svg?logo=vercel&logoColor=white)](https://law-firm-system-two.vercel.app)
+[![Live Demo: Vercel](https://img.shields.io/badge/Live%20Demo-Vercel%20Production-000000.svg?logo=vercel&logoColor=white)](https://law-firm-system-frontend.vercel.app)
 [![Live Demo: GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-181717.svg?logo=github&logoColor=white)](https://aryank0.github.io/Law-Firm-System/)
 [![Java 21 LTS](https://img.shields.io/badge/Java-21_LTS_Adoptium_Temurin-ED8B00.svg?logo=openjdk&logoColor=white)](https://adoptium.net)
 [![MySQL 8.3 Enterprise](https://img.shields.io/badge/MySQL-8.3_Enterprise-4479A1.svg?logo=mysql&logoColor=white)](https://mysql.com)
@@ -19,7 +19,7 @@
 
 | Deployment Tier | Provider / Network | Live Endpoint URL | Operational Status |
 | :--- | :--- | :--- | :--- |
-| **Primary Production Console** | Vercel Global Edge Network | [law-firm-system-two.vercel.app](https://law-firm-system-two.vercel.app) | ![Production Active](https://img.shields.io/badge/Status-Live%20%26%20Active-brightgreen) |
+| **Primary Production Console** | Vercel Global Edge Network | [law-firm-system-frontend.vercel.app](https://law-firm-system-frontend.vercel.app) | ![Production Active](https://img.shields.io/badge/Status-Live%20%26%20Active-brightgreen) |
 | **Failover Static CDN Mirror** | GitHub Pages CDN | [aryank0.github.io/Law-Firm-System](https://aryank0.github.io/Law-Firm-System/) | ![GitHub Pages Active](https://img.shields.io/badge/Status-Live%20%26%20Active-brightgreen) |
 | **Java 21 Enterprise Core Server** | Embedded High-Throughput REST | `http://localhost:8085/api/health` | ![Java 21 Ready](https://img.shields.io/badge/Runtime-Java%2021%20LTS-orange) |
 | **JavaFX Operations Suite** | Native OpenJFX 21 Desktop GUI | `backend\run_gui.bat` | ![Desktop Live](https://img.shields.io/badge/UI-JavaFX%2021-blue) |
