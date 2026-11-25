@@ -1,13 +1,50 @@
+# Dependencies
 node_modules/
 frontend/node_modules/
+
+# Build outputs
 dist/
 frontend/dist/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Binaries & Executables
+*.exe
+*.dll
+*.so
+powershell.exe
+
+# Local Python & Test Caches
 __pycache__/
 *.pyc
+.pytest_cache/
+.coverage
+htmlcov/
 .codex-temp/
+
+# Java Build & Runtime Artifacts
+backend-java/target/
+backend-java/logs/
+backend-java/storage/
+*.class
+*.jar
+!backend-java/lib/*.jar
+
+# Storage, Snapshots & Uploads
+storage/snapshots/*.ser
+storage/exports/*.csv
+storage/
+uploads/
+.vercel/
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 vite-start*.log
-# Local environment files and deployment secrets.
+
+# Local Environment Files & Deployment Secrets
 .env
 .env.*
 !.env.example
@@ -17,17 +54,16 @@ frontend/.env.*
 backend/.env
 backend/.env.*
 !backend/.env.example
-uploads/
-*.tsbuildinfo
-frontend/vite.config.js
-frontend/vite.config.d.ts
 
-.vercel/
-storage/
-
-# Local tooling, test caches, and runtime output.
-.pytest_cache/
+# Editor & Local History
 .history/
-backend-java/logs/
-backend-java/target/
-backend-java/storage/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

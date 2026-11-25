@@ -45,6 +45,30 @@ services:
       start_period: 15s
 
   # ----------------------------------------------------------------------------
+  # 1b. Enterprise Java 21 LTS Core Service (Port 8085)
+  # ----------------------------------------------------------------------------
+  backend-java:
+    build:
+      context: ./backend-java
+      dockerfile: Dockerfile
+    container_name: lfms_backend_java
+    ports:
+      - "8085:8085"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/lawfirm?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - SERVER_PORT=8085
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - storage_data:/app/storage
+    networks:
+      - lfms_network
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------------
   # 2. React SPA Frontend (Served via Nginx Reverse Proxy)
   # ----------------------------------------------------------------------------
   frontend:

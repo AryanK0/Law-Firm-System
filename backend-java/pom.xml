@@ -11,12 +11,12 @@
     <packaging>jar</packaging>
 
     <name>Pearson Specter Litt Legal Platform</name>
-    <description>Enterprise Legal Practice Management System (Java 25 LTS, JDBC DAO Layer, High-Throughput Persistence, and Desktop Operations Console)</description>
+    <description>Enterprise Legal Practice Management System (Java 21 LTS, JDBC DAO Layer, High-Throughput Persistence, and Desktop Operations Console)</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>25</maven.compiler.release>
-        <javafx.version>25.0.2</javafx.version>
+        <maven.compiler.release>21</maven.compiler.release>
+        <javafx.version>21.0.2</javafx.version>
     </properties>
 
     <dependencies>
@@ -63,13 +63,13 @@
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin targeting Java 25 LTS -->
+            <!-- Maven Compiler Plugin targeting Java 21 LTS -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.1</version>
                 <configuration>
-                    <release>25</release>
+                    <release>21</release>
                 </configuration>
             </plugin>
 
@@ -87,6 +87,33 @@
                 <configuration>
                     <mainClass>com.psl.lawfirm.gui.LawFirmJavaFXApp</mainClass>
                 </configuration>
+            </plugin>
+
+            <!-- Exec Maven Plugin for running the REST Server or Diagnostics -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>server</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.psl.lawfirm.api.JavaRestServer</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>diagnostics</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.psl.lawfirm.EnterpriseSystemRunner</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

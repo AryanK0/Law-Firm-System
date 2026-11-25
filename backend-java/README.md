@@ -1,6 +1,6 @@
-# Pearson Specter Litt | Enterprise Legal Management System (Core Platform)
+# Pearson Specter Litt | Enterprise Legal Management System (Java Core Platform)
 
-A mission-critical enterprise legal practice management and governance platform engineered with **Java 25 LTS**, **MySQL 8.3 Enterprise**, **JDBC Data Access Object (DAO) Layer**, and **JavaFX 25 Desktop Console**.
+A mission-critical enterprise legal practice management and governance platform engineered with **Java 21 LTS**, **MySQL 8.3 Enterprise**, **JDBC Data Access Object (DAO) Layer**, and **JavaFX 21 Desktop Operations Suite**.
 
 ---
 
@@ -12,7 +12,7 @@ The system is architected as a modular, high-throughput legal practice managemen
 +-------------------------------------------------------------------------+
 |                  Enterprise Presentation Tier                           |
 |  - Web Console (React 19 + TypeScript + Vite)                           |
-|  - Desktop Console (JavaFX 25 OpenJFX with BorderPane, TableView)       |
+|  - Desktop Console (JavaFX 21 OpenJFX with BorderPane, TableView)       |
 +------------------------------------+------------------------------------+
                                      |
 +------------------------------------+------------------------------------+
@@ -30,7 +30,7 @@ The system is architected as a modular, high-throughput legal practice managemen
                                      |
 +------------------------------------+------------------------------------+
 |                  Database Tier (MySQL 8.3.0 Engine)                     |
-|  - 54 Production Tables, Legal Hold Locks, IOLTA Ledgers                |
+|  - 39 Normalized Schemas, Legal Hold Locks, IOLTA Ledgers               |
 +-------------------------------------------------------------------------+
 ```
 
@@ -39,7 +39,7 @@ The system is architected as a modular, high-throughput legal practice managemen
 ## ⚡ Key Technical Capabilities
 
 1. **High-Precision Trust Accounting (IOLTA Compliance)**
-   - Strict Bar Association compliance guaranteeing trust accounts cannot be overdrawn.
+   - Strict Bar Association compliance guaranteeing trust accounts cannot be overdrawn under ABA Model Rule 1.15.
    - Enforces 2-phase atomic fund transfers with transactional rollback via `setAutoCommit(false)` and `conn.rollback()`.
    - Domain exception handling via `InsufficientTrustFundsException`.
 
@@ -53,37 +53,50 @@ The system is architected as a modular, high-throughput legal practice managemen
    - **Byte Streams**: Bit-for-bit secure file vaulting via `FileInputStream` and `FileOutputStream`.
    - **Object Serialization**: Complete binary cluster snapshots and state restoration via `ObjectOutputStream` and `ObjectInputStream`.
 
-4. **Institutional Desktop Operations Console (JavaFX 25)**
+4. **Institutional Desktop Operations Console (JavaFX 21)**
    - Real-time `TableView` with dynamic matter sorting and search filtering.
    - Matter initiation forms with live validation dialogs and alert notifications.
    - On-demand snapshot serialization and CSV auditing triggers.
+
+5. **Embedded High-Performance REST Server**
+   - Built-in lightweight HTTP REST service listening on `http://localhost:8085` with zero external servlet container bloat.
+   - Exposes `/api/health`, `/api/cases`, `/api/clients`, `/api/trust-accounts`, `/api/persistence/export-csv`, and `/api/persistence/snapshot`.
 
 ---
 
 ## 🚀 Execution & Verification
 
-**Prerequisites:** Install a Java 25 JDK and Maven, set `JAVA_HOME` to the JDK 25 installation, and make both `java`/`javac` and `mvn` available on `PATH`. The launch scripts resolve current dependencies from `pom.xml`.
+**Prerequisites:** Install Java 21 JDK (such as Eclipse Adoptium Temurin 21 LTS). The bundled batch scripts auto-detect standard JDK 21 installations and include all required libraries in `lib/` for zero-dependency execution.
 
-Compile production and test sources, then run the test suite:
+### 1. One-Click Compile
 ```cmd
 cd backend-java
-mvn clean test
+compile.bat
 ```
 
-### 1. System Health & Diagnostics Runner
+### 2. System Health & Diagnostics Runner (5 Modules)
 Validates end-to-end database connectivity, transaction rollback isolation, collection pipelines, and streaming persistence:
 ```cmd
 backend-java\run_system.bat
 ```
 
-### 2. Standalone Java REST API Engine
+### 3. Standalone Java REST API Engine
 Spawns the embedded HTTP server on `http://localhost:8085`:
 ```cmd
 backend-java\run_server.bat
 ```
 
-### 3. JavaFX Desktop Operations Console
+### 4. JavaFX Desktop Operations Console
 Launches the native desktop management application:
 ```cmd
 backend-java\run_gui.bat
+```
+
+### 5. Maven Lifecycle (Optional)
+If Apache Maven is installed on your environment:
+```cmd
+mvn clean compile
+mvn exec:java@server
+mvn exec:java@diagnostics
+mvn javafx:run
 ```
